@@ -2,6 +2,7 @@ import { formatCountdown, getCoverUrl, getReleaseYear } from './utils.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const ICON_SIZE = 18;
+const DEFAULT_VOLUME = 0.25;
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -20,6 +21,7 @@ const modeDescription = document.querySelector('#mode-description');
 const lockDot = document.querySelector('#lock-dot');
 const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
+
 
 function createIcon(pathData) {
     const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
@@ -125,6 +127,7 @@ function createSongCard(song, mode) {
     const audio = document.createElement('audio');
     audio.className = 'song-audio';
     audio.controls = true;
+    audio.volume = DEFAULT_VOLUME;
     audio.src = song.previewUrl;
 
     const appleLink = document.createElement('a');
