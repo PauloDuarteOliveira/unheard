@@ -1,2 +1,40 @@
-// picker.js: closure that picks a candidate song and avoids repeats.
-// Coming soon.
+import { searchSongs, verifyPreview } from './api.js';
+import { buildQuery } from './modes.js';
+import { pickRandom } from './utils.js';
+
+const MAX_ATTEMPTS = 3;
+
+export const NO_SONG_MESSAGE = 'No playable song found';
+
+export default function createPicker() {
+    const triedIds = new Set();
+
+    function pick(songs) {
+        const freshSongs = songs.filter((song) => !triedIds.has(song.trackId));
+        if (freshSongs.length === 0) return null;
+
+        const song = pickRandom(freshSongs);
+        triedIds.add(song.trackId);
+        return song;
+    }
+
+    return { pick };
+}
+
+export async function discoverSong(modeKey, pool, picker) {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        const query = buildQuery(modeKey, pool);
+        const songs = await searchSongs(query.term);
+        const candidate = picker.pick(songs);
+        if (!candidate) continue;
+
+        try {
+            await verifyPreview(candidate.previewUrl);
+            return candidate;
+        } catch (error) {
+            console.warn(`Attempt ${attempt}: preview not playable, trying another song.`, error);
+        }
+    }
+
+    throw new Error(NO_SONG_MESSAGE);
+}

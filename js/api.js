@@ -25,7 +25,7 @@ export async function searchSongs(term) {
   return data.results.filter((song) => song.previewUrl);
 }
 
-// Resolves when the preview can play, rejects on an audio error or after the timeout.
+
 export function verifyPreview(url, timeoutMs = PREVIEW_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {
     const audio = new Audio();
