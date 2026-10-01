@@ -3,9 +3,10 @@ import { MODES, getMode } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderGreeting, renderModeCard, renderPhase, renderTabs } from './render.js';
-import { getDateKey, getGreeting } from './utils.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs } from './render.js';
+import { getDateKey, getGreeting, getMsUntilMidnight } from './utils.js';
 
+const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
 const DEFAULT_PROFILE_ID = 'guest';
 
@@ -25,6 +26,7 @@ function init() {
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
     let isSearching = false;
+    let isShowingLocked = false;
 
     function getLockedToday() {
         const today = store.getToday();
@@ -44,12 +46,23 @@ function init() {
 
     function showCurrentState() {
         const today = getLockedToday();
+        isShowingLocked = Boolean(today);
 
         if (today) {
             selectMode(today.mode);
             showPhase('revealed', { song: today.song });
         } else {
             showPhase('idle');
+        }
+    }
+
+    function tick() {
+        const isLocked = Boolean(getLockedToday());
+        renderGreeting(getGreeting());
+        renderCountdown(getMsUntilMidnight(), isLocked);
+
+        if (isShowingLocked && !isLocked) {
+            showCurrentState();
         }
     }
 
@@ -70,6 +83,7 @@ function init() {
             showPhase('error', { message: getErrorMessage(error) });
         } finally {
             isSearching = false;
+            tick();
         }
     }
 
@@ -81,9 +95,10 @@ function init() {
         showPhase('idle');
     }
 
-    renderGreeting(getGreeting());
     selectMode(currentModeKey);
     showCurrentState();
+    tick();
+    setInterval(tick, TICK_MS);
 
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);

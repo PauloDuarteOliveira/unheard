@@ -1,4 +1,4 @@
-import { getCoverUrl, getReleaseYear } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear } from './utils.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const ICON_SIZE = 18;
@@ -19,6 +19,7 @@ const modeStamp = document.querySelector('#mode-stamp');
 const modeDescription = document.querySelector('#mode-description');
 const lockDot = document.querySelector('#lock-dot');
 const lockStatus = document.querySelector('#lock-status');
+const countdown = document.querySelector('#countdown');
 
 function createIcon(pathData) {
     const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
@@ -74,6 +75,11 @@ function setTabsLocked(modes, isLocked) {
 export function renderModeCard(mode) {
     modeStamp.textContent = `Mode ${mode.number} · ${mode.stamp}`;
     modeDescription.textContent = mode.description;
+}
+
+export function renderCountdown(msLeft, isLocked) {
+    const label = isLocked ? 'Next in' : 'Resets in';
+    countdown.textContent = `${label} ${formatCountdown(msLeft)}`;
 }
 
 export function renderGreeting(text) {
