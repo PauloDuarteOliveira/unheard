@@ -1,2 +1,3 @@
-// theme.js: mode colors and light/dark theme.
-// Coming soon.
+export function applyMode(modeKey) {
+    document.body.dataset.mode = modeKey;
+}

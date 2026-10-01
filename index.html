@@ -3,31 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Unheard · API test</title>
+  <title>Unheard · Discover a new sound every day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=hourglass_empty,mood,music_note,play_arrow,progress_activity,public,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <header>
-    <h1>Unheard</h1>
-    <p>API test page: search a song and play its 30-second preview.</p>
+<body data-mode="random">
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <div class="brand-text">
+        <span class="brand-name">Unheard</span>
+        <span class="brand-tagline">Discover a new sound every day</span>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <form id="search-form">
-      <label for="search-term">Search term</label>
-      <div class="search-row">
-        <input id="search-term" type="text" value="jazz" required>
-        <button id="search-button" type="submit">Find a song</button>
-      </div>
-    </form>
+  <main class="today">
+    <div class="greeting" id="greeting-block">
+      <h1 id="greeting"></h1>
+      <p class="stamp-row">
+        <span class="stamp" id="phase-stamp">Choose today's frequency</span>
+        <span class="dot" id="phase-dot"></span>
+      </p>
+    </div>
 
-    <p id="status" role="status"></p>
+    <div class="tabs" id="mode-tabs" role="tablist" aria-label="Discovery mode"></div>
 
-    <section id="result" aria-live="polite"></section>
+    <div class="stage" id="stage">
+      <button class="unveil" id="unveil-button" type="button" aria-label="Unveil today's song">
+        <span class="unveil-face">
+          <span class="unveil-icon" aria-hidden="true">
+            <span class="material-symbols-outlined icon-play">play_arrow</span>
+            <span class="material-symbols-outlined icon-spinner">progress_activity</span>
+          </span>
+          <span class="unveil-title" id="unveil-title">Unveil</span>
+          <span class="stamp" id="unveil-subtitle">Today's pressing</span>
+        </span>
+      </button>
+      <p class="status" id="status" role="status"></p>
+    </div>
+
+    <section class="revealed" id="revealed" aria-live="polite" hidden></section>
+
+    <section class="mode-card" id="mode-card" aria-label="Mode setup">
+      <p class="stamp-row">
+        <span class="dot dot-mode"></span>
+        <span class="stamp stamp-mode" id="mode-stamp">Mode 01 · True shuffle</span>
+      </p>
+      <p class="mode-description" id="mode-description">A completely random song from anywhere, any era, any genre.</p>
+      <p class="stamp">No setup · Anything can come up</p>
+    </section>
   </main>
 
-  <footer>
-    <p>Previews provided by Apple</p>
+  <footer class="app-footer">
+    <div class="status-bar">
+      <span class="lock-status">
+        <span class="dot" id="lock-dot"></span>
+        <span id="lock-status">Daily discovery: unlocked</span>
+      </span>
+      <span class="countdown" id="countdown"></span>
+    </div>
+    <span class="credit">Previews provided by Apple</span>
   </footer>
 
   <script type="module" src="js/main.js"></script>
