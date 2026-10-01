@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unheard · API test</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Unheard</h1>
+    <p>API test page: search a song and play its 30-second preview.</p>
+  </header>
+
+  <main>
+    <form id="search-form">
+      <label for="search-term">Search term</label>
+      <div class="search-row">
+        <input id="search-term" type="text" value="jazz" required>
+        <button id="search-button" type="submit">Find a song</button>
+      </div>
+    </form>
+
+    <p id="status" role="status"></p>
+
+    <section id="result" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <p>Previews provided by Apple</p>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

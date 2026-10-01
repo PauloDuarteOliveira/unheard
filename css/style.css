@@ -1,0 +1,84 @@
+/* Temporary styles for the API test page. The real design comes later. */
+body {
+  margin: 0;
+  padding: 24px 16px;
+  background: #0d0e12;
+  color: #efece6;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+header,
+main,
+footer {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #8c8f9e;
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+}
+
+input,
+button {
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+input {
+  flex-grow: 1;
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid #333;
+  background: #15171e;
+  color: #efece6;
+}
+
+button {
+  padding: 0 16px;
+  border: 0;
+  background: #efece6;
+  color: #0d0e12;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+.song-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #15171e;
+}
+
+.song-card img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 8px;
+}
+
+.song-card audio {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.error {
+  color: #ffb4ab;
+}
+
+footer {
+  margin-top: 32px;
+  color: #8c8f9e;
+  font-size: 13px;
+}
