@@ -1,67 +1,92 @@
-// main.js: entry point. For now it only runs the API test.
-import { searchSongs } from './api.js';
+import { loadPool } from './api.js';
+import { MODES, getMode } from './modes.js';
+import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
+import createStore from './store.js';
+import { applyMode } from './theme.js';
+import { renderGreeting, renderModeCard, renderPhase, renderTabs } from './render.js';
+import { getDateKey, getGreeting } from './utils.js';
 
-const form = document.querySelector('#search-form');
-const input = document.querySelector('#search-term');
-const button = document.querySelector('#search-button');
-const statusText = document.querySelector('#status');
-const result = document.querySelector('#result');
+const DEFAULT_MODE = 'random';
+const DEFAULT_PROFILE_ID = 'guest';
 
-function pickRandom(list) {
-  const index = Math.floor(Math.random() * list.length);
-  return list[index];
+function getErrorMessage(error) {
+    if (error.message === NO_SONG_MESSAGE) {
+        return 'Could not find a song that plays. Try again, your discovery was not used.';
+    }
+    return 'Could not reach the music service. Check your connection and try again.';
 }
 
-function renderSong(song) {
-  const card = document.createElement('article');
-  card.className = 'song-card';
+function init() {
+    const store = createStore(DEFAULT_PROFILE_ID);
+    const picker = createPicker();
+    const tabList = document.querySelector('#mode-tabs');
+    const unveilButton = document.querySelector('#unveil-button');
 
-  const cover = document.createElement('img');
-  cover.src = song.artworkUrl100.replace('100x100', '600x600');
-  cover.alt = `Cover of ${song.collectionName}`;
+    let pool = null;
+    let currentModeKey = DEFAULT_MODE;
+    let isSearching = false;
 
-  const title = document.createElement('h2');
-  title.textContent = song.trackName;
-
-  const artist = document.createElement('p');
-  artist.textContent = `${song.artistName} · ${song.releaseDate.slice(0, 4)}`;
-
-  const audio = document.createElement('audio');
-  audio.controls = true;
-  audio.src = song.previewUrl;
-
-  card.append(cover, title, artist, audio);
-  result.replaceChildren(card);
-}
-
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
-  const term = input.value.trim();
-  if (!term) return;
-
-  button.disabled = true;
-  statusText.textContent = 'Searching...';
-  statusText.classList.remove('error');
-
-  try {
-    const songs = await searchSongs(term);
-
-    if (songs.length === 0) {
-      statusText.textContent = 'No songs with a preview found. Try another word.';
-      result.replaceChildren();
-      return;
+    function getLockedToday() {
+        const today = store.getToday();
+        return today && today.date === getDateKey() ? today : null;
     }
 
-    const song = pickRandom(songs);
-    console.log('Full song object from the API:', song);
-    statusText.textContent = `Found ${songs.length} songs with a preview. Showing one at random.`;
-    renderSong(song);
-  } catch (error) {
-    console.error('Request failed:', error);
-    statusText.textContent = 'Could not reach the music service. Check your connection and try again.';
-    statusText.classList.add('error');
-  } finally {
-    button.disabled = false;
-  }
-});
+    function showPhase(phase, details = {}) {
+        renderPhase(phase, { modes: MODES, mode: getMode(currentModeKey), ...details });
+    }
+
+    function selectMode(modeKey) {
+        currentModeKey = modeKey;
+        applyMode(modeKey);
+        renderTabs(MODES, modeKey);
+        renderModeCard(getMode(modeKey));
+    }
+
+    function showCurrentState() {
+        const today = getLockedToday();
+
+        if (today) {
+            selectMode(today.mode);
+            showPhase('revealed', { song: today.song });
+        } else {
+            showPhase('idle');
+        }
+    }
+
+    async function handleUnveil() {
+        if (isSearching || getLockedToday()) return;
+
+        isSearching = true;
+        showPhase('searching');
+
+        try {
+            pool = pool ?? await loadPool();
+            const song = await discoverSong(currentModeKey, pool, picker);
+
+            store.saveToday({ date: getDateKey(), mode: currentModeKey, song });
+            showCurrentState();
+        } catch (error) {
+            console.error('Discovery failed:', error);
+            showPhase('error', { message: getErrorMessage(error) });
+        } finally {
+            isSearching = false;
+        }
+    }
+
+    function handleTabClick(event) {
+        const tab = event.target.closest('.tab');
+        if (!tab || tab.disabled) return;
+
+        selectMode(tab.dataset.mode);
+        showPhase('idle');
+    }
+
+    renderGreeting(getGreeting());
+    selectMode(currentModeKey);
+    showCurrentState();
+
+    unveilButton.addEventListener('click', handleUnveil);
+    tabList.addEventListener('click', handleTabClick);
+}
+
+init();

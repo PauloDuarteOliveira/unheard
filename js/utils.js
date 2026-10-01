@@ -9,6 +9,9 @@ const AFTERNOON_START_HOUR = 12;
 const EVENING_START_HOUR = 18;
 const LATE_NIGHT_START_HOUR = 22;
 
+const SMALL_COVER_SIZE = '100x100';
+const LARGE_COVER_SIZE = '600x600';
+
 function twoDigits(number) {
     return String(number).padStart(2, '0');
 }
@@ -38,6 +41,14 @@ export function getGreeting(hour = new Date().getHours()) {
     if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';
     if (hour >= EVENING_START_HOUR && hour < LATE_NIGHT_START_HOUR) return 'Good evening';
     return 'Late night listening';
+}
+
+export function getReleaseYear(releaseDate) {
+    return releaseDate ? releaseDate.slice(0, 4) : '';
+}
+
+export function getCoverUrl(artworkUrl) {
+    return artworkUrl.replace(SMALL_COVER_SIZE, LARGE_COVER_SIZE);
 }
 
 export function pickRandom(list) {
