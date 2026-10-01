@@ -1,7 +1,5 @@
 import { formatCountdown, getCoverUrl, getReleaseYear } from './utils.js';
 
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-const ICON_SIZE = 18;
 const DEFAULT_VOLUME = 0.25;
 
 const greetingBlock = document.querySelector('#greeting-block');
@@ -23,22 +21,12 @@ const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
 
 
-function createIcon(pathData) {
-    const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-    svg.setAttribute('width', ICON_SIZE);
-    svg.setAttribute('height', ICON_SIZE);
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '1.8');
-    svg.setAttribute('stroke-linecap', 'round');
-    svg.setAttribute('stroke-linejoin', 'round');
-    svg.setAttribute('aria-hidden', 'true');
-
-    const path = document.createElementNS(SVG_NAMESPACE, 'path');
-    path.setAttribute('d', pathData);
-    svg.append(path);
-    return svg;
+function createIcon(name) {
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = name;
+    return icon;
 }
 
 function createTab(mode, isSelected) {

@@ -262,7 +262,11 @@ h2 {
   color: var(--text);
 }
 
-.tab[aria-selected="true"] svg {
+.tab .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.tab[aria-selected="true"] .material-symbols-outlined {
   color: rgb(var(--mode-rgb));
 }
 
@@ -340,6 +344,10 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text);
+}
+
+.unveil-icon .material-symbols-outlined {
+  font-size: 28px;
 }
 
 .icon-spinner,
