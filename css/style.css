@@ -396,6 +396,14 @@ h2 {
   justify-content: space-between;
 }
 
+.catalog-number {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text-soft);
+}
+
 .song-cover {
   width: 176px;
   height: 176px;
