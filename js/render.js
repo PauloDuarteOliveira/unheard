@@ -1,6 +1,7 @@
 import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
+const SHARE_FEEDBACK_MS = 2000;
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -121,9 +122,9 @@ function createSongCard(song, mode) {
     const spotifyLink = document.createElement('a');
     spotifyLink.className = 'song-link song-link-primary';
     spotifyLink.href = getSpotifyUrl(song);
-    spotifyLink.target = '_blacnk';
+    spotifyLink.target = '_blank';
     spotifyLink.rel = 'noopener';
-    spotifyLink.textContent = 'Open in Spotity'
+    spotifyLink.textContent = 'Open in Spotify'
 
     const appleLink = document.createElement('a');
     appleLink.className = 'song-link';
@@ -131,10 +132,17 @@ function createSongCard(song, mode) {
     appleLink.target = '_blank';
     appleLink.rel = 'noopener';
     appleLink.textContent = 'Apple Music';
-    
+
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'song-link song-share'
+    shareButton.dataset.action = 'share';
+    shareButton.setAttribute('aria-label', "Share today's discovery");
+    shareButton.append(createIcon('share'));
+
     const actions = document.createElement('div');
     actions.className = 'song-actions';
-    actions.append(spotifyLink, appleLink);
+    actions.append(spotifyLink, appleLink, shareButton);
 
     return [stamp, cover, title, meta, audio, actions];
 }
@@ -170,4 +178,13 @@ export function renderPhase(phase, { modes, mode, song, message = '' }) {
             renderStatus('', false);
             revealed.replaceChildren();
     }
+}
+
+export function renderShareFeedback(button) {
+    const icon = button.querySelector('.material-symbols-outlined');
+    icon.textContent = 'check';
+
+    setTimeout(() => {
+        icon.textContent = 'share';
+    }, SHARE_FEEDBACK_MS);
 }

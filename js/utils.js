@@ -56,6 +56,10 @@ export function getSpotifyUrl(song){
     return SPOTIFY_SEARCH_URL + encodeURIComponent(searchText);
 }
 
+export function getShareText(song){
+    return `Today I discovered ${song.trackName} by ${song.artistName} 🎧`;
+}
+
 export function pickRandom(list) {
     const index = Math.floor(Math.random() * list.length);
     return list[index];

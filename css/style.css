@@ -445,6 +445,13 @@ h2 {
   font-weight: 600;
 }
 
+.song-share {
+  width: 48px;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--text);
+}
+
 /* ---------- Mode card ---------- */
 
 .mode-card {

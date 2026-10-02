@@ -3,8 +3,8 @@ import { MODES, getMode } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight } from './utils.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback } from './render.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -34,6 +34,7 @@ function init() {
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
     const devButton = document.querySelector('#dev-button');
+    const revealed = document.querySelector('#revealed');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -113,6 +114,21 @@ function init() {
         tick();
     }
 
+    async function handleRevealedClick(event) {
+        const shareButton = event.target.closest('[data-action="share"]');
+        if(!shareButton) return;
+
+        const today = getLockedToday();
+        if (!today) return;
+
+        try {
+            await navigator.clipboard.writeText(getShareText(today.song));
+            renderShareFeedback(shareButton);
+        } catch (error) {
+            console.error ('could not copy to the clipboard', error);
+        }
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -120,6 +136,7 @@ function init() {
 
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
+    revealed.addEventListener('click', handleRevealedClick);
 
     if (isDevMode()) {
         devButton.hidden = false;
