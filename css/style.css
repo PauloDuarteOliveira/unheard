@@ -476,6 +476,12 @@ h2 {
   gap: 12px;
 }
 
+.dev-button {
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+  }
+
 .lock-status {
   display: flex;
   align-items: center;

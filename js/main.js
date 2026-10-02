@@ -9,6 +9,17 @@ import { getDateKey, getGreeting, getMsUntilMidnight } from './utils.js';
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
 const DEFAULT_PROFILE_ID = 'guest';
+const DEV_MODE_KEY = 'unheard:devMode';
+
+function isDevMode() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('dev') === '1') {
+        sessionStorage.setItem(DEV_MODE_KEY, '1');
+    }
+
+    return sessionStorage.getItem(DEV_MODE_KEY) === '1';
+}
 
 function getErrorMessage(error) {
     if (error.message === NO_SONG_MESSAGE) {
@@ -22,6 +33,7 @@ function init() {
     const picker = createPicker();
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
+    const devButton = document.querySelector('#dev-button');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -95,6 +107,12 @@ function init() {
         showPhase('idle');
     }
 
+    function handleDevReset() {
+        store.clearToday();
+        showCurrentState();
+        tick();
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -102,6 +120,11 @@ function init() {
 
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
+
+    if (isDevMode()) {
+        devButton.hidden = false;
+        devButton.addEventListener('click', handleDevReset);
+    }
 }
 
 init();
