@@ -390,6 +390,12 @@ h2 {
   gap: 12px;
 }
 
+.song-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .song-cover {
   width: 176px;
   height: 176px;

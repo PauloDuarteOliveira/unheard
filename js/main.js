@@ -46,6 +46,12 @@ function init() {
         return today && today.date === getDateKey() ? today : null;
     }
 
+    function getNextNumber() {
+        const previous = store.getToday();
+        const previousNumber = previous?.number ?? 0;
+        return previousNumber + 1;
+    }
+
     function showPhase(phase, details = {}) {
         renderPhase(phase, { modes: MODES, mode: getMode(currentModeKey), ...details });
     }
@@ -63,7 +69,7 @@ function init() {
 
         if (today) {
             selectMode(today.mode);
-            showPhase('revealed', { song: today.song });
+            showPhase('revealed', { song: today.song, number: today.number });
         } else {
             showPhase('idle');
         }
@@ -89,7 +95,7 @@ function init() {
             pool = pool ?? await loadPool();
             const song = await discoverSong(currentModeKey, pool, picker);
 
-            store.saveToday({ date: getDateKey(), mode: currentModeKey, song });
+            store.saveToday({ date: getDateKey(), mode: currentModeKey, song, number: getNextNumber() });
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
@@ -116,7 +122,7 @@ function init() {
 
     async function handleRevealedClick(event) {
         const shareButton = event.target.closest('[data-action="share"]');
-        if(!shareButton) return;
+        if (!shareButton) return;
 
         const today = getLockedToday();
         if (!today) return;
@@ -125,7 +131,7 @@ function init() {
             await navigator.clipboard.writeText(getShareText(today.song));
             renderShareFeedback(shareButton);
         } catch (error) {
-            console.error ('could not copy to the clipboard', error);
+            console.error('could not copy to the clipboard', error);
         }
     }
 

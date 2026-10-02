@@ -12,6 +12,9 @@ const LARGE_COVER_SIZE = '600x600';
 
 const SPOTIFY_SEARCH_URL = 'https://open.spotify.com/search/';
 
+const CATALOG_PREFIX = 'UNH-';
+const CATALOG_DIGITS = 3;
+
 function twoDigits(number) {
     return String(number).padStart(2, '0');
 }
@@ -58,6 +61,10 @@ export function getSpotifyUrl(song){
 
 export function getShareText(song){
     return `Today I discovered ${song.trackName} by ${song.artistName} 🎧`;
+}
+
+export function formatCatalogNumber(number) {
+    return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
 }
 
 export function pickRandom(list) {

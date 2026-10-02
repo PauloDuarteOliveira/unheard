@@ -1,4 +1,4 @@
-import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
 const SHARE_FEEDBACK_MS = 2000;
@@ -95,10 +95,25 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
-function createSongCard(song, mode) {
-    const stamp = document.createElement('p');
-    stamp.className = 'stamp stamp-mode';
-    stamp.textContent = `${mode.name} · Today's pressing`;
+function createSongCard(song, mode, number) {
+    const dot = document.createElement('span');
+    dot.className = 'dot dot-mode'
+
+    const modeLabel = document.createElement('span');
+    modeLabel.className = 'stamp stamp-mode';
+    modeLabel.textContent = mode.name;
+
+    const modeTag = document.createElement('span');
+    modeTag.className = 'stamp-row';
+    modeTag.append(dot, modeLabel);
+
+    const catalog = document.createElement('span');
+    catalog.className = 'stamp catalog-number';
+    catalog.textContent = formatCatalogNumber(number);
+
+    const header = document.createElement('div');
+    header.className = 'song-header';
+    header.append(modeTag, catalog);
 
     const cover = document.createElement('img');
     cover.className = 'song-cover';
@@ -144,10 +159,10 @@ function createSongCard(song, mode) {
     actions.className = 'song-actions';
     actions.append(spotifyLink, appleLink, shareButton);
 
-    return [stamp, cover, title, meta, audio, actions];
+    return [header, cover, title, meta, audio, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, message = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
 
@@ -171,7 +186,7 @@ export function renderPhase(phase, { modes, mode, song, message = '' }) {
             renderStatus(message, true);
             break;
         case 'revealed':
-            revealed.replaceChildren(...createSongCard(song, mode));
+            revealed.replaceChildren(...createSongCard(song, mode, number));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
