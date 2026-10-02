@@ -1,7 +1,7 @@
 
 const API_URL = 'https://itunes.apple.com/search';
 const POOL_URL = 'data/pool.json';
-const RESULT_LIMIT = 25;
+const RESULT_LIMIT = 50;
 const PREVIEW_TIMEOUT_MS = 8000;
 const PLAYABLE_EVENTS = ['canplaythrough', 'loadedmetadata'];
 
