@@ -429,6 +429,20 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 16px;
+}
+
+.song-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.song-link-primary {
+  flex-grow: 1;
+  border-color: transparent;
+  background: rgb(var(--mode-rgb));
+  color: var(--bg);
+  font-weight: 600;
 }
 
 /* ---------- Mode card ---------- */
@@ -477,10 +491,10 @@ h2 {
 }
 
 .dev-button {
-    background-color: transparent;
-    border: 0;
-    padding: 0;
-  }
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+}
 
 .lock-status {
   display: flex;

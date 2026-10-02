@@ -1,4 +1,4 @@
-import { formatCountdown, getCoverUrl, getReleaseYear } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
 
@@ -118,14 +118,25 @@ function createSongCard(song, mode) {
     audio.volume = DEFAULT_VOLUME;
     audio.src = song.previewUrl;
 
+    const spotifyLink = document.createElement('a');
+    spotifyLink.className = 'song-link song-link-primary';
+    spotifyLink.href = getSpotifyUrl(song);
+    spotifyLink.target = '_blacnk';
+    spotifyLink.rel = 'noopener';
+    spotifyLink.textContent = 'Open in Spotity'
+
     const appleLink = document.createElement('a');
     appleLink.className = 'song-link';
     appleLink.href = song.trackViewUrl;
     appleLink.target = '_blank';
     appleLink.rel = 'noopener';
-    appleLink.textContent = 'Open in Apple Music';
+    appleLink.textContent = 'Apple Music';
+    
+    const actions = document.createElement('div');
+    actions.className = 'song-actions';
+    actions.append(spotifyLink, appleLink);
 
-    return [stamp, cover, title, meta, audio, appleLink];
+    return [stamp, cover, title, meta, audio, actions];
 }
 
 export function renderPhase(phase, { modes, mode, song, message = '' }) {
