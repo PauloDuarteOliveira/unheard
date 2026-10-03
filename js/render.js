@@ -21,7 +21,8 @@ const modeDescription = document.querySelector('#mode-description');
 const lockDot = document.querySelector('#lock-dot');
 const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
-
+const errorCard = document.querySelector('#error-card');
+const errorTitle = document.querySelector('#error-title');
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -83,12 +84,31 @@ function renderLockStatus(isLocked) {
     lockDot.classList.toggle('is-collected', isLocked);
 }
 
-function renderUnveilButton(isSearching) {
+function renderUnveilButton(phase) {
+    const isSearching = phase === 'searching';
+    const isError = phase === 'error';
+
     unveilButton.disabled = isSearching;
     unveilButton.classList.toggle('is-searching', isSearching);
-    unveilButton.setAttribute('aria-label', isSearching ? 'Searching for your song' : "Unveil today's song");
-    unveilTitle.textContent = isSearching ? 'Searching' : 'Unveil';
-    unveilSubtitle.textContent = isSearching ? 'Checking the preview' : "Today's pressing";
+    unveilButton.classList.toggle('is-error', isError);
+
+    switch (phase) {
+        case 'searching':
+            unveilButton.setAttribute('aria-label', 'Searching for your song');
+            unveilTitle.textContent = 'Searching';
+            unveilSubtitle.textContent = 'Checking the preview';
+            break;
+        case 'error':
+            unveilButton.setAttribute('aria-label', 'Try unveiling again');
+            unveilTitle.textContent = 'No signal';
+            unveilSubtitle.textContent = 'Nothing was used';
+            break;
+        default:
+            unveilButton.setAttribute('aria-label', "Unveil today's song");
+            unveilTitle.textContent = 'Unveil';
+            unveilSubtitle.textContent = "Today's pressing";
+            break;
+    }
 }
 
 function renderStatus(message, isError) {
@@ -230,7 +250,8 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
     revealed.hidden = !isRevealed;
 
     setTabsLocked(modes, isRevealed || isSearching);
-    renderUnveilButton(isSearching);
+    renderUnveilButton(phase);
+    errorCard.hidden = phase !== 'error';
     renderLockStatus(isRevealed);
     phaseDot.classList.toggle('is-busy', isSearching);
 
@@ -240,8 +261,9 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             renderStatus('Digging for a song and making sure the preview plays before we lock it in.', false);
             break;
         case 'error':
-            phaseStamp.textContent = 'No signal';
-            renderStatus(message, true);
+            phaseStamp.textContent = 'Transmission lost';
+            errorTitle.textContent = message;
+            renderStatus('', false);
             break;
         case 'revealed':
             revealed.replaceChildren(...createSongCard(song, mode, number));

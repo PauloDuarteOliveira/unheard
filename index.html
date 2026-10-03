@@ -44,6 +44,14 @@
         </span>
       </button>
       <p class="status" id="status" role="status"></p>
+      <div class="error-card" id="error-card" role="alert" hidden>
+        <span class="material-symbols-outlined error-icon" aria-hidden="true">error</span>
+        <div class="error-text">
+          <h2 class="error-title" id="error-title">This song couldn't be loaded</h2>
+          <p class="error-detail">No discovery used.</p>
+        </div>
+        <button class="error-retry" id="retry-button" type="button">Try again</button>
+      </div>
     </div>
 
     <section class="revealed" id="revealed" aria-live="polite" hidden></section>

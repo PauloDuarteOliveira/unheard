@@ -1,4 +1,4 @@
-import { loadPool } from './api.js';
+import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
 import { MODES, getMode } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
@@ -21,11 +21,15 @@ function isDevMode() {
     return sessionStorage.getItem(DEV_MODE_KEY) === '1';
 }
 
-function getErrorMessage(error) {
-    if (error.message === NO_SONG_MESSAGE) {
-        return 'Could not find a song that plays. Try again, your discovery was not used.';
-    }
-    return 'Could not reach the music service. Check your connection and try again.';
+function getErrorTitle(error) {
+    switch (error.message) {
+        case NO_SONG_MESSAGE:
+            return "This song couldn't be loaded";
+        case POOL_ERROR_MESSAGE:
+            return "Something went wrong on our side";
+        default:
+            return "Can't reach the music service";
+    }    
 }
 
 function init() {
@@ -35,6 +39,7 @@ function init() {
     const unveilButton = document.querySelector('#unveil-button');
     const devButton = document.querySelector('#dev-button');
     const revealed = document.querySelector('#revealed');
+    const retryButton = document.querySelector('#retry-button');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -99,7 +104,7 @@ function init() {
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
-            showPhase('error', { message: getErrorMessage(error) });
+            showPhase('error', { message: getErrorTitle(error) });
         } finally {
             isSearching = false;
             tick();
@@ -143,6 +148,7 @@ function init() {
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
+    retryButton.addEventListener('click', handleUnveil)
 
     if (isDevMode()) {
         devButton.hidden = false;
