@@ -217,6 +217,18 @@ function createSongCard(song, mode, number) {
     cover.src = getCoverUrl(song.artworkUrl100);
     cover.alt = `Cover of ${song.collectionName}`;
 
+    const label = document.createElement('div');
+    label.className = 'vinyl-label';
+
+    const vinyl = document.createElement('div');
+    vinyl.className = 'vinyl';
+    vinyl.append(label);
+
+    const sleeve = document.createElement('div');
+    sleeve.className = 'sleeve';
+    sleeve.setAttribute('aria-hidden', 'true');
+    sleeve.append(vinyl, cover);
+
     const title = document.createElement('h2');
     title.className = 'song-title';
     title.textContent = song.trackName;
@@ -252,7 +264,7 @@ function createSongCard(song, mode, number) {
     actions.className = 'song-actions';
     actions.append(spotifyLink, appleLink, shareButton);
 
-    return [header, cover, title, meta, dock, actions];
+    return [header, sleeve, title, meta, dock, actions];
 }
 
 export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
