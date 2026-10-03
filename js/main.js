@@ -29,7 +29,7 @@ function getErrorTitle(error) {
             return "Something went wrong on our side";
         default:
             return "Can't reach the music service";
-    }    
+    }
 }
 
 function init() {
@@ -48,13 +48,14 @@ function init() {
 
     function getLockedToday() {
         const today = store.getToday();
-        return today && today.date === getDateKey() ? today : null;
+        return today && today.date === getDateKey() && today.song ? today : null;
     }
 
     function getNextNumber() {
         const previous = store.getToday();
         const previousNumber = previous?.number ?? 0;
-        return previousNumber + 1;
+        const isSameDay = previous?.date === getDateKey();
+        return isSameDay ? previousNumber : previousNumber + 1;
     }
 
     function showPhase(phase, details = {}) {
@@ -125,19 +126,38 @@ function init() {
         tick();
     }
 
-    async function handleRevealedClick(event) {
-        const shareButton = event.target.closest('[data-action="share"]');
-        if (!shareButton) return;
+    function handleRevealedClick(event) {
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) return;
 
+        switch (actionButton.dataset.action) {
+            case 'share':
+                shareToday(actionButton);
+                break;
+            case 'reroll':
+                rerollToday();
+                break;
+        }
+    }
+    
+    async function shareToday(button) {
         const today = getLockedToday();
         if (!today) return;
 
         try {
             await navigator.clipboard.writeText(getShareText(today.song));
-            renderShareFeedback(shareButton);
-        } catch (error) {
+            renderShareFeedback(button);
+        } catch(error) {
             console.error('could not copy to the clipboard', error);
         }
+    }
+
+    function rerollToday() {
+        const today = getLockedToday();
+        if (!today) return;
+
+        store.saveToday({...today, song: null});
+        handleUnveil();
     }
 
     selectMode(currentModeKey);

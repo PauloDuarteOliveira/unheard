@@ -138,9 +138,16 @@ function createAudioDock(song) {
     time.className = 'audio-time';
     time.textContent = `${formatTime(0)} / ${formatTime(PREVIEW_SECONDS)}`;
 
+    const rerollButton = document.createElement('button');
+    rerollButton.type = 'button';
+    rerollButton.className = 'audio-reroll';
+    rerollButton.dataset.action = 'reroll';
+    rerollButton.hidden = true;
+    rerollButton.append(createIcon('refresh'), 'Re-roll');
+
     const dock = document.createElement('div');
     dock.className = 'audio-dock';
-    dock.append(audio, playButton, track, time);
+    dock.append(audio, playButton, track, time, rerollButton);
 
     function getDuration() {
         return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
@@ -165,6 +172,13 @@ function createAudioDock(song) {
         }
     }
 
+    function showBroken(){
+        playButton.disabled = true;
+        track.hidden = true;
+        time.textContent = 'Preview unavailable';
+        rerollButton.hidden = false;
+    }
+
     playButton.addEventListener('click', togglePlay);
     audio.addEventListener('play', () => showPlaying(true));
     audio.addEventListener('pause', () => showPlaying(false));
@@ -173,6 +187,7 @@ function createAudioDock(song) {
         audio.currentTime = 0;
         showProgress();
     });
+    audio.addEventListener('error', showBroken);
 
     return dock;
 }
