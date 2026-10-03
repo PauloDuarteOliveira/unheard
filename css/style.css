@@ -280,6 +280,7 @@ h2 {
 /* ---------- Unveil button ---------- */
 
 .stage {
+  align-self: stretch;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -361,6 +362,14 @@ h2 {
 .unveil.is-searching .icon-spinner {
   display: block;
   animation: spin 0.9s linear infinite;
+}
+
+.unveil.is-error {
+  transform: scale(0.88);
+  box-shadow: 
+    0 0 60px -10px rgba(var(--mode-rgb), 0.3),
+    0 10px 28px -4px var(--shadow),
+    inset 0 1px 1px var(--highlight);
 }
 
 @keyframes spin {
@@ -792,6 +801,15 @@ h2 {
 
   .unveil-title {
     font-size: 20px;
+  }
+
+  .status {
+    max-width: 420px;
+    font-size: 14px;
+  }
+
+  .error-card {
+    max-width: 680px;
   }
 
   .sleeve {
