@@ -1,6 +1,7 @@
-import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber, formatTime } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
+const PREVIEW_SECONDS = 30;
 const SHARE_FEEDBACK_MS = 2000;
 
 const greetingBlock = document.querySelector('#greeting-block');
@@ -95,6 +96,67 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
+function createAudioDock(song) {
+    const audio = document.createElement('audio');
+    audio.src = song.previewUrl;
+    audio.volume = DEFAULT_VOLUME
+
+    const playButton = document.createElement('button');
+    playButton.type = 'button';
+    playButton.className = 'audio-play';
+    playButton.setAttribute('aria-label', 'Play preview');
+    playButton.append(createIcon('play_arrow'));
+
+    const fill = document.createElement('div');
+    fill.className = 'audio-fill';
+
+    const track = document.createElement('div');
+    track.className = 'audio-track';
+    track.append(fill);
+
+    const time = document.createElement('span');
+    time.className = 'audio-time';
+    time.textContent = `${formatTime(0)} / ${formatTime(PREVIEW_SECONDS)}`;
+
+    const dock = document.createElement('div');
+    dock.className = 'audio-dock';
+    dock.append(audio, playButton, track, time);
+
+    function getDuration() {
+        return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
+    }
+
+    function showPlaying(isPlaying) {
+        playButton.querySelector('.material-symbols-outlined').textContent = isPlaying ? 'pause' : 'play_arrow';
+        playButton.setAttribute('aria-label', isPlaying ? 'Pause preview' : 'Play preview');
+    }
+
+    function showProgress() {
+        const duration = getDuration();
+        fill.style.width = `${(audio.currentTime / duration) * 100}%`;
+        time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(duration)}`;
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch((error) => console.error('Preview could not play:', error));
+        } else {
+            audio.pause();
+        }
+    }
+
+    playButton.addEventListener('click', togglePlay);
+    audio.addEventListener('play', () => showPlaying(true));
+    audio.addEventListener('pause', () => showPlaying(false));
+    audio.addEventListener('timeupdate', showProgress);
+    audio.addEventListener('ended', () => {
+        audio.currentTime = 0;
+        showProgress();
+    });
+
+    return dock;
+}
+
 function createSongCard(song, mode, number) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
@@ -128,11 +190,7 @@ function createSongCard(song, mode, number) {
     meta.className = 'song-meta';
     meta.textContent = `${song.artistName} · ${getReleaseYear(song.releaseDate)}`;
 
-    const audio = document.createElement('audio');
-    audio.className = 'song-audio';
-    audio.controls = true;
-    audio.volume = DEFAULT_VOLUME;
-    audio.src = song.previewUrl;
+    const dock = createAudioDock(song);
 
     const spotifyLink = document.createElement('a');
     spotifyLink.className = 'song-link song-link-primary';
@@ -159,7 +217,7 @@ function createSongCard(song, mode, number) {
     actions.className = 'song-actions';
     actions.append(spotifyLink, appleLink, shareButton);
 
-    return [header, cover, title, meta, audio, actions];
+    return [header, cover, title, meta, dock, actions];
 }
 
 export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {

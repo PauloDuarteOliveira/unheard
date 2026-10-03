@@ -30,6 +30,8 @@
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
   --glow-shape: 95% 42% at 50% 60%;
+
+  --surface-glass: rgba(21, 23, 30, 0.78);
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -427,9 +429,52 @@ h2 {
   color: var(--text-soft);
 }
 
-.song-audio {
-  width: 100%;
+.audio-dock {
+  box-sizing: border-box;
+  padding: 8px 14px 8px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-glass);
+  box-shadow: inset 0 1px 0 var(--highlight), 0 12px 30px -8px var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.audio-play {
+  width: 44px;
   height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-track {
+  flex-grow: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--highlight);
+  overflow: hidden;
+}
+
+.audio-fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(var(--mode-rgb), 0.3), rgb(var(--mode-rgb)));
+  transition: width 0.25s linear;
+}
+
+.audio-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-soft);
 }
 
 .song-link {

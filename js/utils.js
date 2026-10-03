@@ -39,6 +39,13 @@ export function formatCountdown(ms) {
     return `${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}`;
 }
 
+export function formatTime(seconds) {
+    const wholeSeconds = Math.floor(seconds);
+    const minutes = Math.floor(wholeSeconds/ SECONDS_PER_MINUTE);
+    const remainingSeconds = wholeSeconds % SECONDS_PER_MINUTE;
+    return `${minutes}:${twoDigits(remainingSeconds)}`;
+}
+
 export function getGreeting(hour = new Date().getHours()) {
     if (hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR) return 'Good morning';
     if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';
