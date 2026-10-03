@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Unheard · Discover a new sound every day</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=check,error,hourglass_empty,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=check,error,hourglass_empty,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body data-mode="random">
   <header class="app-header">
     <div class="brand">
@@ -57,12 +61,15 @@
     <section class="revealed" id="revealed" aria-live="polite" hidden></section>
 
     <section class="mode-card" id="mode-card" aria-label="Mode setup">
-      <p class="stamp-row">
-        <span class="dot dot-mode"></span>
-        <span class="stamp stamp-mode" id="mode-stamp">Mode 01 · True shuffle</span>
-      </p>
-      <p class="mode-description" id="mode-description">A completely random song from anywhere, any era, any genre.</p>
-      <p class="stamp">No setup · Anything can come up</p>
+      <div class="mode-card-text">
+        <p class="stamp-row">
+          <span class="dot dot-mode"></span>
+          <span class="stamp stamp-mode" id="mode-stamp">Mode 01 · True shuffle</span>
+        </p>
+        <p class="mode-description" id="mode-description">A completely random song from anywhere, any era, any genre.
+        </p>
+      </div>
+      <p class="stamp mode-setup">No setup · Anything can come up</p>
     </section>
   </main>
 
@@ -80,4 +87,5 @@
 
   <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
