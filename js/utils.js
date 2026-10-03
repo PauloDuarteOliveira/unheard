@@ -1,9 +1,7 @@
-//time converstion
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
 
-//fof countdown
 const MORNING_START_HOUR = 5;
 const AFTERNOON_START_HOUR = 12;
 const EVENING_START_HOUR = 18;
@@ -11,6 +9,11 @@ const LATE_NIGHT_START_HOUR = 22;
 
 const SMALL_COVER_SIZE = '100x100';
 const LARGE_COVER_SIZE = '600x600';
+
+const SPOTIFY_SEARCH_URL = 'https://open.spotify.com/search/';
+
+const CATALOG_PREFIX = 'UNH-';
+const CATALOG_DIGITS = 3;
 
 function twoDigits(number) {
     return String(number).padStart(2, '0');
@@ -36,6 +39,13 @@ export function formatCountdown(ms) {
     return `${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}`;
 }
 
+export function formatTime(seconds) {
+    const wholeSeconds = Math.floor(seconds);
+    const minutes = Math.floor(wholeSeconds/ SECONDS_PER_MINUTE);
+    const remainingSeconds = wholeSeconds % SECONDS_PER_MINUTE;
+    return `${minutes}:${twoDigits(remainingSeconds)}`;
+}
+
 export function getGreeting(hour = new Date().getHours()) {
     if (hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR) return 'Good morning';
     if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';
@@ -49,6 +59,19 @@ export function getReleaseYear(releaseDate) {
 
 export function getCoverUrl(artworkUrl) {
     return artworkUrl.replace(SMALL_COVER_SIZE, LARGE_COVER_SIZE);
+}
+
+export function getSpotifyUrl(song){
+    const searchText = `${song.trackName} ${song.artistName}`;
+    return SPOTIFY_SEARCH_URL + encodeURIComponent(searchText);
+}
+
+export function getShareText(song){
+    return `Today I discovered ${song.trackName} by ${song.artistName} 🎧`;
+}
+
+export function formatCatalogNumber(number) {
+    return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
 }
 
 export function pickRandom(list) {

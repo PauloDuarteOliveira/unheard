@@ -1,6 +1,6 @@
-
 const API_URL = 'https://itunes.apple.com/search';
 const POOL_URL = 'data/pool.json';
+export const POOL_ERROR_MESSAGE = 'Search terms could not be loaded';
 const RESULT_LIMIT = 50;
 const PREVIEW_TIMEOUT_MS = 8000;
 const PLAYABLE_EVENTS = ['canplaythrough', 'loadedmetadata'];
@@ -15,8 +15,13 @@ async function fetchJson(url) {
   return response.json();
 }
 
-export function loadPool() {
-  return fetchJson(POOL_URL);
+export async function loadPool() {
+  try {
+    return await fetchJson(POOL_URL);
+  } catch (error) {
+    console.error('pool.json failed to load', error);
+    throw new Error(POOL_ERROR_MESSAGE);
+  }
 }
 
 export async function searchSongs(term) {

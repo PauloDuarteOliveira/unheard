@@ -1,6 +1,8 @@
-import { formatCountdown, getCoverUrl, getReleaseYear } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber, formatTime } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
+const PREVIEW_SECONDS = 30;
+const SHARE_FEEDBACK_MS = 2000;
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -19,7 +21,8 @@ const modeDescription = document.querySelector('#mode-description');
 const lockDot = document.querySelector('#lock-dot');
 const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
-
+const errorCard = document.querySelector('#error-card');
+const errorTitle = document.querySelector('#error-title');
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -81,12 +84,31 @@ function renderLockStatus(isLocked) {
     lockDot.classList.toggle('is-collected', isLocked);
 }
 
-function renderUnveilButton(isSearching) {
+function renderUnveilButton(phase) {
+    const isSearching = phase === 'searching';
+    const isError = phase === 'error';
+
     unveilButton.disabled = isSearching;
     unveilButton.classList.toggle('is-searching', isSearching);
-    unveilButton.setAttribute('aria-label', isSearching ? 'Searching for your song' : "Unveil today's song");
-    unveilTitle.textContent = isSearching ? 'Searching' : 'Unveil';
-    unveilSubtitle.textContent = isSearching ? 'Checking the preview' : "Today's pressing";
+    unveilButton.classList.toggle('is-error', isError);
+
+    switch (phase) {
+        case 'searching':
+            unveilButton.setAttribute('aria-label', 'Searching for your song');
+            unveilTitle.textContent = 'Searching';
+            unveilSubtitle.textContent = 'Checking the preview';
+            break;
+        case 'error':
+            unveilButton.setAttribute('aria-label', 'Try unveiling again');
+            unveilTitle.textContent = 'No signal';
+            unveilSubtitle.textContent = 'Nothing was used';
+            break;
+        default:
+            unveilButton.setAttribute('aria-label', "Unveil today's song");
+            unveilTitle.textContent = 'Unveil';
+            unveilSubtitle.textContent = "Today's pressing";
+            break;
+    }
 }
 
 function renderStatus(message, isError) {
@@ -94,15 +116,118 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
-function createSongCard(song, mode) {
-    const stamp = document.createElement('p');
-    stamp.className = 'stamp stamp-mode';
-    stamp.textContent = `${mode.name} · Today's pressing`;
+function createAudioDock(song) {
+    const audio = document.createElement('audio');
+    audio.src = song.previewUrl;
+    audio.volume = DEFAULT_VOLUME
+
+    const playButton = document.createElement('button');
+    playButton.type = 'button';
+    playButton.className = 'audio-play';
+    playButton.setAttribute('aria-label', 'Play preview');
+    playButton.append(createIcon('play_arrow'));
+
+    const fill = document.createElement('div');
+    fill.className = 'audio-fill';
+
+    const track = document.createElement('div');
+    track.className = 'audio-track';
+    track.append(fill);
+
+    const time = document.createElement('span');
+    time.className = 'audio-time';
+    time.textContent = `${formatTime(0)} / ${formatTime(PREVIEW_SECONDS)}`;
+
+    const rerollButton = document.createElement('button');
+    rerollButton.type = 'button';
+    rerollButton.className = 'audio-reroll';
+    rerollButton.dataset.action = 'reroll';
+    rerollButton.hidden = true;
+    rerollButton.append(createIcon('refresh'), 'Re-roll');
+
+    const dock = document.createElement('div');
+    dock.className = 'audio-dock';
+    dock.append(audio, playButton, track, time, rerollButton);
+
+    function getDuration() {
+        return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
+    }
+
+    function showPlaying(isPlaying) {
+        playButton.querySelector('.material-symbols-outlined').textContent = isPlaying ? 'pause' : 'play_arrow';
+        playButton.setAttribute('aria-label', isPlaying ? 'Pause preview' : 'Play preview');
+    }
+
+    function showProgress() {
+        const duration = getDuration();
+        fill.style.width = `${(audio.currentTime / duration) * 100}%`;
+        time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(duration)}`;
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play().catch((error) => console.error('Preview could not play:', error));
+        } else {
+            audio.pause();
+        }
+    }
+
+    function showBroken(){
+        playButton.disabled = true;
+        track.hidden = true;
+        time.textContent = 'Preview unavailable';
+        rerollButton.hidden = false;
+    }
+
+    playButton.addEventListener('click', togglePlay);
+    audio.addEventListener('play', () => showPlaying(true));
+    audio.addEventListener('pause', () => showPlaying(false));
+    audio.addEventListener('timeupdate', showProgress);
+    audio.addEventListener('ended', () => {
+        audio.currentTime = 0;
+        showProgress();
+    });
+    audio.addEventListener('error', showBroken);
+
+    return dock;
+}
+
+function createSongCard(song, mode, number) {
+    const dot = document.createElement('span');
+    dot.className = 'dot dot-mode'
+
+    const modeLabel = document.createElement('span');
+    modeLabel.className = 'stamp stamp-mode';
+    modeLabel.textContent = mode.name;
+
+    const modeTag = document.createElement('span');
+    modeTag.className = 'stamp-row';
+    modeTag.append(dot, modeLabel);
+
+    const catalog = document.createElement('span');
+    catalog.className = 'stamp catalog-number';
+    catalog.textContent = formatCatalogNumber(number);
+
+    const header = document.createElement('div');
+    header.className = 'song-header';
+    header.append(modeTag, catalog);
 
     const cover = document.createElement('img');
     cover.className = 'song-cover';
     cover.src = getCoverUrl(song.artworkUrl100);
     cover.alt = `Cover of ${song.collectionName}`;
+
+    const label = document.createElement('div');
+    label.className = 'vinyl-label';
+
+    const vinyl = document.createElement('div');
+    vinyl.className = 'vinyl';
+    vinyl.append(label);
+
+    const sleeve = document.createElement('div');
+    sleeve.className = 'sleeve';
+    sleeve.setAttribute('aria-hidden', 'true');
+    sleeve.append(vinyl, cover);
 
     const title = document.createElement('h2');
     title.className = 'song-title';
@@ -112,23 +237,37 @@ function createSongCard(song, mode) {
     meta.className = 'song-meta';
     meta.textContent = `${song.artistName} · ${getReleaseYear(song.releaseDate)}`;
 
-    const audio = document.createElement('audio');
-    audio.className = 'song-audio';
-    audio.controls = true;
-    audio.volume = DEFAULT_VOLUME;
-    audio.src = song.previewUrl;
+    const dock = createAudioDock(song);
+
+    const spotifyLink = document.createElement('a');
+    spotifyLink.className = 'song-link song-link-primary';
+    spotifyLink.href = getSpotifyUrl(song);
+    spotifyLink.target = '_blank';
+    spotifyLink.rel = 'noopener';
+    spotifyLink.textContent = 'Open in Spotify'
 
     const appleLink = document.createElement('a');
     appleLink.className = 'song-link';
     appleLink.href = song.trackViewUrl;
     appleLink.target = '_blank';
     appleLink.rel = 'noopener';
-    appleLink.textContent = 'Open in Apple Music';
+    appleLink.textContent = 'Apple Music';
 
-    return [stamp, cover, title, meta, audio, appleLink];
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'song-link song-share'
+    shareButton.dataset.action = 'share';
+    shareButton.setAttribute('aria-label', "Share today's discovery");
+    shareButton.append(createIcon('share'));
+
+    const actions = document.createElement('div');
+    actions.className = 'song-actions';
+    actions.append(spotifyLink, appleLink, shareButton);
+
+    return [header, sleeve, title, meta, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, message = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
 
@@ -138,7 +277,8 @@ export function renderPhase(phase, { modes, mode, song, message = '' }) {
     revealed.hidden = !isRevealed;
 
     setTabsLocked(modes, isRevealed || isSearching);
-    renderUnveilButton(isSearching);
+    renderUnveilButton(phase);
+    errorCard.hidden = phase !== 'error';
     renderLockStatus(isRevealed);
     phaseDot.classList.toggle('is-busy', isSearching);
 
@@ -148,15 +288,25 @@ export function renderPhase(phase, { modes, mode, song, message = '' }) {
             renderStatus('Digging for a song and making sure the preview plays before we lock it in.', false);
             break;
         case 'error':
-            phaseStamp.textContent = 'No signal';
-            renderStatus(message, true);
+            phaseStamp.textContent = 'Transmission lost';
+            errorTitle.textContent = message;
+            renderStatus('', false);
             break;
         case 'revealed':
-            revealed.replaceChildren(...createSongCard(song, mode));
+            revealed.replaceChildren(...createSongCard(song, mode, number));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
             renderStatus('', false);
             revealed.replaceChildren();
     }
+}
+
+export function renderShareFeedback(button) {
+    const icon = button.querySelector('.material-symbols-outlined');
+    icon.textContent = 'check';
+
+    setTimeout(() => {
+        icon.textContent = 'share';
+    }, SHARE_FEEDBACK_MS);
 }

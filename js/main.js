@@ -1,20 +1,35 @@
-import { loadPool } from './api.js';
+import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
 import { MODES, getMode } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight } from './utils.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback } from './render.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
 const DEFAULT_PROFILE_ID = 'guest';
+const DEV_MODE_KEY = 'unheard:devMode';
 
-function getErrorMessage(error) {
-    if (error.message === NO_SONG_MESSAGE) {
-        return 'Could not find a song that plays. Try again, your discovery was not used.';
+function isDevMode() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('dev') === '1') {
+        sessionStorage.setItem(DEV_MODE_KEY, '1');
     }
-    return 'Could not reach the music service. Check your connection and try again.';
+
+    return sessionStorage.getItem(DEV_MODE_KEY) === '1';
+}
+
+function getErrorTitle(error) {
+    switch (error.message) {
+        case NO_SONG_MESSAGE:
+            return "This song couldn't be loaded";
+        case POOL_ERROR_MESSAGE:
+            return "Something went wrong on our side";
+        default:
+            return "Can't reach the music service";
+    }
 }
 
 function init() {
@@ -22,6 +37,9 @@ function init() {
     const picker = createPicker();
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
+    const devButton = document.querySelector('#dev-button');
+    const revealed = document.querySelector('#revealed');
+    const retryButton = document.querySelector('#retry-button');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -30,7 +48,14 @@ function init() {
 
     function getLockedToday() {
         const today = store.getToday();
-        return today && today.date === getDateKey() ? today : null;
+        return today && today.date === getDateKey() && today.song ? today : null;
+    }
+
+    function getNextNumber() {
+        const previous = store.getToday();
+        const previousNumber = previous?.number ?? 0;
+        const isSameDay = previous?.date === getDateKey();
+        return isSameDay ? previousNumber : previousNumber + 1;
     }
 
     function showPhase(phase, details = {}) {
@@ -50,7 +75,7 @@ function init() {
 
         if (today) {
             selectMode(today.mode);
-            showPhase('revealed', { song: today.song });
+            showPhase('revealed', { song: today.song, number: today.number });
         } else {
             showPhase('idle');
         }
@@ -76,11 +101,11 @@ function init() {
             pool = pool ?? await loadPool();
             const song = await discoverSong(currentModeKey, pool, picker);
 
-            store.saveToday({ date: getDateKey(), mode: currentModeKey, song });
+            store.saveToday({ date: getDateKey(), mode: currentModeKey, song, number: getNextNumber() });
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
-            showPhase('error', { message: getErrorMessage(error) });
+            showPhase('error', { message: getErrorTitle(error) });
         } finally {
             isSearching = false;
             tick();
@@ -95,6 +120,46 @@ function init() {
         showPhase('idle');
     }
 
+    function handleDevReset() {
+        store.clearToday();
+        showCurrentState();
+        tick();
+    }
+
+    function handleRevealedClick(event) {
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) return;
+
+        switch (actionButton.dataset.action) {
+            case 'share':
+                shareToday(actionButton);
+                break;
+            case 'reroll':
+                rerollToday();
+                break;
+        }
+    }
+    
+    async function shareToday(button) {
+        const today = getLockedToday();
+        if (!today) return;
+
+        try {
+            await navigator.clipboard.writeText(getShareText(today.song));
+            renderShareFeedback(button);
+        } catch(error) {
+            console.error('could not copy to the clipboard', error);
+        }
+    }
+
+    function rerollToday() {
+        const today = getLockedToday();
+        if (!today) return;
+
+        store.saveToday({...today, song: null});
+        handleUnveil();
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -102,6 +167,13 @@ function init() {
 
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
+    revealed.addEventListener('click', handleRevealedClick);
+    retryButton.addEventListener('click', handleUnveil)
+
+    if (isDevMode()) {
+        devButton.hidden = false;
+        devButton.addEventListener('click', handleDevReset);
+    }
 }
 
 init();
