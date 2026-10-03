@@ -134,6 +134,26 @@ function createAudioDock(song) {
     track.className = 'audio-track';
     track.append(fill);
 
+    const infoTitle = document.createElement('span');
+    infoTitle.className = 'audio-info-title';
+    infoTitle.textContent= song.trackName;
+
+    const infoArtist = document.createElement('span');
+    infoArtist.className = 'audio-info-artist';
+    infoArtist.textContent = song.artistName;
+
+    const info = document.createElement('div');
+    info.className = 'audio-info';
+    info.append(infoTitle, infoArtist);
+
+    const caption = document.createElement('span');
+    caption.className = 'audio-caption';
+    caption.textContent = '30-second preview';
+
+    const progress = document.createElement('div');
+    progress.className = 'audio-progress';
+    progress.append(track, caption);
+
     const time = document.createElement('span');
     time.className = 'audio-time';
     time.textContent = `${formatTime(0)} / ${formatTime(PREVIEW_SECONDS)}`;
@@ -147,7 +167,7 @@ function createAudioDock(song) {
 
     const dock = document.createElement('div');
     dock.className = 'audio-dock';
-    dock.append(audio, playButton, track, time, rerollButton);
+    dock.append(audio, playButton, info, progress, time, rerollButton);
 
     function getDuration() {
         return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
@@ -174,7 +194,7 @@ function createAudioDock(song) {
 
     function showBroken() {
         playButton.disabled = true;
-        track.hidden = true;
+        progress.hidden = true;
         time.textContent = 'Preview unavailable';
         rerollButton.hidden = false;
     }
