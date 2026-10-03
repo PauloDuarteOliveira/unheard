@@ -33,6 +33,7 @@
 
   --surface-glass: rgba(21, 23, 30, 0.78);
   --vinyl: #0a0a0c;
+  --tint: rgba(255, 255, 255, 0.03);
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -546,6 +547,32 @@ h2 {
   color: var(--text-soft);
 }
 
+.song-details {
+  display: none;
+  margin: 0;
+}
+
+.song-detail {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--tint);
+}
+
+.song-detail dt {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.song-detail dd {
+  margin: 0;
+  font-size: 13px;
+}
+
 .audio-dock {
   box-sizing: border-box;
   padding: 8px 14px 8px 8px;
@@ -803,6 +830,17 @@ h2 {
     font-size: 20px;
   }
 
+  .song-details {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+  }
+
+  .song-meta-year {
+    display: none;
+  }
+  
   .status {
     max-width: 420px;
     font-size: 14px;
