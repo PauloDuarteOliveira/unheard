@@ -705,6 +705,7 @@ h2 {
   flex-direction: column;
   gap: 10px;
   transition: border-color 0.4s ease;
+  min-height: 180px;
 }
 
 .mode-card-text {
@@ -716,6 +717,95 @@ h2 {
 .mode-description {
   font-size: 14px;
   color: var(--text-soft);
+}
+
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-label {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--mode-rgb));
+}
+
+.setup-dial {
+  position: relative;
+  height: 52px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--mode-rgb), 0.9);
+  background: linear-gradient(180deg, rgba(var(--mode-rgb), 0.24), rgba(var(--mode-rgb), 0.08));
+  box-shadow:
+    0 0 0 3px rgba(var(--mode-rgb), 0.22),
+    0 0 24px -2px rgba(var(--mode-rgb), 0.7),
+    inset 0 2px 4px var(--shadow);
+}
+
+.setup-dial:focus-within {
+  outline: 2px solid rgb(var(--mode-rgb));
+  outline-offset: 4px;
+}
+
+.setup-select {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 40px 0 48px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 16px;
+  font-weight: 600;
+  appearance: none;
+  cursor: pointer;
+}
+
+.setup-select:focus {
+  outline: none;
+}
+
+.setup-select:disabled {
+  cursor: default;
+}
+
+.setup-select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.setup-icon,
+.setup-chevron {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.setup-icon {
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(var(--mode-rgb));
+  color: var(--bg);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-chevron {
+  right: 12px;
+  color: rgb(var(--mode-rgb));
+  font-size: 22px;
 }
 
 /* ---------- Status bar ---------- */
@@ -980,6 +1070,7 @@ h2 {
     flex-direction: row;
     align-items: center;
     gap: 24px;
+    min-height: 106px;
   }
 
   .mode-card-text {
@@ -1190,6 +1281,7 @@ h2 {
     flex-direction: row;
     align-items: center;
     gap: 14px;
+    min-height: 0px;
   }
 
   .mode-card-text {
