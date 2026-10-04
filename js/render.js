@@ -23,6 +23,7 @@ const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
 const errorCard = document.querySelector('#error-card');
 const errorTitle = document.querySelector('#error-title');
+const today = document.querySelector('#today');
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -321,6 +322,7 @@ function createSongCard(song, mode, number) {
 }
 
 export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
+    today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
 

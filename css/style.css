@@ -1043,6 +1043,108 @@ h2 {
     text-transform: uppercase;
   }
 
+    .today {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-areas:
+      "button ."
+      "button greeting"
+      "button tabs"
+      "button error"
+      "button mode"
+      "button status"
+      "button .";
+    column-gap: 28px;
+    row-gap: 10px;
+  }
+
+  .stage {
+    display: contents;
+  }
+
+  .unveil {
+    grid-area: button;
+    align-self: center;
+    justify-self: center;
+    width: 200px;
+    height: 200px;
+  }
+
+  .unveil-face {
+    width: 160px;
+    height: 160px;
+  }
+
+  .greeting {
+    grid-area: greeting;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .greeting h1 {
+    min-height: 0;
+    font-size: 20px;
+  }
+
+  .today[data-phase="error"] .greeting {
+    display: none;
+  }
+
+  .tabs {
+    grid-area: tabs;
+    min-height: 0;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 10px;
+  }
+
+  .tab {
+    height: 44px;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .error-card {
+    grid-area: error;
+    max-width: none;
+    padding: 8px 8px 8px 14px;
+    gap: 12px;
+  }
+
+  .mode-card {
+    grid-area: mode;
+    max-width: none;
+    padding: 10px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mode-card-text {
+    flex-grow: 1;
+    gap: 4px;
+  }
+
+  .mode-description {
+    font-size: 13px;
+  }
+
+  .mode-setup {
+    width: 210px;
+    flex-shrink: 0;
+  }
+
+  .status {
+    grid-area: status;
+    min-height: 0;
+    max-width: none;
+    text-align: left;
+    font-size: 13px;
+  }
+
   .status-bar {
     width: auto;
   }
