@@ -1137,7 +1137,7 @@ h2 {
     .today {
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-rows: minmax(0, 1fr) auto auto auto auto auto minmax(0, 1fr);
     grid-template-areas:
       "button ."
       "button greeting"
@@ -1281,7 +1281,7 @@ h2 {
     flex-direction: row;
     align-items: center;
     gap: 14px;
-    min-height: 0px;
+    min-height: 78px;
   }
 
   .mode-card-text {
