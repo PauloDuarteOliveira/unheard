@@ -1,5 +1,5 @@
 import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
-import { MODES, getMode } from './modes.js';
+import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
@@ -57,6 +57,11 @@ function init() {
         return pool?.[mode.optionsKey] ?? [];
     }
 
+    function getSearchingMessage() {
+        const mode = getMode(currentModeKey);
+        const option = getOptions(mode).find((item) => item.key === currentOptionKey);
+        return `${describeSearch(mode, option)} and making sure the preview plays before we lock it in.`;
+    }
 
     function getNextNumber() {
         const previous = store.getToday();
@@ -115,7 +120,7 @@ function init() {
         if (isSearching || getLockedToday()) return;
 
         isSearching = true;
-        showPhase('searching');
+        showPhase('searching', { message: getSearchingMessage() });
 
         try {
             pool = pool ?? await loadPool();

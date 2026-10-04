@@ -374,7 +374,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
     switch (phase) {
         case 'searching':
             phaseStamp.textContent = 'Pressing in progress';
-            renderStatus('Digging for a song and making sure the preview plays before we lock it in.', false);
+            renderStatus(message, false);
             break;
         case 'error':
             phaseStamp.textContent = 'Transmission lost';

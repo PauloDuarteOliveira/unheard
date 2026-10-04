@@ -67,6 +67,25 @@ export function getMode(modeKey) {
     return MODES.find((mode) => mode.key === modeKey);
 }
 
+export function describeSearch(mode, option) {
+    if (!option) return 'Digging for a song';
+
+    switch (mode.key) {
+        case 'time':
+            return `Going back to the ${option.label}`;
+        case 'world': {
+            const place = option.article ? `${option.article} ${option.label}` : option.label;
+            return `Traveling to ${place}`;
+        }
+        case 'mood':
+            return `Looking for something ${option.label.toLowerCase()}`;
+        case 'genre':
+            return `Searching for some ${option.label}`;
+        default:
+            return 'Digging for a song';
+    }
+}
+
 function pickOption(options, optionKey) {
     return options.find((option) => option.key === optionKey) ?? pickRandom(options);
 }
