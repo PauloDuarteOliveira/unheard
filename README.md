@@ -6,8 +6,8 @@ Discover a new sound every day. Unheard gives you one song a day, chosen through
 
 ## How it works
 
-1. Press **Unveil** on the Today screen.
-2. The app picks a random search term, asks the iTunes Search API for songs, and chooses one.
+1. Pick a discovery mode and, if you like, an option in its dial (a decade, a country, a mood or a genre). Then press **Unveil**.
+2. The app builds a search for that mode, asks the iTunes Search API for songs, keeps the ones that fit, and chooses one.
 3. It checks that the 30-second preview really plays before accepting the song.
 4. The song appears in a record sleeve, with its own player, a catalog number, and links to Spotify and Apple Music. The day is locked until local midnight, and a refresh shows the same song.
 
@@ -16,6 +16,20 @@ A failed attempt never uses up the daily discovery: the lock is saved only after
 - **If something fails**, an error card explains what happened (no connection, no playable song, or the search terms could not load) and offers **Try again**.
 - **If a preview stops working after the day is locked**, the player shows **Re-roll**, which finds a new song in the same mode and keeps the same catalog number.
 - **Share** copies "Today I discovered … by … 🎧" to the clipboard.
+
+## Discovery modes
+
+| Mode | Dial | How the song is found |
+|---|---|---|
+| Random | none | a random word from 351 search terms |
+| Time Machine | 7 decades, 1950s to 2010s | search terms typical of the decade, then only songs released in it |
+| World Explorer | 24 countries | that country's iTunes store, with local search terms |
+| Mood | 8 moods | search terms for each mood |
+| Genre | 18 genres | genre search terms, then only songs of that genre |
+
+Every dial starts on **Surprise me**, which picks a random option. While searching, the dial shows "Locked in" and the status line names the choice, for example "Going back to the 1980s" or "Traveling to Japan".
+
+All the options and their search terms are in `data/pool.json`. Every decade and genre term was tested against the API, and terms that found too few matching songs were replaced.
 
 ## Run it locally
 
@@ -31,7 +45,7 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 |---|---|
 | `index.html` | The single page of the app |
 | `css/style.css` | Styles. Every color is a CSS variable, and each mode swaps its own color |
-| `data/pool.json` | Search terms for Random mode |
+| `data/pool.json` | Search terms for every mode: random words, decades, countries, moods and genres |
 | `js/main.js` | Entry point: connects all the modules and handles clicks |
 | `js/api.js` | iTunes Search API requests and the preview check |
 | `js/modes.js` | The list of discovery modes and one query-building function per mode |
@@ -75,11 +89,12 @@ A small developer button appears in the footer. It removes today's lock and show
 - Error card with Try again, and re-roll for previews that break after the lock
 - Dev reset with `?dev=1`
 - Layouts for phone portrait, phone landscape and desktop
+- Time Machine, World Explorer, Mood and Genre modes, each with its setup dial
 
 **Next**
 
-- Time Machine, World Explorer, Mood and Genre modes
-- Profiles, collection, settings
+- Profiles and Negative harmony
+- Collector binder, settings
 
 ## Credits
 
