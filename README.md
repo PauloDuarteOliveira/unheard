@@ -41,6 +41,18 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `js/theme.js` | Applies the selected mode's color |
 | `js/utils.js` | Dates, countdown, greeting, links and other small helpers |
 
+## Screen sizes
+
+The CSS is written mobile first, with three layouts:
+
+| Layout | When | Media query |
+|---|---|---|
+| Phone portrait | the base rules | none |
+| Desktop | wide and tall screens | `(min-width: 768px) and (min-height: 501px)` |
+| Phone landscape | wide and short screens | `(orientation: landscape) and (max-height: 500px)` |
+
+Desktop and landscape both build on the phone rules, so they never undo each other. On desktop and in landscape the screens use two columns, arranged with CSS grid. `renderPhase` writes the current phase on `<main>` as `data-phase`, so the CSS can change the layout per phase.
+
 ## Testing the daily lock
 
 After one discovery the app is locked until midnight. To test again, open the site with `?dev=1` at the end of the address:
@@ -62,10 +74,10 @@ A small developer button appears in the footer. It removes today's lock and show
 - Revealed screen: record sleeve with a sliding vinyl, catalog number, custom audio player, Spotify, Apple Music and share
 - Error card with Try again, and re-roll for previews that break after the lock
 - Dev reset with `?dev=1`
+- Layouts for phone portrait, phone landscape and desktop
 
 **Next**
 
-- Desktop and mobile landscape layouts
 - Time Machine, World Explorer, Mood and Genre modes
 - Profiles, collection, settings
 
