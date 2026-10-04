@@ -24,12 +24,13 @@ export async function loadPool() {
   }
 }
 
-export async function searchSongs(term) {
-  const url = `${API_URL}?term=${encodeURIComponent(term)}&entity=song&limit=${RESULT_LIMIT}`;
-  const data = await fetchJson(url);
+export async function searchSongs({term, country}) {
+  const params = new URLSearchParams({ term, entity: 'song', limit: RESULT_LIMIT });
+    if (country) params.set('country', country);
+
+  const data = await fetchJson(`${API_URL}?${params}`);
   return data.results.filter((song) => song.previewUrl);
 }
-
 
 export function verifyPreview(url, timeoutMs = PREVIEW_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {

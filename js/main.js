@@ -1,9 +1,9 @@
 import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
-import { MODES, getMode } from './modes.js';
+import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback } from './render.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
 
 const TICK_MS = 1000;
@@ -40,15 +40,27 @@ function init() {
     const devButton = document.querySelector('#dev-button');
     const revealed = document.querySelector('#revealed');
     const retryButton = document.querySelector('#retry-button');
+    const dialSelect = document.querySelector('#setup-select');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
     let isSearching = false;
     let isShowingLocked = false;
+    let currentOptionKey = '';
 
     function getLockedToday() {
         const today = store.getToday();
         return today && today.date === getDateKey() && today.song ? today : null;
+    }
+
+    function getOptions(mode) {
+        return pool?.[mode.optionsKey] ?? [];
+    }
+
+    function getSearchingMessage() {
+        const mode = getMode(currentModeKey);
+        const option = getOptions(mode).find((item) => item.key === currentOptionKey);
+        return `${describeSearch(mode, option)} and making sure the preview plays before we lock it in.`;
     }
 
     function getNextNumber() {
@@ -62,11 +74,24 @@ function init() {
         renderPhase(phase, { modes: MODES, mode: getMode(currentModeKey), ...details });
     }
 
-    function selectMode(modeKey) {
+    function selectMode(modeKey, optionKey = '') {
         currentModeKey = modeKey;
+        currentOptionKey = optionKey;
+        const mode = getMode(modeKey);
         applyMode(modeKey);
         renderTabs(MODES, modeKey);
-        renderModeCard(getMode(modeKey));
+        renderModeCard(mode);
+        renderSetup(mode, getOptions(mode), currentOptionKey);
+    }
+
+    async function preparePool() {
+        try {
+            pool = await loadPool();
+            const mode = getMode(currentModeKey);
+            renderSetup(mode, getOptions(mode), currentOptionKey);
+        } catch (error) {
+            console.error('Search terms could not be loaded yet:', error);
+        }
     }
 
     function showCurrentState() {
@@ -74,7 +99,7 @@ function init() {
         isShowingLocked = Boolean(today);
 
         if (today) {
-            selectMode(today.mode);
+            selectMode(today.mode, today.optionKey);
             showPhase('revealed', { song: today.song, number: today.number });
         } else {
             showPhase('idle');
@@ -95,13 +120,13 @@ function init() {
         if (isSearching || getLockedToday()) return;
 
         isSearching = true;
-        showPhase('searching');
+        showPhase('searching', { message: getSearchingMessage() });
 
         try {
             pool = pool ?? await loadPool();
-            const song = await discoverSong(currentModeKey, pool, picker);
+            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey);
 
-            store.saveToday({ date: getDateKey(), mode: currentModeKey, song, number: getNextNumber() });
+            store.saveToday({ date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() });
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
@@ -118,6 +143,10 @@ function init() {
 
         selectMode(tab.dataset.mode);
         showPhase('idle');
+    }
+
+    function handleOptionChange(event) {
+        currentOptionKey = event.target.value;
     }
 
     function handleDevReset() {
@@ -139,7 +168,7 @@ function init() {
                 break;
         }
     }
-    
+
     async function shareToday(button) {
         const today = getLockedToday();
         if (!today) return;
@@ -147,7 +176,7 @@ function init() {
         try {
             await navigator.clipboard.writeText(getShareText(today.song));
             renderShareFeedback(button);
-        } catch(error) {
+        } catch (error) {
             console.error('could not copy to the clipboard', error);
         }
     }
@@ -156,7 +185,7 @@ function init() {
         const today = getLockedToday();
         if (!today) return;
 
-        store.saveToday({...today, song: null});
+        store.saveToday({ ...today, song: null });
         handleUnveil();
     }
 
@@ -169,6 +198,9 @@ function init() {
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
     retryButton.addEventListener('click', handleUnveil)
+    dialSelect.addEventListener('change', handleOptionChange);
+
+    preparePool();
 
     if (isDevMode()) {
         devButton.hidden = false;

@@ -50,5 +50,74 @@
     "california", "mississippi", "alabama", "georgia", "mexico", "bogota", "lima",
     "santiago", "caracas", "bahia", "sao paulo", "montreal", "jamaica", "cuba",
     "africa", "brazil", "sahara", "amazon", "mediterranean"
+  ],
+
+  "decades": [
+    { "key": "1950s", "label": "1950s", "start": 1950, "terms": ["chuck berry", "crooner", "elvis presley", "rockabilly", "jump blues", "cool jazz"] },
+    { "key": "1960s", "label": "1960s", "start": 1960, "terms": ["psychedelic", "beatles", "british invasion", "motown", "folk", "garage rock"] },
+    { "key": "1970s", "label": "1970s", "start": 1970, "terms": ["disco", "funk", "soul", "glam rock", "bee gees", "soft rock"] },
+    { "key": "1980s", "label": "1980s", "start": 1980, "terms": ["synth pop", "new wave", "hair metal", "italo disco", "post punk", "cyndi lauper"] },
+    { "key": "1990s", "label": "1990s", "start": 1990, "terms": ["grunge", "britpop", "eurodance", "backstreet boys", "new jack swing", "gangsta rap"] },
+    { "key": "2000s", "label": "2000s", "start": 2000, "terms": ["emo", "pop punk", "crunk", "indie rock", "garage rock", "post grunge"] },
+    { "key": "2010s", "label": "2010s", "start": 2010, "terms": ["edm", "trap", "indie pop", "tropical house", "dubstep", "synthwave"] }
+  ],
+
+  "countries": [
+    { "key": "PT", "label": "Portugal", "terms": ["fado", "lisboa", "saudade", "kizomba", "pimba"] },
+    { "key": "ES", "label": "Spain", "terms": ["flamenco", "rumba", "madrid", "copla", "sevillanas"] },
+    { "key": "FR", "label": "France", "terms": ["chanson", "paris", "amour", "variété", "french touch"] },
+    { "key": "IT", "label": "Italy", "terms": ["canzone", "napoli", "amore", "cantautore", "italo"] },
+    { "key": "DE", "label": "Germany", "terms": ["schlager", "krautrock", "berlin", "liebe", "deutschrap"] },
+    { "key": "GB", "label": "United Kingdom", "article": "the", "terms": ["britpop", "london", "grime", "uk garage", "northern soul"] },
+    { "key": "IE", "label": "Ireland", "terms": ["celtic", "dublin", "irish folk", "trad", "ballad"] },
+    { "key": "NL", "label": "Netherlands", "article": "the", "terms": ["amsterdam", "levenslied", "hardstyle", "nederpop", "dutch"] },
+    { "key": "SE", "label": "Sweden", "terms": ["stockholm", "swedish pop", "kärlek", "visor", "folk"] },
+    { "key": "PL", "label": "Poland", "terms": ["disco polo", "polska", "warszawa", "miłość", "góralska"] },
+    { "key": "US", "label": "United States", "article": "the", "terms": ["americana", "country", "blues", "hip hop", "motown"] },
+    { "key": "CA", "label": "Canada", "terms": ["canadian", "montreal", "toronto", "québec", "folk"] },
+    { "key": "MX", "label": "Mexico", "terms": ["mariachi", "ranchera", "corridos", "cumbia", "bolero"] },
+    { "key": "BR", "label": "Brazil", "terms": ["samba", "bossa nova", "forró", "mpb", "sertanejo"] },
+    { "key": "AR", "label": "Argentina", "terms": ["tango", "folklore", "rock nacional", "cumbia", "buenos aires"] },
+    { "key": "CO", "label": "Colombia", "terms": ["cumbia", "vallenato", "champeta", "salsa", "bogotá"] },
+    { "key": "JP", "label": "Japan", "terms": ["city pop", "enka", "j-pop", "tokyo", "anime"] },
+    { "key": "PH", "label": "Philippines", "article": "the", "terms": ["opm", "manila", "pinoy", "kundiman", "harana"] },
+    { "key": "IN", "label": "India", "terms": ["bollywood", "qawwali", "punjabi", "ghazal", "carnatic"] },
+    { "key": "TR", "label": "Turkey", "terms": ["arabesk", "istanbul", "türkü", "anatolian rock", "aşk"] },
+    { "key": "NG", "label": "Nigeria", "terms": ["afrobeat", "afrobeats", "highlife", "lagos", "fuji"] },
+    { "key": "ZA", "label": "South Africa", "terms": ["amapiano", "kwaito", "mbaqanga", "gqom", "maskandi"] },
+    { "key": "EG", "label": "Egypt", "terms": ["mahraganat", "cairo", "tarab", "shaabi", "habibi"] },
+    { "key": "AU", "label": "Australia", "terms": ["aussie rock", "sydney", "melbourne", "outback", "surf"] }
+  ],
+
+  "moods": [
+    { "key": "chill", "label": "Chill", "terms": ["chill", "lofi", "acoustic", "sunday morning", "mellow"] },
+    { "key": "happy", "label": "Happy", "terms": ["happy", "sunshine", "good vibes", "feel good", "smile"] },
+    { "key": "melancholy", "label": "Melancholy", "terms": ["melancholy", "rain", "lonely", "heartbreak", "tears"] },
+    { "key": "energetic", "label": "Energetic", "terms": ["workout", "energy", "run", "power", "party"] },
+    { "key": "romantic", "label": "Romantic", "terms": ["love song", "romance", "kiss", "valentine", "slow dance"] },
+    { "key": "focus", "label": "Focused", "terms": ["instrumental", "piano", "ambient", "study", "concentration"] },
+    { "key": "dreamy", "label": "Dreamy", "terms": ["dream pop", "shoegaze", "ethereal", "dreamy", "stars"] },
+    { "key": "latenight", "label": "Late night", "terms": ["midnight", "late night", "after hours", "neon", "nocturne"] }
+  ],
+
+  "genres": [
+    { "key": "pop", "label": "Pop", "terms": ["pop", "pop hits", "synth pop", "dance pop", "electropop"], "matches": ["Pop"] },
+    { "key": "rock", "label": "Rock", "terms": ["classic rock", "hard rock", "arena rock", "rock and roll", "guitar rock"], "matches": ["Rock", "Hard Rock", "Classic Rock", "Rock & Roll", "Arena Rock"] },
+    { "key": "hiphop", "label": "Hip-Hop", "terms": ["hip hop", "rap", "boom bap", "trap", "freestyle rap"], "matches": ["Hip-Hop/Rap", "Rap", "Hip-Hop", "Hip Hop"] },
+    { "key": "electronic", "label": "Electronic", "terms": ["electronic", "techno", "house", "ambient", "edm"], "matches": ["Electronic", "Dance", "House", "Techno", "Electronica", "Ambient"] },
+    { "key": "jazz", "label": "Jazz", "terms": ["saxophone jazz", "jazz trio", "jazz standards", "smooth jazz", "bebop"], "matches": ["Jazz", "Vocal Jazz", "Smooth Jazz", "Contemporary Jazz", "Latin Jazz", "Bebop", "Big Band"] },
+    { "key": "classical", "label": "Classical", "terms": ["concerto", "sonata", "string quartet", "mozart", "nocturne"], "matches": ["Classical", "Classical Crossover", "Orchestral", "Opera", "Chamber Music"] },
+    { "key": "country", "label": "Country", "terms": ["country", "honky tonk", "bluegrass", "nashville", "americana"], "matches": ["Country", "Americana", "Bluegrass", "Honky Tonk"] },
+    { "key": "metal", "label": "Metal", "terms": ["metal", "heavy metal", "death metal", "thrash metal", "metalcore"], "matches": ["Metal", "Heavy Metal", "Hard Rock", "Death Metal/Black Metal"] },
+    { "key": "reggaeton", "label": "Reggaeton", "terms": ["reggaeton", "perreo", "dembow", "urbano", "latin trap"], "matches": ["Reggaeton", "Urbano latino", "Latin Urban"] },
+    { "key": "kpop", "label": "K-Pop", "terms": ["k-pop", "kpop", "korean pop", "k-pop idol", "k-ballad"], "matches": ["K-Pop"] },
+    { "key": "rnb", "label": "R&B", "terms": ["r&b", "rnb", "neo soul", "slow jam", "contemporary r&b"], "matches": ["R&B/Soul", "R&B", "Contemporary R&B"] },
+    { "key": "punk", "label": "Punk", "terms": ["skate punk", "ramones", "sex pistols", "hardcore punk", "dead kennedys"], "matches": ["Punk", "Punk Rock", "Hardcore"] },
+    { "key": "folk", "label": "Folk", "terms": ["folk", "acoustic folk", "folk rock", "singer songwriter", "indie folk"], "matches": ["Folk", "Alternative Folk", "Singer/Songwriter", "Folk-Rock", "Contemporary Folk"] },
+    { "key": "blues", "label": "Blues", "terms": ["delta blues", "chicago blues", "blues guitar", "bb king", "electric blues"], "matches": ["Blues", "Blues-Rock", "Delta Blues", "Chicago Blues", "Electric Blues"] },
+    { "key": "latin", "label": "Latin", "terms": ["latin", "salsa", "bachata", "cumbia", "merengue"], "matches": ["Latin", "Salsa y Tropical", "Música tropical", "Pop Latino", "Regional Mexicano", "Música Mexicana", "Brazilian", "Latin Jazz"] },
+    { "key": "soul", "label": "Soul", "terms": ["soul", "motown", "otis redding", "aretha franklin", "classic soul"], "matches": ["Soul", "R&B/Soul", "Funk", "Motown"] },
+    { "key": "indie", "label": "Indie", "terms": ["indie", "indie rock", "indie pop", "alt rock", "bedroom pop"], "matches": ["Alternative", "Indie Rock", "Indie Pop"] },
+    { "key": "gospel", "label": "Gospel", "terms": ["gospel", "worship", "praise", "gospel choir", "spiritual"], "matches": ["Christian & Gospel", "Gospel", "Contemporary Gospel", "Christian", "Praise & Worship", "Christian Music"] }
   ]
 }

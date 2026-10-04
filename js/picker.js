@@ -21,10 +21,12 @@ export default function createPicker() {
     return { pick };
 }
 
-export async function discoverSong(modeKey, pool, picker) {
+export async function discoverSong(modeKey, pool, picker, optionKey) {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        const query = buildQuery(modeKey, pool);
-        const songs = await searchSongs(query.term);
+        const query = buildQuery(modeKey, pool, optionKey);
+        const results = await searchSongs(query);
+        const songs = query.filter ? results.filter(query.filter) : results;
+
         const candidate = picker.pick(songs);
         if (!candidate) continue;
 
