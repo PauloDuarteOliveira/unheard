@@ -1092,6 +1092,75 @@ h2 {
     display: none;
   }
 
+  .today[data-phase="revealed"] .tabs {
+    display: none;
+  }
+
+  .revealed {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    max-width: none;
+    display: grid;
+    grid-template-columns: 277px minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-areas: 
+      "sleeve ."
+      "sleeve header"
+      "sleeve title"
+      "sleeve meta"
+      "sleeve dock"
+      "sleeve actions"
+      "sleeve .";
+    column-gap: 28px;
+    row-gap: 8px;
+  }
+
+    .song-header {
+    grid-area: header;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .catalog-number {
+    order: -1;
+  }
+
+  .sleeve {
+    grid-area: sleeve;
+    width: 277px;
+    height: 210px;
+    align-self: center;
+  }
+
+  .song-title {
+    grid-area: title;
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .song-meta {
+    grid-area: meta;
+    font-size: 14px;
+  }
+
+  .audio-dock {
+    grid-area: dock;
+    padding: 6px 14px 6px 6px;
+  }
+
+  .song-actions {
+    grid-area: actions;
+  }
+
+  .song-link {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .song-share {
+    width: 44px;
+  }
+  
   .tabs {
     grid-area: tabs;
     min-height: 0;
