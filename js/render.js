@@ -324,7 +324,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
 
-    greetingBlock.hidden = isRevealed;
+    greetingBlock.classList.toggle('is-collected', isRevealed);
     stage.hidden = isRevealed;
     modeCard.hidden = isRevealed;
     revealed.hidden = !isRevealed;
@@ -333,7 +333,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
     renderUnveilButton(phase);
     errorCard.hidden = phase !== 'error';
     renderLockStatus(isRevealed);
-    phaseDot.classList.toggle('is-busy', isSearching);
+    phaseDot.classList.toggle('is-busy', isSearching || isRevealed);
 
     switch (phase) {
         case 'searching':
@@ -346,6 +346,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             renderStatus('', false);
             break;
         case 'revealed':
+            phaseStamp.textContent = "Today's pressing · collected";
             revealed.replaceChildren(...createSongCard(song, mode, number));
             break;
         default:

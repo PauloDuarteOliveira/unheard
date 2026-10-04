@@ -222,6 +222,10 @@ h2 {
   letter-spacing: -0.02em;
 }
 
+.greeting.is-collected {
+  display: none;
+}
+
 /* ---------- Mode tabs ---------- */
 
 .tabs {
@@ -367,7 +371,7 @@ h2 {
 
 .unveil.is-error {
   transform: scale(0.88);
-  box-shadow: 
+  box-shadow:
     0 0 60px -10px rgba(var(--mode-rgb), 0.3),
     0 10px 28px -4px var(--shadow),
     inset 0 1px 1px var(--highlight);
@@ -606,7 +610,8 @@ h2 {
   overflow: hidden;
 }
 
-.audio-info,.audio-caption {
+.audio-info,
+.audio-caption {
   display: none;
 }
 
@@ -779,7 +784,7 @@ h2 {
     background: var(--header-bg);
   }
 
-    .audio-info {
+  .audio-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -808,7 +813,7 @@ h2 {
     text-transform: uppercase;
     color: var(--muted);
   }
-  
+
   .brand-mark {
     width: 30px;
     height: 30px;
@@ -830,6 +835,14 @@ h2 {
   .greeting h1 {
     min-height: 40px;
     font-size: 30px;
+  }
+
+  .greeting.is-collected {
+    display: flex;
+  }
+
+  .greeting.is-collected h1 {
+    display: none;
   }
 
   .tabs {
@@ -890,9 +903,76 @@ h2 {
     max-width: 680px;
   }
 
+  .revealed {
+    max-width: 1047px;
+    display: grid;
+    grid-template-columns: minmax(0, 435px) minmax(0, 540px);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr auto;
+    grid-template-areas:
+      "sleeve ."
+      "sleeve header"
+      "sleeve title"
+      "sleeve meta"
+      "sleeve details"
+      "sleeve actions"
+      "sleeve ."
+      "dock   dock";
+    column-gap: 72px;
+    row-gap: 16px;
+    justify-content: center;
+  }
+
+  .song-header {
+    grid-area: header;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .catalog-number {
+    order: -1;
+  }
+
   .sleeve {
-    width: 316px;
-    height: 240px;
+    grid-area: sleeve;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 435 / 330;
+    align-self: center;
+  }
+
+  .song-title {
+    grid-area: title;
+    font-size: 48px;
+    line-height: 56px;
+    letter-spacing: -0.03em;
+  }
+
+  .song-meta {
+    grid-area: meta;
+    font-size: 20px;
+  }
+
+  .song-details {
+    grid-area: details;
+  }
+
+  .song-actions {
+    grid-area: actions;
+  }
+
+  .song-link-primary {
+    flex-grow: 0;
+    padding: 0 22px;
+  }
+
+  .audio-dock {
+    grid-area: dock;
+    width: 100%;
+    max-width: 760px;
+    justify-self: center;
+    margin-top: 16px;
+    padding: 8px 20px 8px 8px;
+    gap: 16px;
   }
 
   .mode-card {
@@ -930,6 +1010,11 @@ h2 {
     width: auto;
     justify-content: flex-start;
     gap: 14px;
+  }
+
+  .countdown {
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
   }
 
   .credit {
