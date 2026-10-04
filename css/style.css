@@ -766,7 +766,7 @@ h2 {
 
 /* ---------- Desktop ---------- */
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (min-height: 501px) {
   :root {
     --glow-shape: 46% 60% at 50% 58%;
   }
@@ -1019,5 +1019,31 @@ h2 {
 
   .credit {
     font-size: 11px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    --glow-shape: 38% 70% at 22% 58%;
+    padding: 10px 20px 4px;
+    gap: 8px;
+  }
+
+  .app-header{
+    height: 40px;
+  }
+
+  .app-footer{
+    min-height: 26px;
+    padding-top: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .status-bar {
+    width: auto;
   }
 }
