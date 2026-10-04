@@ -24,6 +24,12 @@ const countdown = document.querySelector('#countdown');
 const errorCard = document.querySelector('#error-card');
 const errorTitle = document.querySelector('#error-title');
 const today = document.querySelector('#today');
+const dial = document.querySelector('#setup');
+const noSetupText = document.querySelector('#no-setup');
+const dialLabel = document.querySelector('#setup-label');
+const dialIcon = document.querySelector('#setup-icon');
+const dialSelect = document.querySelector('#setup-select');
+const dialChevron = document.querySelector('#setup-chevron');
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -69,6 +75,33 @@ function setTabsLocked(modes, isLocked) {
 export function renderModeCard(mode) {
     modeStamp.textContent = `Mode ${mode.number} · ${mode.stamp}`;
     modeDescription.textContent = mode.description;
+}
+
+function createOption(value, label) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    return option;
+}
+
+export function renderSetup(mode, options = [], selectedKey = '') {
+    const hasSetup = Boolean(mode.optionsKey);
+    dial.hidden = !hasSetup;
+    noSetupText.hidden = hasSetup;
+    if (!hasSetup) return;
+
+    dialLabel.textContent = mode.setupLabel;
+    dialIcon.textContent = mode.icon;
+
+    const choices = options.map((option) => createOption(option.key, option.label));
+    dialSelect.replaceChildren(createOption('', 'Surprise me'), ...choices);
+    dialSelect.value = selectedKey;
+}
+
+function renderDialLock(mode, isLocked) {
+    dialSelect.disabled = isLocked;
+    dialLabel.textContent = isLocked ? 'Locked in' : mode.setupLabel ?? '';
+    dialChevron.textContent = isLocked ? 'lock' : 'expand_more';
 }
 
 export function renderCountdown(msLeft, isLocked) {
@@ -137,7 +170,7 @@ function createAudioDock(song) {
 
     const infoTitle = document.createElement('span');
     infoTitle.className = 'audio-info-title';
-    infoTitle.textContent= song.trackName;
+    infoTitle.textContent = song.trackName;
 
     const infoArtist = document.createElement('span');
     infoArtist.className = 'audio-info-artist';
@@ -333,6 +366,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
 
     setTabsLocked(modes, isRevealed || isSearching);
     renderUnveilButton(phase);
+    renderDialLock(mode, isSearching);
     errorCard.hidden = phase !== 'error';
     renderLockStatus(isRevealed);
     phaseDot.classList.toggle('is-busy', isSearching || isRevealed);

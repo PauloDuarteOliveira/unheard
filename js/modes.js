@@ -21,6 +21,8 @@ export const MODES = [
         stamp: 'Pick an era',
         description: 'Travel to a decade and hear something that was out back then.',
         icon: 'hourglass_empty',
+        setupLabel: 'Decade',
+        optionsKey: 'decades',
         isReady: true,
     },
     {
@@ -31,6 +33,8 @@ export const MODES = [
         stamp: 'Pick a country',
         description: 'Hear what people are listening to in a country you rarely hear from.',
         icon: 'public',
+        setupLabel: 'Country',
+        optionsKey: 'countries',
         isReady: true,
     },
     {
@@ -41,6 +45,8 @@ export const MODES = [
         stamp: 'Pick a feeling',
         description: 'Tell us how you feel and get a song that matches it.',
         icon: 'mood',
+        setupLabel: 'Mood',
+        optionsKey: 'moods',
         isReady: true,
     },
     {
@@ -51,6 +57,8 @@ export const MODES = [
         stamp: 'Pick a genre',
         description: 'Dig into one genre and find something in it you have never heard.',
         icon: 'music_note',
+        setupLabel: 'Genre',
+        optionsKey: 'genres',
         isReady: true,
     },
 ];
