@@ -1,4 +1,4 @@
-import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber, formatTime } from './utils.js';
+import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber, formatTime, formatTimeLength } from './utils.js';
 
 const DEFAULT_VOLUME = 0.25;
 const PREVIEW_SECONDS = 30;
@@ -23,6 +23,7 @@ const lockStatus = document.querySelector('#lock-status');
 const countdown = document.querySelector('#countdown');
 const errorCard = document.querySelector('#error-card');
 const errorTitle = document.querySelector('#error-title');
+const today = document.querySelector('#today');
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -134,6 +135,26 @@ function createAudioDock(song) {
     track.className = 'audio-track';
     track.append(fill);
 
+    const infoTitle = document.createElement('span');
+    infoTitle.className = 'audio-info-title';
+    infoTitle.textContent= song.trackName;
+
+    const infoArtist = document.createElement('span');
+    infoArtist.className = 'audio-info-artist';
+    infoArtist.textContent = song.artistName;
+
+    const info = document.createElement('div');
+    info.className = 'audio-info';
+    info.append(infoTitle, infoArtist);
+
+    const caption = document.createElement('span');
+    caption.className = 'audio-caption';
+    caption.textContent = '30-second preview';
+
+    const progress = document.createElement('div');
+    progress.className = 'audio-progress';
+    progress.append(track, caption);
+
     const time = document.createElement('span');
     time.className = 'audio-time';
     time.textContent = `${formatTime(0)} / ${formatTime(PREVIEW_SECONDS)}`;
@@ -147,7 +168,7 @@ function createAudioDock(song) {
 
     const dock = document.createElement('div');
     dock.className = 'audio-dock';
-    dock.append(audio, playButton, track, time, rerollButton);
+    dock.append(audio, playButton, info, progress, time, rerollButton);
 
     function getDuration() {
         return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
@@ -172,9 +193,9 @@ function createAudioDock(song) {
         }
     }
 
-    function showBroken(){
+    function showBroken() {
         playButton.disabled = true;
-        track.hidden = true;
+        progress.hidden = true;
         time.textContent = 'Preview unavailable';
         rerollButton.hidden = false;
     }
@@ -190,6 +211,34 @@ function createAudioDock(song) {
     audio.addEventListener('error', showBroken);
 
     return dock;
+}
+
+function createDetails(song) {
+    const details = [
+        { label: 'Year', value: getReleaseYear(song.releaseDate) },
+        { label: 'Genre', value: song.primaryGenreName },
+        { label: 'Length', value: song.trackTimeMillis ? formatTimeLength(song.trackTimeMillis) : '' },
+    ];
+
+    const list = document.createElement('dl');
+    list.className = 'song-details';
+
+    details
+        .filter((detail) => detail.value)
+        .forEach(({ label, value }) => {
+            const term = document.createElement('dt');
+            term.textContent = label;
+
+            const description = document.createElement('dd');
+            description.textContent = value;
+
+            const item = document.createElement('div');
+            item.className = 'song-detail';
+            item.append(term, description);
+            list.append(item);
+        });
+
+    return list;
 }
 
 function createSongCard(song, mode, number) {
@@ -235,7 +284,12 @@ function createSongCard(song, mode, number) {
 
     const meta = document.createElement('p');
     meta.className = 'song-meta';
-    meta.textContent = `${song.artistName} · ${getReleaseYear(song.releaseDate)}`;
+    const metaYear = document.createElement('span');
+    metaYear.className = 'song-meta-year';
+    metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
+    meta.append(song.artistName, metaYear);
+
+    const details = createDetails(song);
 
     const dock = createAudioDock(song);
 
@@ -264,14 +318,15 @@ function createSongCard(song, mode, number) {
     actions.className = 'song-actions';
     actions.append(spotifyLink, appleLink, shareButton);
 
-    return [header, sleeve, title, meta, dock, actions];
+    return [header, sleeve, title, meta, details, dock, actions];
 }
 
 export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
+    today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
 
-    greetingBlock.hidden = isRevealed;
+    greetingBlock.classList.toggle('is-collected', isRevealed);
     stage.hidden = isRevealed;
     modeCard.hidden = isRevealed;
     revealed.hidden = !isRevealed;
@@ -280,7 +335,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
     renderUnveilButton(phase);
     errorCard.hidden = phase !== 'error';
     renderLockStatus(isRevealed);
-    phaseDot.classList.toggle('is-busy', isSearching);
+    phaseDot.classList.toggle('is-busy', isSearching || isRevealed);
 
     switch (phase) {
         case 'searching':
@@ -293,6 +348,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             renderStatus('', false);
             break;
         case 'revealed':
+            phaseStamp.textContent = "Today's pressing · collected";
             revealed.replaceChildren(...createSongCard(song, mode, number));
             break;
         default:

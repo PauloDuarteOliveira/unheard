@@ -46,6 +46,10 @@ export function formatTime(seconds) {
     return `${minutes}:${twoDigits(remainingSeconds)}`;
 }
 
+export function formatTimeLength(ms) {
+    return formatTime(ms / MS_PER_SECOND);
+}
+
 export function getGreeting(hour = new Date().getHours()) {
     if (hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR) return 'Good morning';
     if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';

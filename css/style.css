@@ -33,6 +33,7 @@
 
   --surface-glass: rgba(21, 23, 30, 0.78);
   --vinyl: #0a0a0c;
+  --tint: rgba(255, 255, 255, 0.03);
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -221,6 +222,10 @@ h2 {
   letter-spacing: -0.02em;
 }
 
+.greeting.is-collected {
+  display: none;
+}
+
 /* ---------- Mode tabs ---------- */
 
 .tabs {
@@ -280,6 +285,7 @@ h2 {
 /* ---------- Unveil button ---------- */
 
 .stage {
+  align-self: stretch;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -361,6 +367,14 @@ h2 {
 .unveil.is-searching .icon-spinner {
   display: block;
   animation: spin 0.9s linear infinite;
+}
+
+.unveil.is-error {
+  transform: scale(0.88);
+  box-shadow:
+    0 0 60px -10px rgba(var(--mode-rgb), 0.3),
+    0 10px 28px -4px var(--shadow),
+    inset 0 1px 1px var(--highlight);
 }
 
 @keyframes spin {
@@ -473,7 +487,8 @@ h2 {
   justify-content: center;
 }
 
-.vinyl::before,.vinyl::after {
+.vinyl::before,
+.vinyl::after {
   content: '';
   position: absolute;
   border-radius: 50%;
@@ -501,12 +516,12 @@ h2 {
   }
 }
 
-.vinyl{
+.vinyl {
   animation: slide-out 0.8s ease-out 0.2s backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vinyl{
+  .vinyl {
     animation: none;
   }
 }
@@ -536,6 +551,32 @@ h2 {
   color: var(--text-soft);
 }
 
+.song-details {
+  display: none;
+  margin: 0;
+}
+
+.song-detail {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--tint);
+}
+
+.song-detail dt {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.song-detail dd {
+  margin: 0;
+  font-size: 13px;
+}
+
 .audio-dock {
   box-sizing: border-box;
   padding: 8px 14px 8px 8px;
@@ -563,11 +604,22 @@ h2 {
 }
 
 .audio-track {
-  flex-grow: 1;
   height: 4px;
   border-radius: 2px;
   background: var(--highlight);
   overflow: hidden;
+}
+
+.audio-info,
+.audio-caption {
+  display: none;
+}
+
+.audio-progress {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .audio-fill {
@@ -655,6 +707,12 @@ h2 {
   transition: border-color 0.4s ease;
 }
 
+.mode-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .mode-description {
   font-size: 14px;
   color: var(--text-soft);
@@ -708,7 +766,7 @@ h2 {
 
 /* ---------- Desktop ---------- */
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (min-height: 501px) {
   :root {
     --glow-shape: 46% 60% at 50% 58%;
   }
@@ -724,6 +782,36 @@ h2 {
     padding: 0 40px;
     border-bottom: 1px solid var(--line);
     background: var(--header-bg);
+  }
+
+  .audio-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 170px;
+    flex-shrink: 0;
+  }
+
+  .audio-info-title {
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .audio-info-artist {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .audio-caption {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
   .brand-mark {
@@ -747,6 +835,14 @@ h2 {
   .greeting h1 {
     min-height: 40px;
     font-size: 30px;
+  }
+
+  .greeting.is-collected {
+    display: flex;
+  }
+
+  .greeting.is-collected h1 {
+    display: none;
   }
 
   .tabs {
@@ -787,13 +883,113 @@ h2 {
     font-size: 20px;
   }
 
+  .song-details {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+  }
+
+  .song-meta-year {
+    display: none;
+  }
+
+  .status {
+    max-width: 420px;
+    font-size: 14px;
+  }
+
+  .error-card {
+    max-width: 680px;
+  }
+
+  .revealed {
+    max-width: 1047px;
+    display: grid;
+    grid-template-columns: minmax(0, 435px) minmax(0, 540px);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr auto;
+    grid-template-areas:
+      "sleeve ."
+      "sleeve header"
+      "sleeve title"
+      "sleeve meta"
+      "sleeve details"
+      "sleeve actions"
+      "sleeve ."
+      "dock   dock";
+    column-gap: 72px;
+    row-gap: 16px;
+    justify-content: center;
+  }
+
+  .song-header {
+    grid-area: header;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .catalog-number {
+    order: -1;
+  }
+
   .sleeve {
-    width: 316px;
-    height: 240px;
+    grid-area: sleeve;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 435 / 330;
+    align-self: center;
+  }
+
+  .song-title {
+    grid-area: title;
+    font-size: 48px;
+    line-height: 56px;
+    letter-spacing: -0.03em;
+  }
+
+  .song-meta {
+    grid-area: meta;
+    font-size: 20px;
+  }
+
+  .song-details {
+    grid-area: details;
+  }
+
+  .song-actions {
+    grid-area: actions;
+  }
+
+  .song-link-primary {
+    flex-grow: 0;
+    padding: 0 22px;
+  }
+
+  .audio-dock {
+    grid-area: dock;
+    width: 100%;
+    max-width: 760px;
+    justify-self: center;
+    margin-top: 16px;
+    padding: 8px 20px 8px 8px;
+    gap: 16px;
   }
 
   .mode-card {
     padding: 16px 20px;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .mode-card-text {
+    flex-grow: 1;
+    gap: 6px;
+  }
+
+  .mode-setup {
+    width: 240px;
+    flex-shrink: 0;
   }
 
   .mode-description {
@@ -816,7 +1012,209 @@ h2 {
     gap: 14px;
   }
 
+  .countdown {
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+  }
+
   .credit {
     font-size: 11px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    --glow-shape: 38% 70% at 22% 58%;
+    padding: 10px 20px 4px;
+    gap: 8px;
+  }
+
+  .app-header{
+    height: 40px;
+  }
+
+  .app-footer{
+    min-height: 26px;
+    padding-top: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+    .today {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-areas:
+      "button ."
+      "button greeting"
+      "button tabs"
+      "button error"
+      "button mode"
+      "button status"
+      "button .";
+    column-gap: 28px;
+    row-gap: 10px;
+  }
+
+  .stage {
+    display: contents;
+  }
+
+  .unveil {
+    grid-area: button;
+    align-self: center;
+    justify-self: center;
+    width: 200px;
+    height: 200px;
+  }
+
+  .unveil-face {
+    width: 160px;
+    height: 160px;
+  }
+
+  .greeting {
+    grid-area: greeting;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .greeting h1 {
+    min-height: 0;
+    font-size: 20px;
+  }
+
+  .today[data-phase="error"] .greeting {
+    display: none;
+  }
+
+  .today[data-phase="revealed"] .tabs {
+    display: none;
+  }
+
+  .revealed {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    max-width: none;
+    display: grid;
+    grid-template-columns: 277px minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-areas: 
+      "sleeve ."
+      "sleeve header"
+      "sleeve title"
+      "sleeve meta"
+      "sleeve dock"
+      "sleeve actions"
+      "sleeve .";
+    column-gap: 28px;
+    row-gap: 8px;
+  }
+
+    .song-header {
+    grid-area: header;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .catalog-number {
+    order: -1;
+  }
+
+  .sleeve {
+    grid-area: sleeve;
+    width: 277px;
+    height: 210px;
+    align-self: center;
+  }
+
+  .song-title {
+    grid-area: title;
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .song-meta {
+    grid-area: meta;
+    font-size: 14px;
+  }
+
+  .audio-dock {
+    grid-area: dock;
+    padding: 6px 14px 6px 6px;
+  }
+
+  .song-actions {
+    grid-area: actions;
+  }
+
+  .song-link {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .song-share {
+    width: 44px;
+  }
+  
+  .tabs {
+    grid-area: tabs;
+    min-height: 0;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 10px;
+  }
+
+  .tab {
+    height: 44px;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .error-card {
+    grid-area: error;
+    max-width: none;
+    padding: 8px 8px 8px 14px;
+    gap: 12px;
+  }
+
+  .mode-card {
+    grid-area: mode;
+    max-width: none;
+    padding: 10px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mode-card-text {
+    flex-grow: 1;
+    gap: 4px;
+  }
+
+  .mode-description {
+    font-size: 13px;
+  }
+
+  .mode-setup {
+    width: 210px;
+    flex-shrink: 0;
+  }
+
+  .status {
+    grid-area: status;
+    min-height: 0;
+    max-width: none;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .status-bar {
+    width: auto;
   }
 }
