@@ -55,10 +55,10 @@
   "decades": [
     { "key": "1950s", "label": "1950s", "start": 1950, "terms": ["chuck berry", "crooner", "elvis presley", "rockabilly", "jump blues", "cool jazz"] },
     { "key": "1960s", "label": "1960s", "start": 1960, "terms": ["psychedelic", "beatles", "british invasion", "motown", "folk", "garage rock"] },
-    { "key": "1970s", "label": "1970s", "start": 1970, "terms": ["disco", "funk", "soul", "glam rock", "punk", "soft rock"] },
-    { "key": "1980s", "label": "1980s", "start": 1980, "terms": ["synth pop", "new wave", "hair metal", "italo disco", "post punk", "freestyle"] },
-    { "key": "1990s", "label": "1990s", "start": 1990, "terms": ["grunge", "britpop", "eurodance", "trip hop", "r&b", "gangsta rap"] },
-    { "key": "2000s", "label": "2000s", "start": 2000, "terms": ["emo", "pop punk", "crunk", "indie rock", "garage rock", "r&b"] },
+    { "key": "1970s", "label": "1970s", "start": 1970, "terms": ["disco", "funk", "soul", "glam rock", "bee gees", "soft rock"] },
+    { "key": "1980s", "label": "1980s", "start": 1980, "terms": ["synth pop", "new wave", "hair metal", "italo disco", "post punk", "cyndi lauper"] },
+    { "key": "1990s", "label": "1990s", "start": 1990, "terms": ["grunge", "britpop", "eurodance", "backstreet boys", "new jack swing", "gangsta rap"] },
+    { "key": "2000s", "label": "2000s", "start": 2000, "terms": ["emo", "pop punk", "crunk", "indie rock", "garage rock", "post grunge"] },
     { "key": "2010s", "label": "2010s", "start": 2010, "terms": ["edm", "trap", "indie pop", "tropical house", "dubstep", "synthwave"] }
   ],
 
@@ -112,12 +112,12 @@
     { "key": "reggaeton", "label": "Reggaeton", "terms": ["reggaeton", "perreo", "dembow", "urbano", "latin trap"], "matches": ["Reggaeton", "Urbano latino", "Latin Urban"] },
     { "key": "kpop", "label": "K-Pop", "terms": ["k-pop", "kpop", "korean pop", "k-pop idol", "k-ballad"], "matches": ["K-Pop"] },
     { "key": "rnb", "label": "R&B", "terms": ["r&b", "rnb", "neo soul", "slow jam", "contemporary r&b"], "matches": ["R&B/Soul", "R&B", "Contemporary R&B"] },
-    { "key": "punk", "label": "Punk", "terms": ["skate punk", "ramones", "sex pistols", "hardcore punk", "punk rock"], "matches": ["Punk", "Punk Rock", "Hardcore"] },
+    { "key": "punk", "label": "Punk", "terms": ["skate punk", "ramones", "sex pistols", "hardcore punk", "dead kennedys"], "matches": ["Punk", "Punk Rock", "Hardcore"] },
     { "key": "folk", "label": "Folk", "terms": ["folk", "acoustic folk", "folk rock", "singer songwriter", "indie folk"], "matches": ["Folk", "Alternative Folk", "Singer/Songwriter", "Folk-Rock", "Contemporary Folk"] },
     { "key": "blues", "label": "Blues", "terms": ["delta blues", "chicago blues", "blues guitar", "bb king", "electric blues"], "matches": ["Blues", "Blues-Rock", "Delta Blues", "Chicago Blues", "Electric Blues"] },
-    { "key": "latin", "label": "Latin", "terms": ["latin", "salsa", "bachata", "cumbia", "bossa nova"], "matches": ["Latin", "Salsa y Tropical", "Música tropical", "Pop Latino", "Regional Mexicano", "Música Mexicana", "Brazilian", "Latin Jazz"] },
-    { "key": "soul", "label": "Soul", "terms": ["soul", "motown", "northern soul", "funk soul", "classic soul"], "matches": ["Soul", "R&B/Soul", "Funk", "Motown"] },
-    { "key": "indie", "label": "Indie", "terms": ["indie", "indie rock", "indie pop", "lo-fi", "bedroom pop"], "matches": ["Alternative", "Indie Rock", "Indie Pop"] },
+    { "key": "latin", "label": "Latin", "terms": ["latin", "salsa", "bachata", "cumbia", "merengue"], "matches": ["Latin", "Salsa y Tropical", "Música tropical", "Pop Latino", "Regional Mexicano", "Música Mexicana", "Brazilian", "Latin Jazz"] },
+    { "key": "soul", "label": "Soul", "terms": ["soul", "motown", "otis redding", "aretha franklin", "classic soul"], "matches": ["Soul", "R&B/Soul", "Funk", "Motown"] },
+    { "key": "indie", "label": "Indie", "terms": ["indie", "indie rock", "indie pop", "alt rock", "bedroom pop"], "matches": ["Alternative", "Indie Rock", "Indie Pop"] },
     { "key": "gospel", "label": "Gospel", "terms": ["gospel", "worship", "praise", "gospel choir", "spiritual"], "matches": ["Christian & Gospel", "Gospel", "Contemporary Gospel", "Christian", "Praise & Worship", "Christian Music"] }
   ]
 }
