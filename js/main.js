@@ -3,8 +3,9 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup } from './render.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
+import { getCurrentProfile } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -201,6 +202,7 @@ function init() {
     dialSelect.addEventListener('change', handleOptionChange);
 
     preparePool();
+    renderView(getCurrentProfile() ? 'today' : 'profiles');
 
     if (isDevMode()) {
         devButton.hidden = false;

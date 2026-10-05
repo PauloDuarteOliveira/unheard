@@ -1,4 +1,4 @@
-import { readJson, writeJson } from "./store.js";
+import { readJson, writeJson } from './store.js';
 
 const PROFILES_KEY = 'unheard:profiles';
 const CURRENT_PROFILE_KEY = 'unheard:currentProfile';
@@ -28,7 +28,7 @@ export function logOut() {
 export function validateName(name) {
     const trimmed = name.trim();
     if (!trimmed) return 'Type a name.';
-    if (trimmed.length > MAX_NAME_LENGTH) return `Use ${MAX_NAME_LENGTH} characters of fewer.`;
+    if (trimmed.length > MAX_NAME_LENGTH) return `Use ${MAX_NAME_LENGTH} characters or fewer.`;
 
     const isTaken = getProfiles().some((profile) => profile.name.toLowerCase() ===
         trimmed.toLowerCase());

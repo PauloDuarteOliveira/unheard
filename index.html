@@ -15,7 +15,19 @@
 </head>
 
 <body data-mode="random">
-  <header class="app-header">
+  <section class="view" id="view-profiles" data-view="profiles" hidden>
+    <h1>Who's listening?</h1>
+  </section>
+
+  <section class="view" id="view-create" data-view="create" hidden>
+    <h1>Create your profile</h1>
+  </section>
+
+  <section class="view" id="view-harmony" data-view="harmony" hidden>
+    <h1>Negative harmony</h1>
+  </section>
+
+  <header class="app-header" data-view="today">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <div class="brand-text">
@@ -25,7 +37,7 @@
     </div>
   </header>
 
-  <main class="today" id="today">
+  <main class="today" id="today" data-view="today">
     <div class="greeting" id="greeting-block">
       <h1 id="greeting"></h1>
       <p class="stamp-row">
@@ -85,7 +97,7 @@
     </section>
   </main>
 
-  <footer class="app-footer">
+  <footer class="app-footer" data-view="today">
     <div class="status-bar">
       <button class="dev-button" type="button" id="dev-button" hidden>👨🏻‍💻</button>
       <span class="lock-status">

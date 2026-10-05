@@ -60,6 +60,13 @@ function createTab(mode, isSelected) {
     return tab;
 }
 
+export function renderView(viewName) {
+    document.body.dataset.view = viewName;
+    document.querySelectorAll('[data-view]').forEach((element) => {
+        element.hidden = element.dataset.view !== viewName;
+    })
+}
+
 export function renderTabs(modes, selectedKey) {
     const tabs = modes.map((mode) => createTab(mode, mode.key === selectedKey));
     tabList.replaceChildren(...tabs);

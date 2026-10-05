@@ -2,7 +2,7 @@ export function readJson(key, fallback = null) {
     try {
         return JSON.parse(localStorage.getItem(key)) ?? fallback;
     } catch (error) {
-        console.error(`Saved data is not valio JSON: ${key}`, error);
+        console.error(`Saved data is not valid JSON: ${key}`, error);
         return fallback;
     }
 }
