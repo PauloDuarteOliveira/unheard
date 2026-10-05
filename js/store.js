@@ -1,25 +1,25 @@
+export function readJson(key, fallback = null) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch (error) {
+        console.error(`Saved data is not valio JSON: ${key}`, error);
+        return fallback;
+    }
+}
+
+export function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
 export default function createStore(profileId) {
     const todayKey = `unheard:${profileId}:today`;
 
-    function read(key) {    
-        try {
-            return JSON.parse(localStorage.getItem(key));
-        } catch (error) {
-            console.error(`Saved data is not valid JSON: ${key}`, error);
-            return null;
-        }
-    }
-
-    function write(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-    }
-
     function getToday() {
-        return read(todayKey);
+        return readJson(todayKey);
     }
 
     function saveToday(today) {
-        write(todayKey, today);
+        writeJson(todayKey, today);
     }
 
     function clearToday() {
