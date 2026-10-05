@@ -1,11 +1,11 @@
-import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
+import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView } from './render.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
-import { getCurrentProfile } from './profiles.js';
+import { getCurrentProfile, getProfiles, setCurrentProfile } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -42,12 +42,34 @@ function init() {
     const revealed = document.querySelector('#revealed');
     const retryButton = document.querySelector('#retry-button');
     const dialSelect = document.querySelector('#setup-select');
+    const profileGrid = document.querySelector('#profile-grid');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
     let isSearching = false;
     let isShowingLocked = false;
     let currentOptionKey = '';
+    let config = null;
+
+    async function showProfiles() {
+        try {
+            config = config ?? await loadConfig();
+        } catch (error) {
+            console.error('Avatars could not be loaded:', error);
+        }
+        renderProfiles(getProfiles(), config?.avatars);
+        renderView('profiles');
+    }
+
+    function handleProfileClick(event) {
+        const tile = event.target.closest('.profile-tile');
+        if (!tile) return;
+
+        if (tile.dataset.action === 'new-profile') {
+            renderView('create');
+            return;
+        }
+    }
 
     function getLockedToday() {
         const today = store.getToday();
@@ -195,6 +217,7 @@ function init() {
     tick();
     setInterval(tick, TICK_MS);
 
+    profileGrid.addEventListener('click', handleProfileClick);
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
@@ -202,7 +225,12 @@ function init() {
     dialSelect.addEventListener('change', handleOptionChange);
 
     preparePool();
-    renderView(getCurrentProfile() ? 'today' : 'profiles');
+
+    if (getCurrentProfile()) {
+        renderView('today');
+    } else {
+        showProfiles();
+    }
 
     if (isDevMode()) {
         devButton.hidden = false;

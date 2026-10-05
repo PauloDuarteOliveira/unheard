@@ -4,6 +4,7 @@ export const POOL_ERROR_MESSAGE = 'Search terms could not be loaded';
 const RESULT_LIMIT = 50;
 const PREVIEW_TIMEOUT_MS = 8000;
 const PLAYABLE_EVENTS = ['canplaythrough', 'loadedmetadata'];
+const CONFIG_URL = 'data/config.json';
 
 async function fetchJson(url) {
   const response = await fetch(url);
@@ -24,9 +25,13 @@ export async function loadPool() {
   }
 }
 
-export async function searchSongs({term, country}) {
+export function loadConfig() {
+  return fetchJson(CONFIG_URL);
+}
+
+export async function searchSongs({ term, country }) {
   const params = new URLSearchParams({ term, entity: 'song', limit: RESULT_LIMIT });
-    if (country) params.set('country', country);
+  if (country) params.set('country', country);
 
   const data = await fetchJson(`${API_URL}?${params}`);
   return data.results.filter((song) => song.previewUrl);

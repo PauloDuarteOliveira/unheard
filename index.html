@@ -10,13 +10,21 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body data-mode="random">
-  <section class="view" id="view-profiles" data-view="profiles" hidden>
-    <h1>Who's listening?</h1>
+  <section class="view profiles-view" id="view-profiles" data-view="profiles" hidden>
+    <div class="welcome-brand">
+      <span class="welcome-mark" aria-hidden="true"><span></span></span>
+      <span class="welcome-name">Unheard</span>
+      <span class="stamp">Discover a new sound every day</span>
+    </div>
+    <div class="welcome-picker">
+      <h1 class="welcome-title">Who's listening?</h1>
+      <div class="profile-grid" id="profile-grid"></div>
+    </div>
   </section>
 
   <section class="view" id="view-create" data-view="create" hidden>
@@ -90,7 +98,8 @@
             <select class="setup-select" id="setup-select">
               <option value="">Surprise me</option>
             </select>
-            <span class="material-symbols-outlined setup-chevron" id="setup-chevron" aria-hidden="true">expand_more</span>
+            <span class="material-symbols-outlined setup-chevron" id="setup-chevron"
+              aria-hidden="true">expand_more</span>
           </div>
         </div>
       </div>

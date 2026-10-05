@@ -30,6 +30,61 @@ const dialLabel = document.querySelector('#setup-label');
 const dialIcon = document.querySelector('#setup-icon');
 const dialSelect = document.querySelector('#setup-select');
 const dialChevron = document.querySelector('#setup-chevron');
+const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
+const profileGrid = document.querySelector('#profile-grid');
+
+export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
+    const label = document.createElement('span');
+    label.className = 'record-label';
+    label.textContent = profile.name.charAt(0).toUpperCase();
+    label.style.setProperty('--avatar-color', avatar.color);
+    label.style.setProperty('--avatar-ink', avatar.ink);
+
+    const record = document.createElement('span');
+    record.className = 'record-avatar';
+    record.setAttribute('aria-hidden', 'true');
+    record.append(label);
+    return record;
+}
+
+function createProfileTile(profile, avatar) {
+    const name = document.createElement('span');
+    name.className = 'profile-name';
+    name.textContent = profile.name;
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'profile-tile';
+    tile.dataset.profileId = profile.id;
+    tile.append(createRecordAvatar(profile, avatar), name);
+    return tile;
+}
+
+function createNewProfileTile() {
+    const circle = document.createElement('span');
+    circle.className = 'record-avatar record-avatar-new';
+    circle.setAttribute('aria-hidden', 'true');
+    circle.append(createIcon('add'));
+
+    const name = document.createElement('span');
+    name.className = 'profile-name';
+    name.textContent = 'New profile';
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'profile-tile profile-tile-new';
+    tile.dataset.action = 'new-profile';
+    tile.append(circle, name);
+    return tile;
+}
+
+export function renderProfiles(profiles, avatars = []) {
+    const tiles = profiles.map((profile) => {
+        const avatar = avatars.find((item) => item.key === profile.avatar);
+        return createProfileTile(profile, avatar);
+    });
+    profileGrid.replaceChildren(...tiles, createNewProfileTile());
+}
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -61,7 +116,7 @@ function createTab(mode, isSelected) {
 }
 
 export function renderView(viewName) {
-    document.body.dataset.view = viewName;
+    document.body.dataset.screen = viewName;
     document.querySelectorAll('[data-view]').forEach((element) => {
         element.hidden = element.dataset.view !== viewName;
     })
