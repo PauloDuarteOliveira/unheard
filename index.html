@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,arrow_back,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -27,8 +27,40 @@
     </div>
   </section>
 
-  <section class="view" id="view-create" data-view="create" hidden>
-    <h1>Create your profile</h1>
+  <section class="view create-view" id="view-create" data-view="create" hidden>
+    <div class="create-heading">
+      <span class="stamp">Step 1 of 2</span>
+      <h1 class="create-title">Create your profile</h1>
+    <p class="create-intro">Your collection and streak will be saved under it.</p>
+    </div>
+
+    <div class="create-body">
+      <div class="create-preview" id="create-preview">
+        <span class="create-preview-name" id="create-preview-name"></span>
+      </div>
+
+      <form class="create-form" id="create-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="profile-name">Your name</label>
+          <input class="field-input" id="profile-name" name="name" type="text" maxlength="20"
+          autocomplete="off" aria-describedby="profile-name-hint">
+          <p class="field-hint" id="profile-name-hint">Up to 20 characters. Shown in your greeting.</p>
+        </div>
+
+        <fieldset class="avatar-picker">
+          <legend class="field-label">Pick your record</legend>
+          <div class="avatar-options" id="avatar-options"></div>
+        </fieldset>
+
+        <div class="create-actions">
+          <button class="button-primary" type="submit">Next</button>
+          <button class="button-ghost" id="create-back" type="button">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Back to profiles
+          </button>
+        </div>
+      </form>
+    </div>
   </section>
 
   <section class="view" id="view-harmony" data-view="harmony" hidden>

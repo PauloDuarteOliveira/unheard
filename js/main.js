@@ -3,9 +3,9 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles } from './render.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError, renderAvatarOptions, renderCreatePreview } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
-import { getCurrentProfile, getProfiles, setCurrentProfile } from './profiles.js';
+import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -43,6 +43,8 @@ function init() {
     const retryButton = document.querySelector('#retry-button');
     const dialSelect = document.querySelector('#setup-select');
     const profileGrid = document.querySelector('#profile-grid');
+    const createForm = document.querySelector('#create-form');
+    const createBackButton = document.querySelector('#create-back');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -66,9 +68,48 @@ function init() {
         if (!tile) return;
 
         if (tile.dataset.action === 'new-profile') {
-            renderView('create');
+            showCreate();
             return;
         }
+    }
+
+    function getAvatar(key) {
+        return config?.avatars.find((avatar) => avatar.key === key);
+    }
+
+    function showCreate() {
+        const avatars = config?.avatars ?? [];
+        const usedKeys = getProfiles().map((profile) => profile.avatar);
+        const firstFree = avatars.find((avatar) => !usedKeys.includes(avatar.key)) ?? avatars[0];
+
+        createForm.reset();
+        renderNameError('');
+        renderAvatarOptions(avatars, firstFree?.key);
+        renderCreatePreview('', firstFree);
+        renderView('create');
+        createForm.elements.name.focus();
+    }
+
+    function handleCreateInput() {
+        const { name, avatar } = createForm.elements;
+        renderCreatePreview(name.value, getAvatar(avatar.value));
+        renderNameError('');
+    }
+
+    function handleCreateSubmit(event) {
+        event.preventDefault();
+        const { name, avatar } = createForm.elements;
+
+        const message = validateName(name.value);
+        if (message) {
+            renderNameError(message);
+            name.focus();
+            return;
+        }
+
+        const profile = createProfile(name.value, avatar.value);
+        setCurrentProfile(profile.id);
+        renderView('harmony');
     }
 
     function getLockedToday() {
@@ -223,6 +264,9 @@ function init() {
     revealed.addEventListener('click', handleRevealedClick);
     retryButton.addEventListener('click', handleUnveil)
     dialSelect.addEventListener('change', handleOptionChange);
+    createForm.addEventListener('input', handleCreateInput);
+    createForm.addEventListener('submit', handleCreateSubmit);
+    createBackButton.addEventListener('click', showProfiles);
 
     preparePool();
 

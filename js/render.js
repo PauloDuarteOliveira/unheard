@@ -32,6 +32,50 @@ const dialSelect = document.querySelector('#setup-select');
 const dialChevron = document.querySelector('#setup-chevron');
 const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
 const profileGrid = document.querySelector('#profile-grid');
+const createPreview = document.querySelector('#create-preview');
+const createPreviewName = document.querySelector('#create-preview-name');
+const avatarOptions = document.querySelector('#avatar-options');
+const nameHint = document.querySelector('#profile-name-hint');
+const nameInput = document.querySelector('#profile-name');
+const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
+
+function createAvatarOption(avatar, isChecked) {
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'avatar';
+    input.value = avatar.key;
+    input.checked = isChecked;
+    input.className = 'avatar-radio';
+    input.setAttribute('aria-label', `${avatar.label} record`);
+
+    const option = document.createElement('label');
+    option.className = 'avatar-option';
+    option.append(input, createRecordAvatar({ name: '?' }, avatar));
+    return option;
+}
+
+export function renderAvatarOptions(avatars, selectedKey) {
+    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key === selectedKey));
+    avatarOptions.replaceChildren(...options);
+}
+
+export function renderCreatePreview(name, avatar) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    const record = createRecordAvatar({ name: initial }, avatar);
+    createPreview.querySelector('.record-avatar')?.remove();
+    createPreview.prepend(record);
+    createPreviewName.textContent = name.trim() || 'Your name';
+    avatarOptions.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+        createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
+    });
+}
+
+export function renderNameError(message) {
+    nameHint.textContent = message || NAME_HINT;
+    nameHint.classList.toggle('is-error', Boolean(message));
+    nameInput.setAttribute('aria-invalid', String(Boolean(message)));
+}
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
     const label = document.createElement('span');
