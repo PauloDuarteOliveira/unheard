@@ -816,6 +816,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 28px;
 }
 
 .welcome-brand {
@@ -902,12 +903,12 @@ h2 {
 .profile-tile-new {
   border-style: dashed;
   border-color: var(--line-strong);
-  background: var(--line-strong);
+  background: transparent;
   box-shadow: none;
   color: var(--text-soft);
 }
 
-.profile-new {
+.profile-name {
   font-family: var(--font-title);
   font-weight: 600;
   font-size: 16px;
