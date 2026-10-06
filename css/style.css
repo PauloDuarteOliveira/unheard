@@ -808,6 +808,148 @@ h2 {
   font-size: 22px;
 }
 
+/* ---------- Profiles ---------- */
+
+.profiles-view {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.welcome-mark {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--brand-mark-bg);
+  box-shadow: inset 0 0 0 1px var(--highlight), 0 0 50px -8px rgba(var(--mode-rgb), 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-mark span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgb(var(--mode-rgb));
+}
+
+.welcome-name {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.welcome-picker {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome-title {
+  font-family: var(--font-title);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.profile-grid {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-tile {
+  height: 176px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.profile-tile:hover {
+  border-color: var(--line-strong);
+}
+
+.profile-tile:focus-visible {
+  outline: 2px solid rgb(var(--mode-rgb));
+  outline-offset: 3px;
+}
+
+.profile-tile-new {
+  border-style: dashed;
+  border-color: var(--line-strong);
+  background: var(--line-strong);
+  box-shadow: none;
+  color: var(--text-soft);
+}
+
+.profile-new {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.record-avatar {
+  --record-size: 84px;
+  width: var(--record-size);
+  height: var(--record-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--vinyl);
+  box-shadow: 0 0 0 4px var(--line), 0 0 0 1px var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.record-label {
+  width: 45%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--avatar-color);
+  color: var(--avatar-ink);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: calc(var(--record-size)* 0.23);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.record-avatar-new {
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--line-strong);
+}
+
+.record-avatar-new .material-symbols-outlined {
+  font-size: 28px;
+}
+
 /* ---------- Status bar ---------- */
 
 .app-footer {
@@ -1111,6 +1253,49 @@ h2 {
   .credit {
     font-size: 11px;
   }
+
+  .profiles-view {
+    gap: 44px;
+  }
+
+  .welcome-mark {
+    width: 72px;
+    height: 72px;
+  }
+
+  .welcome-name {
+    font-size: 40px;
+  }
+
+  .welcome-picker {
+    gap: 24px;
+  }
+
+  .welcome-title {
+    font-size: 26px;
+  }
+
+  .profile-grid {
+    max-width: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .profile-tile {
+    width: 200px;
+    height: 232px;
+  }
+
+  .record-avatar {
+    --record-size: 110px;
+    box-shadow: inset 0 0 0 6px var(--line), 0 0 0 1px var(--line);
+  }
+
+  .profile-name {
+    font-size: 18px;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -1120,11 +1305,11 @@ h2 {
     gap: 8px;
   }
 
-  .app-header{
+  .app-header {
     height: 40px;
   }
 
-  .app-footer{
+  .app-footer {
     min-height: 26px;
     padding-top: 0;
     flex-direction: row;
@@ -1134,7 +1319,7 @@ h2 {
     text-transform: uppercase;
   }
 
-    .today {
+  .today {
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto auto auto auto auto minmax(0, 1fr);
@@ -1194,7 +1379,7 @@ h2 {
     display: grid;
     grid-template-columns: 277px minmax(0, 1fr);
     grid-template-rows: 1fr auto auto auto auto auto 1fr;
-    grid-template-areas: 
+    grid-template-areas:
       "sleeve ."
       "sleeve header"
       "sleeve title"
@@ -1206,7 +1391,7 @@ h2 {
     row-gap: 8px;
   }
 
-    .song-header {
+  .song-header {
     grid-area: header;
     justify-content: flex-start;
     gap: 6px;
@@ -1251,7 +1436,7 @@ h2 {
   .song-share {
     width: 44px;
   }
-  
+
   .tabs {
     grid-area: tabs;
     min-height: 0;
@@ -1308,5 +1493,49 @@ h2 {
 
   .status-bar {
     width: auto;
+  }
+
+    .profiles-view {
+    flex-direction: row;
+    gap: 32px;
+  }
+
+  .welcome-brand {
+    width: 230px;
+    flex-shrink: 0;
+  }
+
+  .welcome-mark {
+    width: 64px;
+    height: 64px;
+  }
+
+  .welcome-name {
+    font-size: 34px;
+  }
+
+  .welcome-picker {
+    flex-grow: 1;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .profile-grid {
+    max-width: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .profile-tile {
+    height: 160px;
+    gap: 10px;
+  }
+
+  .record-avatar {
+    --record-size: 76px;
+  }
+
+  .profile-name {
+    font-size: 15px;
   }
 }
