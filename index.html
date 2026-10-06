@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,arrow_back,block,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,arrow_back,block,check,error,expand_more,hourglass_empty,library_music,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,settings,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -102,6 +102,33 @@
       <div class="brand-text">
         <span class="brand-name">Unheard</span>
         <span class="brand-tagline">Discover a new sound every day</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="profile-button" id="profile-button" type="button" aria-haspopup="menu" aria-expanded="false"
+        aria-controls="profile-menu">
+        <span class="profile-button-name" id="profile-button-name"></span>
+        <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+      </button>
+
+      <div class="profile-menu" id="profile-menu" role="menu" hidden>
+        <div class="profile-menu-head" id="profile-menu-head"></div>
+        <div class="menu-divider"></div>
+        <button class="menu-item" type="button" role="menuitem" disabled>
+          <span class="material-symbols-outlined" aria-hidden="true">library_music</span>
+          <span class="menu-label">Collection</span>
+          <span class="menu-note">Soon</span>
+        </button>
+        <button class="menu-item" type="button" role="menuitem" disabled>
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+          <span class="menu-label">Settings</span>
+          <span class="menu-note">Soon</span>
+        </button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" id="logout-button" type="button" role="menuitem">
+          <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+          <span class="menu-label">Log out</span>
+        </button>
       </div>
     </div>
   </header>

@@ -3,9 +3,13 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError, renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit } from './render.js';
+import {
+    renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
+    renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
+    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit, renderProfileButton, renderMenuOpen
+} from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
-import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES } from './profiles.js';
+import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -48,6 +52,10 @@ function init() {
     const harmonyForm = document.querySelector('#harmony-form');
     const harmonyBackButton = document.querySelector('#harmony-back');
     const harmonySkipButton = document.querySelector('#harmony-skip');
+    const profileButton = document.querySelector('#profile-button');
+    const profileMenu = document.querySelector('#profile-menu');
+    const logoutButton = document.querySelector('#logout-button');
+
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -56,6 +64,16 @@ function init() {
     let currentOptionKey = '';
     let config = null;
     let pendingProfile = null;
+    let currentProfile = null;
+
+    function enterToday(profile) {
+        currentProfile = profile;
+        setCurrentProfile(profile.id);
+        renderProfileButton(profile, getAvatar(profile.avatar));
+        renderMenuOpen(false);
+        renderView('today');
+        tick();
+    }
 
     async function showProfiles() {
         try {
@@ -75,6 +93,8 @@ function init() {
             showCreate();
             return;
         }
+        
+        enterToday(getProfile(tile.dataset.profileId));
     }
 
     function getAvatar(key) {
@@ -124,15 +144,37 @@ function init() {
     function finishCreate(blockedGenres) {
         const profile = createProfile(pendingProfile.name, pendingProfile.avatar);
         createStore(profile.id).saveSettings({ blockedGenres });
-        setCurrentProfile(profile.id);
+        enterToday(profile);
         pendingProfile = null;
-        renderView('today');
     }
 
     function handleHarmonySubmit(event) {
         event.preventDefault();
         const blockedGenres = new FormData(harmonyForm).getAll('genre');
         finishCreate(blockedGenres);
+    }
+
+    function toggleMenu() {
+        renderMenuOpen(profileMenu.hidden);
+    }
+
+    function closeMenuOnOutsideClick(event) {
+        if (profileMenu.hidden) return;
+        if (event.target.closest('.header-actions')) return;
+        renderMenuOpen(false);
+    }
+
+    function closeMenuOnEscape(event) {
+        if (event.key !== 'Escape' || profileMenu.hidden) return;
+        renderMenuOpen(false);
+        profileButton.focus();
+    }
+
+    function handleLogOut() {
+        logOut();
+        currentProfile = null;
+        renderMenuOpen(false);
+        showProfiles();
     }
 
     function getLockedToday() {
@@ -195,7 +237,7 @@ function init() {
 
     function tick() {
         const isLocked = Boolean(getLockedToday());
-        renderGreeting(getGreeting());
+        renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
         renderCountdown(getMsUntilMidnight(), isLocked);
 
         if (isShowingLocked && !isLocked) {
@@ -294,11 +336,19 @@ function init() {
     harmonyForm.addEventListener('submit', handleHarmonySubmit);
     harmonyBackButton.addEventListener('click', () => renderView('create'));
     harmonySkipButton.addEventListener('click', () => finishCreate([]));
+    profileButton.addEventListener('click', toggleMenu);
+    document.addEventListener('click', closeMenuOnOutsideClick);
+    document.addEventListener('keydown', closeMenuOnEscape);
+    logoutButton.addEventListener('click', handleLogOut);
 
     preparePool();
 
-    if (getCurrentProfile()) {
-        renderView('today');
+    const savedProfile = getCurrentProfile();
+    if (savedProfile) {
+        loadConfig().then((data) => {
+            config = data;
+            enterToday(savedProfile);
+        }).catch(() => enterToday(savedProfile));
     } else {
         showProfiles();
     }

@@ -41,6 +41,11 @@ const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 const harmonyProfile = document.querySelector('#harmony-profile');
 const genreChips = document.querySelector('#genre-chips');
 const genreCount = document.querySelector('#genre-count');
+const profileButton = document.querySelector('#profile-button');
+const profileButtonName = document.querySelector('#profile-button-name');
+const profileMenu = document.querySelector('#profile-menu');
+const profileMenuHead = document.querySelector('#profile-menu-head');
+
 
 function createAvatarOption(avatar, isChecked) {
     const input = document.createElement('input');
@@ -181,6 +186,24 @@ export function renderHarmony(name, avatar, genres, blocked, max) {
     const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
     genreChips.replaceChildren(...chips);
     renderGenreLimit(max);
+}
+
+export function renderProfileButton(profile, avatar) {
+    profileButton.querySelector('.record-avatar')?.remove();
+    profileButton.prepend(createRecordAvatar(profile, avatar));
+    profileButtonName.textContent = profile.name;
+    profileButton.setAttribute('aria-label', `Profile menu for ${profile.name}`);
+
+    const menuName = document.createElement('span');
+    menuName.className = 'profile-menu-name';
+    menuName.textContent = profile.name;
+    profileMenuHead.replaceChildren(createRecordAvatar(profile, avatar), menuName);
+}
+
+export function renderMenuOpen(isOpen) {
+    profileMenu.hidden = !isOpen;
+    profileButton.setAttribute('aria-expanded', String(isOpen));
+
 }
 
 function createTab(mode, isSelected) {
