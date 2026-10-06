@@ -4,6 +4,7 @@ const PROFILES_KEY = 'unheard:profiles';
 const CURRENT_PROFILE_KEY = 'unheard:currentProfile';
 
 export const MAX_NAME_LENGTH = 20;
+export const MAX_BLOCKED_GENRES = 3;
 
 export function getProfiles() {
     return readJson(PROFILES_KEY, []);

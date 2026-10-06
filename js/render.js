@@ -38,6 +38,9 @@ const avatarOptions = document.querySelector('#avatar-options');
 const nameHint = document.querySelector('#profile-name-hint');
 const nameInput = document.querySelector('#profile-name');
 const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
+const harmonyProfile = document.querySelector('#harmony-profile');
+const genreChips = document.querySelector('#genre-chips');
+const genreCount = document.querySelector('#genre-count');
 
 function createAvatarOption(avatar, isChecked) {
     const input = document.createElement('input');
@@ -136,6 +139,48 @@ function createIcon(name) {
     icon.setAttribute('aria-hidden', 'true');
     icon.textContent = name;
     return icon;
+}
+
+function createGenreChip(genre, isChecked) {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.name = 'genre';
+    input.value = genre.key;
+    input.checked = isChecked;
+    input.className = 'genre-checkbox';
+
+    const icon = createIcon('block');
+    icon.classList.add('genre-block-icon');
+
+    const name = document.createElement('span');
+    name.className = 'genre-name';
+    name.textContent = genre.label;
+
+    const chip = document.createElement('label');
+    chip.className = 'genre-chip';
+    chip.append(input, icon, name);
+    return chip;
+}
+
+export function renderGenreLimit(max) {
+    const boxes = [...genreChips.querySelectorAll('.genre-checkbox')];
+    const count = boxes.filter((box) => box.checked).length;
+
+    genreCount.textContent = `${count} of ${max} used`;
+    genreCount.classList.toggle('is-used', count > 0);
+    boxes.forEach((box) => {
+        box.disabled = !box.checked && count >= max;
+    });
+}
+
+export function renderHarmony(name, avatar, genres, blocked, max) {
+    const profileName = document.createElement('span');
+    profileName.textContent = name;
+    harmonyProfile.replaceChildren(createRecordAvatar({ name }, avatar), profileName);
+
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    genreChips.replaceChildren(...chips);
+    renderGenreLimit(max);
 }
 
 function createTab(mode, isSelected) {

@@ -3,9 +3,9 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError, renderAvatarOptions, renderCreatePreview } from './render.js';
+import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError, renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
-import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName } from './profiles.js';
+import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -45,6 +45,9 @@ function init() {
     const profileGrid = document.querySelector('#profile-grid');
     const createForm = document.querySelector('#create-form');
     const createBackButton = document.querySelector('#create-back');
+    const harmonyForm = document.querySelector('#harmony-form');
+    const harmonyBackButton = document.querySelector('#harmony-back');
+    const harmonySkipButton = document.querySelector('#harmony-skip');
 
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
@@ -52,6 +55,7 @@ function init() {
     let isShowingLocked = false;
     let currentOptionKey = '';
     let config = null;
+    let pendingProfile = null;
 
     async function showProfiles() {
         try {
@@ -107,9 +111,28 @@ function init() {
             return;
         }
 
-        const profile = createProfile(name.value, avatar.value);
-        setCurrentProfile(profile.id);
+        pendingProfile = { name: name.value.trim(), avatar: avatar.value };
+        showHarmony();
+    }
+
+    function showHarmony() {
+        const avatar = getAvatar(pendingProfile.avatar);
+        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], [], MAX_BLOCKED_GENRES);
         renderView('harmony');
+    }
+
+    function finishCreate(blockedGenres) {
+        const profile = createProfile(pendingProfile.name, pendingProfile.avatar);
+        createStore(profile.id).saveSettings({ blockedGenres });
+        setCurrentProfile(profile.id);
+        pendingProfile = null;
+        renderView('today');
+    }
+
+    function handleHarmonySubmit(event) {
+        event.preventDefault();
+        const blockedGenres = new FormData(harmonyForm).getAll('genre');
+        finishCreate(blockedGenres);
     }
 
     function getLockedToday() {
@@ -267,6 +290,10 @@ function init() {
     createForm.addEventListener('input', handleCreateInput);
     createForm.addEventListener('submit', handleCreateSubmit);
     createBackButton.addEventListener('click', showProfiles);
+    harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
+    harmonyForm.addEventListener('submit', handleHarmonySubmit);
+    harmonyBackButton.addEventListener('click', () => renderView('create'));
+    harmonySkipButton.addEventListener('click', () => finishCreate([]));
 
     preparePool();
 

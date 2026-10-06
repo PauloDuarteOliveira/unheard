@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,arrow_back,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add,arrow_back,block,check,error,expand_more,hourglass_empty,lock,mood,music_note,pause,play_arrow,progress_activity,public,refresh,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -31,7 +31,7 @@
     <div class="create-heading">
       <span class="stamp">Step 1 of 2</span>
       <h1 class="create-title">Create your profile</h1>
-    <p class="create-intro">Your collection and streak will be saved under it.</p>
+      <p class="create-intro">Your collection and streak will be saved under it.</p>
     </div>
 
     <div class="create-body">
@@ -42,8 +42,8 @@
       <form class="create-form" id="create-form" novalidate>
         <div class="field">
           <label class="field-label" for="profile-name">Your name</label>
-          <input class="field-input" id="profile-name" name="name" type="text" maxlength="20"
-          autocomplete="off" aria-describedby="profile-name-hint">
+          <input class="field-input" id="profile-name" name="name" type="text" maxlength="20" autocomplete="off"
+            aria-describedby="profile-name-hint">
           <p class="field-hint" id="profile-name-hint">Up to 20 characters. Shown in your greeting.</p>
         </div>
 
@@ -63,8 +63,37 @@
     </div>
   </section>
 
-  <section class="view" id="view-harmony" data-view="harmony" hidden>
-    <h1>Negative harmony</h1>
+  <section class="view harmony-view" id="view-harmony" data-view="harmony" hidden>
+    <div class="harmony-intro">
+      <p class="harmony-profile" id="harmony-profile"></p>
+      <span class="stamp">Step 2 of 2 · Optional</span>
+      <h1 class="create-title">Negative harmony</h1>
+      <p class="harmony-text">Anything you never want to hear? Pick up to 3 genres and they won't
+        appear in any mode. You can change this later in Settings.
+      </p>
+    </div>
+
+    <form class="harmony-form" id="harmony-form">
+      <fieldset class="genre-picker">
+        <legend class="genre-legend">
+          <span>Blocked genres</span>
+          <span class="genre-count" id="genre-count" aria-live="polite">0 of 3 used</span>
+        </legend>
+        <div class="genre-chips" id="genre-chips"></div>
+      </fieldset>
+
+      <div class="harmony-actions">
+        <button class="button-primary" type="submit">Start discovering</button>
+        <div class="harmony-secondary">
+          <button class="button-ghost" id="harmony-back" type="button">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Back
+          </button>
+          <button class="button-ghost button-link" id="harmony-skip" type="button">Skip for now
+          </button>
+        </div>
+      </div>
+    </form>
   </section>
 
   <header class="app-header" data-view="today">

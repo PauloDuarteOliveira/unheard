@@ -13,6 +13,7 @@ export function writeJson(key, value) {
 
 export default function createStore(profileId) {
     const todayKey = `unheard:${profileId}:today`;
+    const settingsKey = `unheard:${profileId}:settings`;
 
     function getToday() {
         return readJson(todayKey);
@@ -26,5 +27,13 @@ export default function createStore(profileId) {
         localStorage.removeItem(todayKey);
     }
 
-    return { getToday, saveToday, clearToday };
+    function getSettings() {
+        return readJson(settingsKey, { blockedGenres: [] });
+    }
+
+    function saveSettings(settings) {
+        writeJson(settingsKey, settings);
+    }
+
+    return { getToday, saveToday, clearToday, getSettings, saveSettings };
 }
