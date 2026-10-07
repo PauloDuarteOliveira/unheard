@@ -2115,6 +2115,31 @@ h2 {
     background: var(--surface-glass);
     box-shadow: inset 0 1px 0 var(--line);
   }
+
+    .collection-view {
+    padding: 16px 40px 24px;
+    gap: 16px;
+  }
+
+  .binder-stats {
+    grid-template-columns: repeat(3, 160px);
+  }
+
+  .binder-filters {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .binder-search {
+    width: 300px;
+  }
+
+  .binder-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -2483,5 +2508,64 @@ h2 {
   .genre-picker {
     grid-area: chips;
     align-self: center;
+  }
+
+    .collection-view {
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "back heading filters"
+      "grid grid grid";
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 8px;
+  }
+
+  .back-button {
+    grid-area: back;
+    width: 40px;
+    height: 40px;
+  }
+
+  .back-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .binder-heading {
+    grid-area: heading;
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .binder-title {
+    font-size: 20px;
+  }
+
+  .binder-stats {
+    display: none;
+  }
+
+  .binder-filters {
+    grid-area: filters;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .binder-search {
+    width: 180px;
+    height: 40px;
+  }
+
+  .binder-grid {
+    grid-area: grid;
+    align-self: start;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
   }
 }
