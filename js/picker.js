@@ -21,11 +21,28 @@ export default function createPicker() {
     return { pick };
 }
 
-export async function discoverSong(modeKey, pool, picker, optionKey) {
+function getBlockedNames(genres, blockedGenres) {
+    return genres
+        .filter((genre) => blockedGenres.includes(genre.key))
+        .flatMap((genre) => genre.matches);
+}
+
+export async function discoverSong(modeKey, pool, picker, optionKey, blockedGenres = []) {
+    const blockedNames = getBlockedNames(pool.genres, blockedGenres);
+    const allowedPool = {
+        ...pool, genres: pool.genres.filter((genre) =>
+            !blockedGenres.includes(genre.key))
+    };
+
+    function isAllowed(song, query) {
+        const passesMode = query.filter ? query.filter(song) : true;
+        return passesMode && !blockedNames.includes(song.primaryGenreName);
+    }
+
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        const query = buildQuery(modeKey, pool, optionKey);
+        const query = buildQuery(modeKey, allowedPool, optionKey);
         const results = await searchSongs(query);
-        const songs = query.filter ? results.filter(query.filter) : results;
+        const songs = results.filter((song) => isAllowed(song, query));
 
         const candidate = picker.pick(songs);
         if (!candidate) continue;

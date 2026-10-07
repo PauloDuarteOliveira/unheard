@@ -30,6 +30,113 @@ const dialLabel = document.querySelector('#setup-label');
 const dialIcon = document.querySelector('#setup-icon');
 const dialSelect = document.querySelector('#setup-select');
 const dialChevron = document.querySelector('#setup-chevron');
+const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
+const profileGrid = document.querySelector('#profile-grid');
+const createPreview = document.querySelector('#create-preview');
+const createPreviewName = document.querySelector('#create-preview-name');
+const avatarOptions = document.querySelector('#avatar-options');
+const nameHint = document.querySelector('#profile-name-hint');
+const nameInput = document.querySelector('#profile-name');
+const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
+const harmonyProfile = document.querySelector('#harmony-profile');
+const genreChips = document.querySelector('#genre-chips');
+const genreCount = document.querySelector('#genre-count');
+const profileButton = document.querySelector('#profile-button');
+const profileButtonName = document.querySelector('#profile-button-name');
+const profileMenu = document.querySelector('#profile-menu');
+const profileMenuHead = document.querySelector('#profile-menu-head');
+
+
+function createAvatarOption(avatar, isChecked) {
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'avatar';
+    input.value = avatar.key;
+    input.checked = isChecked;
+    input.className = 'avatar-radio';
+    input.setAttribute('aria-label', `${avatar.label} record`);
+
+    const option = document.createElement('label');
+    option.className = 'avatar-option';
+    option.append(input, createRecordAvatar({ name: '?' }, avatar));
+    return option;
+}
+
+export function renderAvatarOptions(avatars, selectedKey) {
+    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key === selectedKey));
+    avatarOptions.replaceChildren(...options);
+}
+
+export function renderCreatePreview(name, avatar) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    const record = createRecordAvatar({ name: initial }, avatar);
+    createPreview.querySelector('.record-avatar')?.remove();
+    createPreview.prepend(record);
+    createPreviewName.textContent = name.trim() || 'Your name';
+    avatarOptions.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+        createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
+    });
+}
+
+export function renderNameError(message) {
+    nameHint.textContent = message || NAME_HINT;
+    nameHint.classList.toggle('is-error', Boolean(message));
+    nameInput.setAttribute('aria-invalid', String(Boolean(message)));
+}
+
+export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
+    const label = document.createElement('span');
+    label.className = 'record-label';
+    label.textContent = profile.name.charAt(0).toUpperCase();
+    label.style.setProperty('--avatar-color', avatar.color);
+    label.style.setProperty('--avatar-ink', avatar.ink);
+
+    const record = document.createElement('span');
+    record.className = 'record-avatar';
+    record.setAttribute('aria-hidden', 'true');
+    record.append(label);
+    return record;
+}
+
+function createProfileTile(profile, avatar) {
+    const name = document.createElement('span');
+    name.className = 'profile-name';
+    name.textContent = profile.name;
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'profile-tile';
+    tile.dataset.profileId = profile.id;
+    tile.append(createRecordAvatar(profile, avatar), name);
+    return tile;
+}
+
+function createNewProfileTile() {
+    const circle = document.createElement('span');
+    circle.className = 'record-avatar record-avatar-new';
+    circle.setAttribute('aria-hidden', 'true');
+    circle.append(createIcon('add'));
+
+    const name = document.createElement('span');
+    name.className = 'profile-name';
+    name.textContent = 'New profile';
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'profile-tile profile-tile-new';
+    tile.dataset.action = 'new-profile';
+    tile.append(circle, name);
+    return tile;
+}
+
+export function renderProfiles(profiles, avatars = []) {
+    const tiles = profiles.map((profile) => {
+        const avatar = avatars.find((item) => item.key === profile.avatar);
+        return createProfileTile(profile, avatar);
+    });
+    profileGrid.replaceChildren(...tiles, createNewProfileTile());
+}
 
 function createIcon(name) {
     const icon = document.createElement('span');
@@ -37,6 +144,66 @@ function createIcon(name) {
     icon.setAttribute('aria-hidden', 'true');
     icon.textContent = name;
     return icon;
+}
+
+function createGenreChip(genre, isChecked) {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.name = 'genre';
+    input.value = genre.key;
+    input.checked = isChecked;
+    input.className = 'genre-checkbox';
+
+    const icon = createIcon('block');
+    icon.classList.add('genre-block-icon');
+
+    const name = document.createElement('span');
+    name.className = 'genre-name';
+    name.textContent = genre.label;
+
+    const chip = document.createElement('label');
+    chip.className = 'genre-chip';
+    chip.append(input, icon, name);
+    return chip;
+}
+
+export function renderGenreLimit(max) {
+    const boxes = [...genreChips.querySelectorAll('.genre-checkbox')];
+    const count = boxes.filter((box) => box.checked).length;
+
+    genreCount.textContent = `${count} of ${max} used`;
+    genreCount.classList.toggle('is-used', count > 0);
+    boxes.forEach((box) => {
+        box.disabled = !box.checked && count >= max;
+    });
+}
+
+export function renderHarmony(name, avatar, genres, blocked, max) {
+    const profileName = document.createElement('span');
+    profileName.textContent = name;
+    harmonyProfile.replaceChildren(createRecordAvatar({ name }, avatar), profileName);
+
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    genreChips.replaceChildren(...chips);
+    renderGenreLimit(max);
+}
+
+export function renderProfileButton(profile, avatar) {
+    profileButton.querySelector('.record-avatar')?.remove();
+    profileButton.prepend(createRecordAvatar(profile, avatar));
+    profileButtonName.textContent = profile.name;
+    profileButton.setAttribute('aria-label', `Profile menu for ${profile.name}`);
+
+    const menuName = document.createElement('span');
+    menuName.className = 'profile-menu-name';
+    menuName.textContent = profile.name;
+    profileMenuHead.replaceChildren(createRecordAvatar(profile, avatar), menuName);
+}
+
+export function renderMenuOpen(isOpen) {
+    profileMenu.hidden = !isOpen;
+    profileButton.setAttribute('aria-expanded', String(isOpen));
+
 }
 
 function createTab(mode, isSelected) {
@@ -58,6 +225,13 @@ function createTab(mode, isSelected) {
 
     tab.append(createIcon(mode.icon), shortName, name);
     return tab;
+}
+
+export function renderView(viewName) {
+    document.body.dataset.screen = viewName;
+    document.querySelectorAll('[data-view]').forEach((element) => {
+        element.hidden = element.dataset.view !== viewName;
+    })
 }
 
 export function renderTabs(modes, selectedKey) {

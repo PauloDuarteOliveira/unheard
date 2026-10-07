@@ -1,1 +1,10 @@
-{}
+{
+  "avatars": [
+    { "key": "teal", "label": "Teal", "color": "#5DCAA5", "ink": "#003829" },
+    { "key": "amber", "label": "Amber", "color": "#EF9F27", "ink": "#3A2400" },
+    { "key": "lavender", "label": "Lavender", "color": "#AFA9EC", "ink": "#221C57" },
+    { "key": "coral", "label": "Coral", "color": "#F0997B", "ink": "#3B1507" },
+    { "key": "blue", "label": "Blue", "color": "#85B7EB", "ink": "#0A2A4A" },
+    { "key": "gold", "label": "Gold", "color": "#F2C94C", "ink": "#3A2B00" }
+  ]
+}

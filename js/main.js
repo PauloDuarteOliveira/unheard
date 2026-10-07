@@ -1,14 +1,18 @@
-import { loadPool, POOL_ERROR_MESSAGE } from './api.js';
+import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore from './store.js';
 import { applyMode } from './theme.js';
-import { renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs, renderShareFeedback, renderSetup } from './render.js';
+import {
+    renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
+    renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
+    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit, renderProfileButton, renderMenuOpen
+} from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
+import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
-const DEFAULT_PROFILE_ID = 'guest';
 const DEV_MODE_KEY = 'unheard:devMode';
 
 function isDevMode() {
@@ -33,7 +37,6 @@ function getErrorTitle(error) {
 }
 
 function init() {
-    const store = createStore(DEFAULT_PROFILE_ID);
     const picker = createPicker();
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
@@ -41,20 +44,156 @@ function init() {
     const revealed = document.querySelector('#revealed');
     const retryButton = document.querySelector('#retry-button');
     const dialSelect = document.querySelector('#setup-select');
+    const profileGrid = document.querySelector('#profile-grid');
+    const createForm = document.querySelector('#create-form');
+    const createBackButton = document.querySelector('#create-back');
+    const harmonyForm = document.querySelector('#harmony-form');
+    const harmonyBackButton = document.querySelector('#harmony-back');
+    const harmonySkipButton = document.querySelector('#harmony-skip');
+    const profileButton = document.querySelector('#profile-button');
+    const profileMenu = document.querySelector('#profile-menu');
+    const logoutButton = document.querySelector('#logout-button');
 
+    let store = null;
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
     let isSearching = false;
     let isShowingLocked = false;
     let currentOptionKey = '';
+    let config = null;
+    let pendingProfile = null;
+    let currentProfile = null;
+
+    function enterToday(profile) {
+        currentProfile = profile;
+        store = createStore(profile.id);
+        selectMode(DEFAULT_MODE);
+        showCurrentState();
+        setCurrentProfile(profile.id);
+        renderProfileButton(profile, getAvatar(profile.avatar));
+        renderMenuOpen(false);
+        renderView('today');
+        tick();
+    }
+
+    async function showProfiles() {
+        try {
+            config = config ?? await loadConfig();
+        } catch (error) {
+            console.error('Avatars could not be loaded:', error);
+        }
+        renderProfiles(getProfiles(), config?.avatars);
+        renderView('profiles');
+    }
+
+    function handleProfileClick(event) {
+        const tile = event.target.closest('.profile-tile');
+        if (!tile) return;
+
+        if (tile.dataset.action === 'new-profile') {
+            showCreate();
+            return;
+        }
+
+        enterToday(getProfile(tile.dataset.profileId));
+    }
+
+    function getAvatar(key) {
+        return config?.avatars.find((avatar) => avatar.key === key);
+    }
+
+    function showCreate() {
+        const avatars = config?.avatars ?? [];
+        const usedKeys = getProfiles().map((profile) => profile.avatar);
+        const firstFree = avatars.find((avatar) => !usedKeys.includes(avatar.key)) ?? avatars[0];
+
+        createForm.reset();
+        renderNameError('');
+        renderAvatarOptions(avatars, firstFree?.key);
+        renderCreatePreview('', firstFree);
+        renderView('create');
+        createForm.elements.name.focus();
+    }
+
+    function handleCreateInput() {
+        const { name, avatar } = createForm.elements;
+        renderCreatePreview(name.value, getAvatar(avatar.value));
+        renderNameError('');
+    }
+
+    function handleCreateSubmit(event) {
+        event.preventDefault();
+        const { name, avatar } = createForm.elements;
+
+        const message = validateName(name.value);
+        if (message) {
+            renderNameError(message);
+            name.focus();
+            return;
+        }
+
+        pendingProfile = { name: name.value.trim(), avatar: avatar.value };
+        showHarmony();
+    }
+
+    function showHarmony() {
+        const avatar = getAvatar(pendingProfile.avatar);
+        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], [], MAX_BLOCKED_GENRES);
+        renderView('harmony');
+    }
+
+    function finishCreate(blockedGenres) {
+        const profile = createProfile(pendingProfile.name, pendingProfile.avatar);
+        createStore(profile.id).saveSettings({ blockedGenres });
+        enterToday(profile);
+        pendingProfile = null;
+    }
+
+    function handleHarmonySubmit(event) {
+        event.preventDefault();
+        const blockedGenres = new FormData(harmonyForm).getAll('genre');
+        finishCreate(blockedGenres);
+    }
+
+    function toggleMenu() {
+        renderMenuOpen(profileMenu.hidden);
+    }
+
+    function closeMenuOnOutsideClick(event) {
+        if (profileMenu.hidden) return;
+        if (event.target.closest('.header-actions')) return;
+        renderMenuOpen(false);
+    }
+
+    function closeMenuOnEscape(event) {
+        if (event.key !== 'Escape' || profileMenu.hidden) return;
+        renderMenuOpen(false);
+        profileButton.focus();
+    }
+
+    function handleLogOut() {
+        logOut();
+        currentProfile = null;
+        store = null;
+        renderMenuOpen(false);
+        showProfiles();
+    }
 
     function getLockedToday() {
-        const today = store.getToday();
+        const today = store?.getToday();
         return today && today.date === getDateKey() && today.song ? today : null;
     }
 
     function getOptions(mode) {
-        return pool?.[mode.optionsKey] ?? [];
+        const options = pool?.[mode.optionsKey] ?? [];
+        if (mode.optionsKey !== 'genres') return options;
+
+        const blockedGenres = getBlockedGenres();
+        return options.filter((option) => !blockedGenres.includes(option.key));
+    }
+
+    function getBlockedGenres() {
+        return store?.getSettings().blockedGenres ?? [];
     }
 
     function getSearchingMessage() {
@@ -108,7 +247,7 @@ function init() {
 
     function tick() {
         const isLocked = Boolean(getLockedToday());
-        renderGreeting(getGreeting());
+        renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
         renderCountdown(getMsUntilMidnight(), isLocked);
 
         if (isShowingLocked && !isLocked) {
@@ -124,7 +263,7 @@ function init() {
 
         try {
             pool = pool ?? await loadPool();
-            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey);
+            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
 
             store.saveToday({ date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() });
             showCurrentState();
@@ -194,13 +333,35 @@ function init() {
     tick();
     setInterval(tick, TICK_MS);
 
+    profileGrid.addEventListener('click', handleProfileClick);
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
     retryButton.addEventListener('click', handleUnveil)
     dialSelect.addEventListener('change', handleOptionChange);
+    createForm.addEventListener('input', handleCreateInput);
+    createForm.addEventListener('submit', handleCreateSubmit);
+    createBackButton.addEventListener('click', showProfiles);
+    harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
+    harmonyForm.addEventListener('submit', handleHarmonySubmit);
+    harmonyBackButton.addEventListener('click', () => renderView('create'));
+    harmonySkipButton.addEventListener('click', () => finishCreate([]));
+    profileButton.addEventListener('click', toggleMenu);
+    document.addEventListener('click', closeMenuOnOutsideClick);
+    document.addEventListener('keydown', closeMenuOnEscape);
+    logoutButton.addEventListener('click', handleLogOut);
 
     preparePool();
+
+    const savedProfile = getCurrentProfile();
+    if (savedProfile) {
+        loadConfig().then((data) => {
+            config = data;
+            enterToday(savedProfile);
+        }).catch(() => enterToday(savedProfile));
+    } else {
+        showProfiles();
+    }
 
     if (isDevMode()) {
         devButton.hidden = false;
