@@ -10,7 +10,7 @@ Discover a new sound every day. Unheard gives you one song a day, chosen through
 2. Pick a discovery mode and, if you like, an option in its dial (a decade, a country, a mood or a genre). Then press **Unveil**.
 3. The app builds a search for that mode, asks the iTunes Search API for songs, keeps the ones that fit (and removes any genre your profile blocked), and chooses one.
 4. It checks that the 30-second preview really plays before accepting the song.
-5. The song appears in a record sleeve, with its own player, a catalog number, and links to Spotify and Apple Music. The day is locked until local midnight, and a refresh shows the same song.
+5. The song appears in a record sleeve, with its own player, a catalog number, and links to Spotify and Apple Music. The day is locked until local midnight, and a refresh shows the same song. The song is also added to your **collector binder**.
 
 A failed attempt never uses up the daily discovery: the lock is saved only after a playable song is found.
 
@@ -25,7 +25,7 @@ Several people can share one browser, each with their own profile:
 - **Who's listening?** shows every profile as a record, plus a tile to add a new one.
 - **Create your profile** asks for a name (up to 20 characters, no duplicates) and a record color, with a live preview of the record.
 - **Negative harmony** is an optional second step: block up to 3 genres you never want to hear. Blocked genres are removed from every mode's results, and they disappear from the Genre dial.
-- **The profile menu** in the header shows who is logged in and has **Log out**. Collection and Settings are marked "Soon".
+- **The profile menu** in the header shows who is logged in, opens the **Collection**, and has **Log out**. Settings is marked "Soon".
 
 Each profile has its own daily lock and catalog numbers, so two people can each discover a song on the same day. The app remembers the last profile and opens straight on its Today screen.
 
@@ -34,9 +34,21 @@ Each profile has its own daily lock and catalog numbers, so two people can each 
 | `unheard:profiles` | The list of profiles: id, name and avatar color |
 | `unheard:currentProfile` | The id of the logged-in profile |
 | `unheard:<id>:today` | That profile's discovery of the day: date, mode, option, song and catalog number |
+| `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag |
 | `unheard:<id>:settings` | That profile's settings, for now the blocked genres |
 
 To block a genre, the app looks up its `matches` in `data/pool.json` (the genre names iTunes uses, for example Hip-Hop is `"Hip-Hop/Rap"`) and drops every song whose `primaryGenreName` is on that list. "Hard Rock" is listed under both Rock and Metal, so blocking Metal also removes Hard Rock songs.
+
+## Collector binder
+
+Every discovery becomes a card in the profile's binder, opened from the profile menu:
+
+- **Cards** show the cover, catalog number, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
+- **Favorites:** a heart on each card and on the Revealed screen. Both hearts stay in sync.
+- **Stats:** pressings, countries visited with World Explorer, and favorites.
+- **Search** by title, artist or tag, **filter** by mode or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
+
+The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title, search and filters share one row.
 
 ## Discovery modes
 
@@ -69,11 +81,12 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `data/pool.json` | Search terms for every mode: random words, decades, countries, moods and genres (with the iTunes genre names each genre matches) |
 | `data/config.json` | The six avatar record colors |
 | `js/main.js` | Entry point: connects all the modules and handles clicks |
+| `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter and sort |
 | `js/profiles.js` | Profile list, logged-in profile, name validation and profile creation |
 | `js/api.js` | iTunes Search API requests and the preview check |
 | `js/modes.js` | The list of discovery modes and one query-building function per mode |
 | `js/picker.js` | Picks a candidate without repeats, removes blocked genres and runs the discovery loop |
-| `js/store.js` | Safe JSON reading and writing, and one store per profile in `localStorage` |
+| `js/store.js` | Safe JSON reading and writing (in `localStorage` or `sessionStorage`), and one store per profile |
 | `js/render.js` | Everything that changes the page, including the audio player |
 | `js/theme.js` | Applies the selected mode's color |
 | `js/utils.js` | Dates, countdown, greeting, links and other small helpers |
@@ -98,7 +111,7 @@ After one discovery the app is locked until midnight. To test again, open the si
 http://127.0.0.1:5500/index.html?dev=1
 ```
 
-A small developer button appears in the footer. It removes today's lock of the logged-in profile only and shows the Unveil button again. Dev mode is remembered in `sessionStorage`, so it stays on while the tab is open and disappears when the tab is closed.
+A small developer button appears in the footer. It removes today's lock of the logged-in profile only and shows the Unveil button again. The binder keeps every song, so unveiling several times in a row fills it for a demo, each with a new catalog number. Dev mode is remembered in `sessionStorage`, so it stays on while the tab is open and disappears when the tab is closed.
 
 ## Status
 
@@ -114,12 +127,13 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Layouts for phone portrait, phone landscape and desktop
 - Time Machine, World Explorer, Mood and Genre modes, each with its setup dial
 - Profiles: Who's listening, create profile with live preview, Negative harmony, profile menu with log out, a daily lock per profile, and blocked genres kept out of every mode
+- Collector binder: cards, favorites, stats, search, filters and sort, in the three layouts
 
 **Next**
 
-- Collector binder
 - Settings, delete profile and streak
-- Rarity, then feature freeze, final README and deploy
+- Rarity tiers and binder sets
+- Feature freeze, final README and deploy
 
 ## Credits
 
