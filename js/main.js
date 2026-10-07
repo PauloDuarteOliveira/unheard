@@ -1,19 +1,25 @@
 import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
-import createStore from './store.js';
+import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
-    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit, renderProfileButton, renderMenuOpen
+    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
+    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
+    renderBinderStats, renderBinderFilters, renderModeFilters
 } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
+import { addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats, DEFAULT_FILTERS, filterCollection } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
 const DEV_MODE_KEY = 'unheard:devMode';
+const BINDER_FILTER_KEY = 'unheard:binderFilters';
+const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
+const NO_MATCHES = 'No pressings match these filters.';
 
 function isDevMode() {
     const params = new URLSearchParams(window.location.search);
@@ -53,6 +59,10 @@ function init() {
     const profileButton = document.querySelector('#profile-button');
     const profileMenu = document.querySelector('#profile-menu');
     const logoutButton = document.querySelector('#logout-button');
+    const collectionButton = document.querySelector('#collection-button');
+    const collectionBackButton = document.querySelector('#collection-back');
+    const binderGrid = document.querySelector('#binder-grid');
+    const binderForm = document.querySelector('#binder-filters');
 
     let store = null;
     let pool = null;
@@ -177,6 +187,7 @@ function init() {
         store = null;
         renderMenuOpen(false);
         showProfiles();
+        sessionStorage.removeItem(BINDER_FILTER_KEY);
     }
 
     function getLockedToday() {
@@ -203,10 +214,11 @@ function init() {
     }
 
     function getNextNumber() {
-        const previous = store.getToday();
-        const previousNumber = previous?.number ?? 0;
-        const isSameDay = previous?.date === getDateKey();
-        return isSameDay ? previousNumber : previousNumber + 1;
+        const today = store.getToday();
+        if (today?.date === getDateKey()) return today.number;
+
+        const numbers = store.getCollection().map((entry) => entry.number);
+        return Math.max(0, ...numbers) + 1;
     }
 
     function showPhase(phase, details = {}) {
@@ -221,6 +233,18 @@ function init() {
         renderTabs(MODES, modeKey);
         renderModeCard(mode);
         renderSetup(mode, getOptions(mode), currentOptionKey);
+    }
+
+    function showCollection() {
+        const collection = store.getCollection();
+        const firstDate = getFirstDate(collection);
+
+        renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
+        renderBinderStats(getStats(collection));
+        renderMenuOpen(false);
+        renderBinderFilters(getBinderFilters());
+        showBinderCards();
+        renderView('collection');
     }
 
     async function preparePool() {
@@ -238,8 +262,12 @@ function init() {
         isShowingLocked = Boolean(today);
 
         if (today) {
+            const entry = store.getCollection().find((item) => item.number === today.number);
             selectMode(today.mode, today.optionKey);
-            showPhase('revealed', { song: today.song, number: today.number });
+            showPhase('revealed', {
+                song: today.song, number: today.number, isFavorite:
+                    entry?.isFavorite ?? false
+            });
         } else {
             showPhase('idle');
         }
@@ -250,7 +278,7 @@ function init() {
         renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
         renderCountdown(getMsUntilMidnight(), isLocked);
 
-        if (isShowingLocked && !isLocked) {
+        if (isShowingLocked && !isLocked && !isSearching) {
             showCurrentState();
         }
     }
@@ -263,9 +291,11 @@ function init() {
 
         try {
             pool = pool ?? await loadPool();
-            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
+            const { song, optionKey } = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
 
-            store.saveToday({ date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() });
+            const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
+            store.saveToday(today);
+            store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
@@ -294,6 +324,45 @@ function init() {
         tick();
     }
 
+    function handleFavoriteClick(button) {
+        const number = Number(button.dataset.number);
+        const collection = toggleFavorite(store.getCollection(), number);
+        store.saveCollection(collection);
+
+        const entry = collection.find((item) => item.number === number);
+        renderFavorite(number, entry.song.trackName, entry.isFavorite);
+        renderBinderStats(getStats(collection));
+    }
+
+    function getBinderFilters() {
+        return { ...DEFAULT_FILTERS, ...readJson(BINDER_FILTER_KEY, {}, sessionStorage) };
+    }
+
+    function readBinderForm() {
+        const { search, mode, sort, favorites } = binderForm.elements;
+        return { search: search.value, mode: mode.value, sort: sort.value, favorites: favorites.checked };
+    }
+
+    function showBinderCards() {
+        const filters = getBinderFilters();
+        const tagged = store.getCollection().map((entry) => ({
+            ...entry, tag:
+                getEntryTag(entry, pool)
+        }));
+        const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
+        renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+    }
+
+    function handleBinderFilterInput() {
+        writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
+        showBinderCards();
+    }
+
+    function handleBinderClick(event) {
+        const button = event.target.closest('[data-action="favorite"]');
+        if (button) handleFavoriteClick(button);
+    }
+
     function handleRevealedClick(event) {
         const actionButton = event.target.closest('[data-action]');
         if (!actionButton) return;
@@ -304,6 +373,9 @@ function init() {
                 break;
             case 'reroll':
                 rerollToday();
+                break;
+            case 'favorite':
+                handleFavoriteClick(actionButton);
                 break;
         }
     }
@@ -332,6 +404,7 @@ function init() {
     showCurrentState();
     tick();
     setInterval(tick, TICK_MS);
+    renderModeFilters(MODES);
 
     profileGrid.addEventListener('click', handleProfileClick);
     unveilButton.addEventListener('click', handleUnveil);
@@ -350,6 +423,11 @@ function init() {
     document.addEventListener('click', closeMenuOnOutsideClick);
     document.addEventListener('keydown', closeMenuOnEscape);
     logoutButton.addEventListener('click', handleLogOut);
+    collectionButton.addEventListener('click', showCollection);
+    collectionBackButton.addEventListener('click', () => renderView('today'));
+    binderGrid.addEventListener('click', handleBinderClick);
+    binderForm.addEventListener('input', handleBinderFilterInput);
+    binderForm.addEventListener('submit', (event) => event.preventDefault());
 
     preparePool();
 

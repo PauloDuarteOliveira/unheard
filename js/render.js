@@ -45,6 +45,13 @@ const profileButton = document.querySelector('#profile-button');
 const profileButtonName = document.querySelector('#profile-button-name');
 const profileMenu = document.querySelector('#profile-menu');
 const profileMenuHead = document.querySelector('#profile-menu-head');
+const binderSummary = document.querySelector('#binder-summary');
+const binderGrid = document.querySelector('#binder-grid');
+const statPressings = document.querySelector('#stat-pressings');
+const statCountries = document.querySelector('#stat-countries');
+const statFavorites = document.querySelector('#stat-favorites');
+const binderForm = document.querySelector('#binder-filters');
+const binderMode = document.querySelector('#binder-mode');
 
 
 function createAvatarOption(avatar, isChecked) {
@@ -230,7 +237,8 @@ function createTab(mode, isSelected) {
 export function renderView(viewName) {
     document.body.dataset.screen = viewName;
     document.querySelectorAll('[data-view]').forEach((element) => {
-        element.hidden = element.dataset.view !== viewName;
+        const views = element.dataset.view.split(' ');
+        element.hidden = !views.includes(viewName);
     })
 }
 
@@ -448,7 +456,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number) {
+function createSongCard(song, mode, number, isFavorite) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -521,14 +529,17 @@ function createSongCard(song, mode, number) {
     shareButton.setAttribute('aria-label', "Share today's discovery");
     shareButton.append(createIcon('share'));
 
+    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
+    favoriteButton.classList.add('song-link', 'song-share');
+
     const actions = document.createElement('div');
     actions.className = 'song-actions';
-    actions.append(spotifyLink, appleLink, shareButton);
+    actions.append(spotifyLink, appleLink, favoriteButton, shareButton);
 
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -557,7 +568,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             break;
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
-            revealed.replaceChildren(...createSongCard(song, mode, number));
+            revealed.replaceChildren(...createSongCard(song, mode, number, isFavorite));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -573,4 +584,107 @@ export function renderShareFeedback(button) {
     setTimeout(() => {
         icon.textContent = 'share';
     }, SHARE_FEEDBACK_MS);
+}
+
+export function renderBinderSummary(count, since) {
+    const word = count === 1 ? 'pressing' : 'pressings';
+    binderSummary.textContent = since ? `${count} ${word} · since ${since}` : 'No pressings yet';
+}
+
+function createBinderCard(entry) {
+    const { song } = entry;
+
+    const cover = document.createElement('img');
+    cover.className = 'binder-cover';
+    cover.src = getCoverUrl(song.artworkUrl100);
+    cover.alt = '';
+    cover.loading = 'lazy';
+
+    const number = document.createElement('span');
+    number.className = 'binder-number';
+    number.textContent = formatCatalogNumber(entry.number);
+
+    const art = document.createElement('div');
+    art.className = 'binder-art';
+    art.append(cover, number);
+
+    const title = document.createElement('h3');
+    title.className = 'binder-song';
+    title.textContent = song.trackName;
+
+    const artist = document.createElement('p');
+    artist.className = 'binder-artist';
+    artist.textContent = song.artistName;
+
+    const tag = document.createElement('span');
+    tag.className = 'binder-tag';
+    tag.textContent = entry.tag;
+
+    const text = document.createElement('div');
+    text.className = 'binder-text';
+    text.append(title, artist, tag);
+
+    const info = document.createElement('div');
+    info.className = 'binder-info';
+    info.append(text, createFavoriteButton(entry.number, song.trackName, entry.isFavorite));
+
+    const card = document.createElement('article');
+    card.className = 'binder-card';
+    card.dataset.mode = entry.mode;
+    card.dataset.number = entry.number;
+    card.append(art, info);
+    return card;
+}
+
+function setFavoriteState(button, trackName, isFavorite) {
+    button.setAttribute('aria-pressed', String(isFavorite));
+    button.setAttribute('aria-label', isFavorite ? `Remove ${trackName} from favorites` :
+        `Add ${trackName} to favorites`);
+}
+
+function createFavoriteButton(number, trackName, isFavorite) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'favorite-button';
+    button.dataset.action = 'favorite';
+    button.dataset.number = number;
+    button.append(createIcon('favorite'));
+    setFavoriteState(button, trackName, isFavorite);
+    return button;
+}
+
+export function renderFavorite(number, trackName, isFavorite) {
+    document.querySelectorAll(`[data-action="favorite"][data-number="${number}"]`)
+        .forEach((button) => setFavoriteState(button, trackName, isFavorite));
+}
+
+export function renderBinderGrid(entries, emptyMessage) {
+    if (entries.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'binder-empty';
+        empty.textContent = emptyMessage;
+        binderGrid.replaceChildren(empty);
+        return
+    }
+
+    binderGrid.replaceChildren(...entries.map(createBinderCard));
+}
+
+export function renderBinderStats({ pressings, countries, favorites }) {
+    statPressings.textContent = pressings;
+    statCountries.textContent = countries;
+    statFavorites.textContent = favorites;
+}
+
+export function renderModeFilters(modes) {
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+    binderMode.replaceChildren(createOption('', 'All modes'), ...options);
+}
+
+export function renderBinderFilters ({ search, mode, sort, favorites}) {
+    const { elements } = binderForm;
+    elements.search.value = search;
+    elements.mode.value = mode;
+    elements.sort.value = sort;
+    elements.favorites.checked = favorites;
 }
