@@ -1507,6 +1507,7 @@ h2 {
 .binder-art {
   position: relative;
   aspect-ratio: 16 / 10;
+  overflow: hidden;
 }
 
 .binder-cover {
