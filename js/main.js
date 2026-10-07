@@ -7,11 +7,12 @@ import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
-    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite
+    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
+    renderBinderStats
 } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate, getEntryTag, sortNewest, toggleFavorite } from './collection.js';
+import { addEntry, getFirstDate, getEntryTag, sortNewest, toggleFavorite ,getStats } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -234,6 +235,7 @@ function init() {
         const firstDate = getFirstDate(collection);
 
         renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
+        renderBinderStats(getStats(collection));
         renderMenuOpen(false);
 
         const cards = sortNewest(collection).map((entry) => ({ ...entry, tag: getEntryTag(entry, pool) }));
@@ -325,6 +327,7 @@ function init() {
 
         const entry = collection.find((item) => item.number === number);
         renderFavorite(number, entry.song.trackName, entry.isFavorite);
+        renderBinderStats(getStats(collection));
     }
 
     function handleBinderClick(event) {

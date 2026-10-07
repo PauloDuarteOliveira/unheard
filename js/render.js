@@ -47,6 +47,9 @@ const profileMenu = document.querySelector('#profile-menu');
 const profileMenuHead = document.querySelector('#profile-menu-head');
 const binderSummary = document.querySelector('#binder-summary');
 const binderGrid = document.querySelector('#binder-grid');
+const statPressings = document.querySelector('#stat-pressings');
+const statCountries = document.querySelector('#stat-countries');
+const statFavorites = document.querySelector('#stat-favorites');
 
 
 function createAvatarOption(avatar, isChecked) {
@@ -534,7 +537,7 @@ function createSongCard(song, mode, number, isFavorite) {
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false}) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -663,4 +666,10 @@ export function renderBinderGrid(entries) {
     }
 
     binderGrid.replaceChildren(...entries.map(createBinderCard));
+}
+
+export function renderBinderStats({ pressings, countries, favorites }) {
+    statPressings.textContent = pressings;
+    statCountries.textContent = countries;
+    statFavorites.textContent = favorites;
 }

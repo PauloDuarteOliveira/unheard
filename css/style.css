@@ -1631,6 +1631,29 @@ h2 {
   outline-offset: 2px;
 }
 
+.binder-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stat {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--tint);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {

@@ -24,3 +24,16 @@ export function toggleFavorite(collection, number) {
     return collection.map((entry) =>
         entry.number === number ? { ...entry, isFavorite: !entry.isFavorite } : entry);
 }
+
+export function getStats(collection) {
+    const countries = new Set(
+        collection
+            .filter((entry) => entry.mode === 'world' && entry.optionKey)
+            .map((entry) => entry.optionKey)
+    );
+
+    const favorites = collection.reduce((count, entry) => (entry.isFavorite ? count + 1 :
+        count), 0);
+
+    return { pressings: collection.length, countries: countries.size, favorites };
+}
