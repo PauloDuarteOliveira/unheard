@@ -10,6 +10,7 @@ import {
 } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
+import { addEntry } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -203,10 +204,11 @@ function init() {
     }
 
     function getNextNumber() {
-        const previous = store.getToday();
-        const previousNumber = previous?.number ?? 0;
-        const isSameDay = previous?.date === getDateKey();
-        return isSameDay ? previousNumber : previousNumber + 1;
+        const today = store.getToday();
+        if (today?.date === getDateKey()) return today.number;
+
+        const numbers = store.getCollection().map((entry) => entry.number);
+        return Math.max(0, ...numbers) + 1;
     }
 
     function showPhase(phase, details = {}) {
@@ -265,7 +267,9 @@ function init() {
             pool = pool ?? await loadPool();
             const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
 
-            store.saveToday({ date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() });
+            const today = { date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() };
+            store.saveToday(today);
+            store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();
         } catch (error) {
             console.error('Discovery failed:', error);
