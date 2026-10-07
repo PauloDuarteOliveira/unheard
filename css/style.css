@@ -1532,14 +1532,6 @@ h2 {
   align-items: center;
 }
 
-.binder-info {
-  min-width: 0;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
 .binder-song,
 .binder-artist {
   white-space: nowrap;
