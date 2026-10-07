@@ -1,22 +1,25 @@
 import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
-import createStore from './store.js';
+import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats
+    renderBinderStats, renderBinderFilters, renderModeFilters
 } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate, getEntryTag, sortNewest, toggleFavorite ,getStats } from './collection.js';
+import { addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats, DEFAULT_FILTERS, filterCollection } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
 const DEV_MODE_KEY = 'unheard:devMode';
+const BINDER_FILTER_KEY = 'unheard:binderFilters';
+const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
+const NO_MATCHES = 'No pressings match these filters.';
 
 function isDevMode() {
     const params = new URLSearchParams(window.location.search);
@@ -59,6 +62,7 @@ function init() {
     const collectionButton = document.querySelector('#collection-button');
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
+    const binderForm = document.querySelector('#binder-filters');
 
     let store = null;
     let pool = null;
@@ -183,6 +187,7 @@ function init() {
         store = null;
         renderMenuOpen(false);
         showProfiles();
+        sessionStorage.removeItem(BINDER_FILTER_KEY);
     }
 
     function getLockedToday() {
@@ -237,9 +242,8 @@ function init() {
         renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
         renderBinderStats(getStats(collection));
         renderMenuOpen(false);
-
-        const cards = sortNewest(collection).map((entry) => ({ ...entry, tag: getEntryTag(entry, pool) }));
-        renderBinderGrid(cards);
+        renderBinderFilters(getBinderFilters());
+        showBinderCards();
         renderView('collection');
     }
 
@@ -330,6 +334,30 @@ function init() {
         renderBinderStats(getStats(collection));
     }
 
+    function getBinderFilters() {
+        return { ...DEFAULT_FILTERS, ...readJson(BINDER_FILTER_KEY, {}, sessionStorage) };
+    }
+
+    function readBinderForm() {
+        const { search, mode, sort, favorites } = binderForm.elements;
+        return { search: search.value, mode: mode.value, sort: sort.value, favorites: favorites.checked };
+    }
+
+    function showBinderCards() {
+        const filters = getBinderFilters();
+        const tagged = store.getCollection().map((entry) => ({
+            ...entry, tag:
+                getEntryTag(entry, pool)
+        }));
+        const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
+        renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+    }
+
+    function handleBinderFilterInput() {
+        writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
+        showBinderCards();
+    }
+
     function handleBinderClick(event) {
         const button = event.target.closest('[data-action="favorite"]');
         if (button) handleFavoriteClick(button);
@@ -376,6 +404,7 @@ function init() {
     showCurrentState();
     tick();
     setInterval(tick, TICK_MS);
+    renderModeFilters(MODES);
 
     profileGrid.addEventListener('click', handleProfileClick);
     unveilButton.addEventListener('click', handleUnveil);
@@ -397,6 +426,8 @@ function init() {
     collectionButton.addEventListener('click', showCollection);
     collectionBackButton.addEventListener('click', () => renderView('today'));
     binderGrid.addEventListener('click', handleBinderClick);
+    binderForm.addEventListener('input', handleBinderFilterInput);
+    binderForm.addEventListener('submit', (event) => event.preventDefault());
 
     preparePool();
 

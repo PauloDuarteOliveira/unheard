@@ -50,6 +50,8 @@ const binderGrid = document.querySelector('#binder-grid');
 const statPressings = document.querySelector('#stat-pressings');
 const statCountries = document.querySelector('#stat-countries');
 const statFavorites = document.querySelector('#stat-favorites');
+const binderForm = document.querySelector('#binder-filters');
+const binderMode = document.querySelector('#binder-mode');
 
 
 function createAvatarOption(avatar, isChecked) {
@@ -656,11 +658,11 @@ export function renderFavorite(number, trackName, isFavorite) {
         .forEach((button) => setFavoriteState(button, trackName, isFavorite));
 }
 
-export function renderBinderGrid(entries) {
+export function renderBinderGrid(entries, emptyMessage) {
     if (entries.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'binder-empty';
-        empty.textContent = 'Unveil your first song and it will appear here.';
+        empty.textContent = emptyMessage;
         binderGrid.replaceChildren(empty);
         return
     }
@@ -672,4 +674,17 @@ export function renderBinderStats({ pressings, countries, favorites }) {
     statPressings.textContent = pressings;
     statCountries.textContent = countries;
     statFavorites.textContent = favorites;
+}
+
+export function renderModeFilters(modes) {
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+    binderMode.replaceChildren(createOption('', 'All modes'), ...options);
+}
+
+export function renderBinderFilters ({ search, mode, sort, favorites}) {
+    const { elements } = binderForm;
+    elements.search.value = search;
+    elements.mode.value = mode;
+    elements.sort.value = sort;
+    elements.favorites.checked = favorites;
 }

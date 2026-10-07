@@ -1646,6 +1646,109 @@ h2 {
   letter-spacing: -0.02em;
 }
 
+.binder-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.binder-search {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--field-bg);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.binder-search:focus-within {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.binder-search-input {
+  flex-grow: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.binder-search-input::placeholder {
+  color: var(--muted);
+}
+
+.binder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.binder-select,
+.binder-toggle {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--tint);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.binder-select {
+  appearance: none;
+}
+
+.binder-select option {
+  background: var(--surface);
+}
+
+.binder-select:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.binder-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.binder-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.binder-toggle:has(input:checked) {
+  color: var(--favorite);
+  border-color: var(--favorite);
+}
+
+.binder-toggle:has(input:checked) .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}
+
+.binder-toggle:has(input:focus-visible) {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {

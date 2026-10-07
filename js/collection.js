@@ -9,9 +9,33 @@ export function getFirstDate(collection) {
     return collection.map((entry) => entry.date).sort()[0] ?? null;
 }
 
-export function sortNewest(collection) {
-    return [...collection].sort((a, b) => b.number - a.number);
+export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false};
+
+export function filterCollection(collection, { search, mode, favorites }) {
+    const query = search.trim().toLowerCase();
+
+    return collection.filter((entry) => {
+        const text = `${entry.song.trackName} ${entry.song.artistName} ${entry.tag}`.toLowerCase();
+        const matchesSearch = text.includes(query);
+        const matchesMode = !mode || entry.mode === mode;
+        const matchesFavorites = !favorites || entry.isFavorite;
+        return matchesSearch && matchesMode && matchesFavorites;
+    });
 }
+
+export function sortCollection(collection, sort) {
+    const sorted = [...collection];
+
+    switch (sort) {
+        case 'oldest':
+            return sorted.sort((a, b) => a.number - b.number);
+        case 'title':
+            return sorted.sort((a, b) => a.song.trackName.localeCompare(b.song.trackName));
+        default:
+            return sorted.sort((a, b) => b.number - a.number);
+    }
+}
+
 
 export function getEntryTag(entry, pool) {
     const mode = getMode(entry.mode);
