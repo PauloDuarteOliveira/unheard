@@ -6,11 +6,12 @@ import { applyMode } from './theme.js';
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
-    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit, renderProfileButton, renderMenuOpen
+    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
+    renderProfileButton, renderMenuOpen, renderBinderSummary
 } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight, getShareText } from './utils.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry } from './collection.js';
+import { addEntry, getFirstDate } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -54,6 +55,8 @@ function init() {
     const profileButton = document.querySelector('#profile-button');
     const profileMenu = document.querySelector('#profile-menu');
     const logoutButton = document.querySelector('#logout-button');
+    const collectionButton = document.querySelector('#collection-button');
+    const collectionBackButton = document.querySelector('#collection-back');
 
     let store = null;
     let pool = null;
@@ -225,6 +228,15 @@ function init() {
         renderSetup(mode, getOptions(mode), currentOptionKey);
     }
 
+    function showCollection() {
+        const collection = store.getCollection();
+        const firstDate = getFirstDate(collection);
+
+        renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
+        renderMenuOpen(false);
+        renderView('collection');
+    }
+
     async function preparePool() {
         try {
             pool = await loadPool();
@@ -252,7 +264,7 @@ function init() {
         renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
         renderCountdown(getMsUntilMidnight(), isLocked);
 
-        if (isShowingLocked && !isLocked) {
+        if (isShowingLocked && !isLocked && !isSearching) {
             showCurrentState();
         }
     }
@@ -354,6 +366,8 @@ function init() {
     document.addEventListener('click', closeMenuOnOutsideClick);
     document.addEventListener('keydown', closeMenuOnEscape);
     logoutButton.addEventListener('click', handleLogOut);
+    collectionButton.addEventListener('click', showCollection);
+    collectionBackButton.addEventListener('click', () => renderView('today'));
 
     preparePool();
 

@@ -45,6 +45,7 @@ const profileButton = document.querySelector('#profile-button');
 const profileButtonName = document.querySelector('#profile-button-name');
 const profileMenu = document.querySelector('#profile-menu');
 const profileMenuHead = document.querySelector('#profile-menu-head');
+const binderSummary = document.querySelector('#binder-summary');
 
 
 function createAvatarOption(avatar, isChecked) {
@@ -230,7 +231,8 @@ function createTab(mode, isSelected) {
 export function renderView(viewName) {
     document.body.dataset.screen = viewName;
     document.querySelectorAll('[data-view]').forEach((element) => {
-        element.hidden = element.dataset.view !== viewName;
+        const views = element.dataset.view.split(' ');
+        element.hidden = !views.includes(viewName);
     })
 }
 
@@ -573,4 +575,9 @@ export function renderShareFeedback(button) {
     setTimeout(() => {
         icon.textContent = 'share';
     }, SHARE_FEEDBACK_MS);
+}
+
+export function renderBinderSummary(count, since) {
+    const word = count === 1 ? 'pressing' : 'pressings';
+    binderSummary.textContent = since ? `${count} ${word} · since ${since}` : 'No pressings yet';
 }

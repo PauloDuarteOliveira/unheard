@@ -14,7 +14,7 @@ export function writeJson(key, value) {
 export default function createStore(profileId) {
     const todayKey = `unheard:${profileId}:today`;
     const settingsKey = `unheard:${profileId}:settings`;
-    const collectionKey = `unheard:${profileId}:collection`
+    const collectionKey = `unheard:${profileId}:collection`;
 
     function getToday() {
         return readJson(todayKey);

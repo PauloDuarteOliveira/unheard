@@ -78,6 +78,12 @@ export function formatCatalogNumber(number) {
     return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
 }
 
+export function formatShortDate(datekey) {
+    const date = new Date(`${datekey}T00:00`);
+    const month = date.toLocaleDateString('en-GB', { month: 'short'})
+    return `${date.getDate()} ${month}`;
+}
+
 export function pickRandom(list) {
     const index = Math.floor(Math.random() * list.length);
     return list[index];

@@ -96,7 +96,7 @@
     </form>
   </section>
 
-  <header class="app-header" data-view="today">
+  <header class="app-header" data-view="today collection">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <div class="brand-text">
@@ -114,10 +114,9 @@
       <div class="profile-menu" id="profile-menu" role="menu" hidden>
         <div class="profile-menu-head" id="profile-menu-head"></div>
         <div class="menu-divider"></div>
-        <button class="menu-item" type="button" role="menuitem" disabled>
+        <button class="menu-item" id="collection-button" type="button" role="menuitem">
           <span class="material-symbols-outlined" aria-hidden="true">library_music</span>
           <span class="menu-label">Collection</span>
-          <span class="menu-note">Soon</span>
         </button>
         <button class="menu-item" type="button" role="menuitem" disabled>
           <span class="material-symbols-outlined" aria-hidden="true">settings</span>
@@ -193,6 +192,20 @@
       </div>
     </section>
   </main>
+
+  <section class="view collection-view" id="view-collection" data-view="collection" hidden>
+    <button class="button-ghost back-button" id="collection-back" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      Back to today
+    </button>
+
+    <div class="binder-heading">
+      <h1 class="binder-title">Collector binder</h1>
+      <p class="stamp" id="binder-summary"></p>
+    </div>
+
+    <div class="binder-grid" id="binder-grid"></div>
+  </section>
 
   <footer class="app-footer" data-view="today">
     <div class="status-bar">

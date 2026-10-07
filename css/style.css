@@ -1455,6 +1455,34 @@ h2 {
   text-transform: uppercase;
 }
 
+/* ---------- Collector binder ---------- */
+
+.collection-view {
+  flex-grow: 1;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.back-button {
+  align-self: flex-start;
+  padding: 0;
+}
+
+.binder-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.binder-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {
