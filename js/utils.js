@@ -80,7 +80,7 @@ export function formatCatalogNumber(number) {
 
 export function formatShortDate(datekey) {
     const date = new Date(`${datekey}T00:00`);
-    const month = date.toLocaleDateString('en-GB', { month: 'short'})
+    const month = date.toLocaleDateString('en-US', { month: 'short'});
     return `${date.getDate()} ${month}`;
 }
 
