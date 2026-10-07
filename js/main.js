@@ -7,11 +7,11 @@ import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
-    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid
+    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite
 } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate, getEntryTag, sortNewest } from './collection.js';
+import { addEntry, getFirstDate, getEntryTag, sortNewest, toggleFavorite } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -57,6 +57,7 @@ function init() {
     const logoutButton = document.querySelector('#logout-button');
     const collectionButton = document.querySelector('#collection-button');
     const collectionBackButton = document.querySelector('#collection-back');
+    const binderGrid = document.querySelector('#binder-grid');
 
     let store = null;
     let pool = null;
@@ -255,8 +256,12 @@ function init() {
         isShowingLocked = Boolean(today);
 
         if (today) {
+            const entry = store.getCollection().find((item) => item.number === today.number);
             selectMode(today.mode, today.optionKey);
-            showPhase('revealed', { song: today.song, number: today.number });
+            showPhase('revealed', {
+                song: today.song, number: today.number, isFavorite:
+                    entry?.isFavorite ?? false
+            });
         } else {
             showPhase('idle');
         }
@@ -313,6 +318,20 @@ function init() {
         tick();
     }
 
+    function handleFavoriteClick(button) {
+        const number = Number(button.dataset.number);
+        const collection = toggleFavorite(store.getCollection(), number);
+        store.saveCollection(collection);
+
+        const entry = collection.find((item) => item.number === number);
+        renderFavorite(number, entry.song.trackName, entry.isFavorite);
+    }
+
+    function handleBinderClick(event) {
+        const button = event.target.closest('[data-action="favorite"]');
+        if (button) handleFavoriteClick(button);
+    }
+
     function handleRevealedClick(event) {
         const actionButton = event.target.closest('[data-action]');
         if (!actionButton) return;
@@ -323,6 +342,9 @@ function init() {
                 break;
             case 'reroll':
                 rerollToday();
+                break;
+            case 'favorite':
+                handleFavoriteClick(actionButton);
                 break;
         }
     }
@@ -371,6 +393,7 @@ function init() {
     logoutButton.addEventListener('click', handleLogOut);
     collectionButton.addEventListener('click', showCollection);
     collectionBackButton.addEventListener('click', () => renderView('today'));
+    binderGrid.addEventListener('click', handleBinderClick);
 
     preparePool();
 

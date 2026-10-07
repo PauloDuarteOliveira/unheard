@@ -13,9 +13,14 @@ export function sortNewest(collection) {
     return [...collection].sort((a, b) => b.number - a.number);
 }
 
-export function getEntryTag (entry, pool) {
+export function getEntryTag(entry, pool) {
     const mode = getMode(entry.mode);
     const options = pool?.[mode.optionsKey] ?? [];
     const option = options.find((item) => item.key === entry.optionKey);
     return option?.label ?? mode.shortName;
+}
+
+export function toggleFavorite(collection, number) {
+    return collection.map((entry) =>
+        entry.number === number ? { ...entry, isFavorite: !entry.isFavorite } : entry);
 }

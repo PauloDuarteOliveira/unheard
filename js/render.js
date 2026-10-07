@@ -451,7 +451,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number) {
+function createSongCard(song, mode, number, isFavorite) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -524,14 +524,17 @@ function createSongCard(song, mode, number) {
     shareButton.setAttribute('aria-label', "Share today's discovery");
     shareButton.append(createIcon('share'));
 
+    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
+    favoriteButton.classList.add('song-link', 'song-share');
+
     const actions = document.createElement('div');
     actions.className = 'song-actions';
-    actions.append(spotifyLink, appleLink, shareButton);
+    actions.append(spotifyLink, appleLink, favoriteButton, shareButton);
 
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false}) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -560,7 +563,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             break;
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
-            revealed.replaceChildren(...createSongCard(song, mode, number));
+            revealed.replaceChildren(...createSongCard(song, mode, number, isFavorite));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -612,9 +615,13 @@ function createBinderCard(entry) {
     tag.className = 'binder-tag';
     tag.textContent = entry.tag;
 
+    const text = document.createElement('div');
+    text.className = 'binder-text';
+    text.append(title, artist, tag);
+
     const info = document.createElement('div');
     info.className = 'binder-info';
-    info.append(title, artist, tag);
+    info.append(text, createFavoriteButton(entry.number, song.trackName, entry.isFavorite));
 
     const card = document.createElement('article');
     card.className = 'binder-card';
@@ -624,8 +631,30 @@ function createBinderCard(entry) {
     return card;
 }
 
+function setFavoriteState(button, trackName, isFavorite) {
+    button.setAttribute('aria-pressed', String(isFavorite));
+    button.setAttribute('aria-label', isFavorite ? `Remove ${trackName} from favorites` :
+        `Add ${trackName} to favorites`);
+}
+
+function createFavoriteButton(number, trackName, isFavorite) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'favorite-button';
+    button.dataset.action = 'favorite';
+    button.dataset.number = number;
+    button.append(createIcon('favorite'));
+    setFavoriteState(button, trackName, isFavorite);
+    return button;
+}
+
+export function renderFavorite(number, trackName, isFavorite) {
+    document.querySelectorAll(`[data-action="favorite"][data-number="${number}"]`)
+        .forEach((button) => setFavoriteState(button, trackName, isFavorite));
+}
+
 export function renderBinderGrid(entries) {
-    if(entries.length === 0) {
+    if (entries.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'binder-empty';
         empty.textContent = 'Unveil your first song and it will appear here.';
