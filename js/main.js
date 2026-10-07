@@ -13,7 +13,6 @@ import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, valid
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
-const DEFAULT_PROFILE_ID = 'guest';
 const DEV_MODE_KEY = 'unheard:devMode';
 
 function isDevMode() {
@@ -186,7 +185,15 @@ function init() {
     }
 
     function getOptions(mode) {
-        return pool?.[mode.optionsKey] ?? [];
+        const options = pool?.[mode.optionsKey] ?? [];
+        if (mode.optionsKey !== 'genres') return options;
+
+        const blockedGenres = getBlockedGenres();
+        return options.filter((option) => !blockedGenres.includes(option.key));
+    }
+
+    function getBlockedGenres() {
+        return store?.getSettings().blockedGenres ?? [];
     }
 
     function getSearchingMessage() {
@@ -256,7 +263,7 @@ function init() {
 
         try {
             pool = pool ?? await loadPool();
-            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey);
+            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
 
             store.saveToday({ date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() });
             showCurrentState();
