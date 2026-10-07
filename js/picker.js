@@ -49,7 +49,7 @@ export async function discoverSong(modeKey, pool, picker, optionKey, blockedGenr
 
         try {
             await verifyPreview(candidate.previewUrl);
-            return candidate;
+            return {song: candidate, optionKey: query.optionKey ?? ''};
         } catch (error) {
             console.warn(`Attempt ${attempt}: preview not playable, trying another song.`, error);
         }

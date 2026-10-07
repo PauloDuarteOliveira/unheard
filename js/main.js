@@ -7,11 +7,11 @@ import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
-    renderProfileButton, renderMenuOpen, renderBinderSummary
+    renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid
 } from './render.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate } from './collection.js';
+import { addEntry, getFirstDate, getEntryTag, sortNewest } from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -234,6 +234,9 @@ function init() {
 
         renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
         renderMenuOpen(false);
+
+        const cards = sortNewest(collection).map((entry) => ({ ...entry, tag: getEntryTag(entry, pool) }));
+        renderBinderGrid(cards);
         renderView('collection');
     }
 
@@ -277,9 +280,9 @@ function init() {
 
         try {
             pool = pool ?? await loadPool();
-            const song = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
+            const { song, optionKey } = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
 
-            const today = { date: getDateKey(), mode: currentModeKey, optionKey: currentOptionKey, song, number: getNextNumber() };
+            const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
             store.saveToday(today);
             store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();

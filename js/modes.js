@@ -117,6 +117,7 @@ function buildTimeQuery(pool, optionKey) {
 
     return {
         term: pickRandom(decade.terms),
+        optionKey: decade.key,
         filter: (song) => {
             const year = Number(getReleaseYear(song.releaseDate));
             return year >= decade.start && year <= lastYear;
@@ -126,12 +127,12 @@ function buildTimeQuery(pool, optionKey) {
 
 function buildWorldQuery(pool, optionKey) {
     const country = pickOption(pool.countries, optionKey);
-    return { term: pickRandom(country.terms), country: country.key };
+    return { term: pickRandom(country.terms), country: country.key, optionKey: country.key };
 }
 
 function buildMoodQuery(pool, optionKey) {
     const mood = pickOption(pool.moods, optionKey);
-    return { term: pickRandom(mood.terms) };
+    return { term: pickRandom(mood.terms), optionKey: mood.key };
 }
 
 function buildGenreQuery(pool, optionKey) {
@@ -139,6 +140,7 @@ function buildGenreQuery(pool, optionKey) {
 
     return {
         term: pickRandom(genre.terms),
+        optionKey: genre.key,
         filter: (song) => genre.matches.includes(song.primaryGenreName),
     };
 }

@@ -46,6 +46,7 @@ const profileButtonName = document.querySelector('#profile-button-name');
 const profileMenu = document.querySelector('#profile-menu');
 const profileMenuHead = document.querySelector('#profile-menu-head');
 const binderSummary = document.querySelector('#binder-summary');
+const binderGrid = document.querySelector('#binder-grid');
 
 
 function createAvatarOption(avatar, isChecked) {
@@ -580,4 +581,57 @@ export function renderShareFeedback(button) {
 export function renderBinderSummary(count, since) {
     const word = count === 1 ? 'pressing' : 'pressings';
     binderSummary.textContent = since ? `${count} ${word} · since ${since}` : 'No pressings yet';
+}
+
+function createBinderCard(entry) {
+    const { song } = entry;
+
+    const cover = document.createElement('img');
+    cover.className = 'binder-cover';
+    cover.src = getCoverUrl(song.artworkUrl100);
+    cover.alt = '';
+    cover.loading = 'lazy';
+
+    const number = document.createElement('span');
+    number.className = 'binder-number';
+    number.textContent = formatCatalogNumber(entry.number);
+
+    const art = document.createElement('div');
+    art.className = 'binder-art';
+    art.append(cover, number);
+
+    const title = document.createElement('h3');
+    title.className = 'binder-song';
+    title.textContent = song.trackName;
+
+    const artist = document.createElement('p');
+    artist.className = 'binder-artist';
+    artist.textContent = song.artistName;
+
+    const tag = document.createElement('span');
+    tag.className = 'binder-tag';
+    tag.textContent = entry.tag;
+
+    const info = document.createElement('div');
+    info.className = 'binder-info';
+    info.append(title, artist, tag);
+
+    const card = document.createElement('article');
+    card.className = 'binder-card';
+    card.dataset.mode = entry.mode;
+    card.dataset.number = entry.number;
+    card.append(art, info);
+    return card;
+}
+
+export function renderBinderGrid(entries) {
+    if(entries.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'binder-empty';
+        empty.textContent = 'Unveil your first song and it will appear here.';
+        binderGrid.replaceChildren(empty);
+        return
+    }
+
+    binderGrid.replaceChildren(...entries.map(createBinderCard));
 }
