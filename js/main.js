@@ -38,7 +38,6 @@ function getErrorTitle(error) {
 }
 
 function init() {
-    const store = createStore(DEFAULT_PROFILE_ID);
     const picker = createPicker();
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
@@ -56,7 +55,7 @@ function init() {
     const profileMenu = document.querySelector('#profile-menu');
     const logoutButton = document.querySelector('#logout-button');
 
-
+    let store = null;
     let pool = null;
     let currentModeKey = DEFAULT_MODE;
     let isSearching = false;
@@ -68,6 +67,9 @@ function init() {
 
     function enterToday(profile) {
         currentProfile = profile;
+        store = createStore(profile.id);
+        selectMode(DEFAULT_MODE);
+        showCurrentState();
         setCurrentProfile(profile.id);
         renderProfileButton(profile, getAvatar(profile.avatar));
         renderMenuOpen(false);
@@ -93,7 +95,7 @@ function init() {
             showCreate();
             return;
         }
-        
+
         enterToday(getProfile(tile.dataset.profileId));
     }
 
@@ -173,12 +175,13 @@ function init() {
     function handleLogOut() {
         logOut();
         currentProfile = null;
+        store = null;
         renderMenuOpen(false);
         showProfiles();
     }
 
     function getLockedToday() {
-        const today = store.getToday();
+        const today = store?.getToday();
         return today && today.date === getDateKey() && today.song ? today : null;
     }
 
