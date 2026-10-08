@@ -4,6 +4,7 @@ import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
+import { scoreSong, getTier } from './rarity.js';
 
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
@@ -360,6 +361,11 @@ function init() {
         }
     }
 
+    function getRarity(entry, collection) {
+        const points = scoreSong(entry, collection, config.rarity);
+        return { points, tier: getTier(points, config.rarity).key };
+    }
+
     async function handleUnveil() {
         if (isSearching || getLockedToday()) return;
 
@@ -372,7 +378,9 @@ function init() {
 
             const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
             store.saveToday(today);
-            store.saveCollection(addEntry(store.getCollection(), today));
+            const previous = store.getCollection().filter((entry) => entry.number !== today.number);
+            const rarity = config?.rarity ? getRarity(today, previous) : null;
+            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity }));
             showCurrentState();
             if (store.getSettings().autoplay) playPreview();
         } catch (error) {
