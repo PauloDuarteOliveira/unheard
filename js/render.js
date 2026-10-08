@@ -66,6 +66,9 @@ const deleteText = document.querySelector('#delete-text');
 const deletePressings = document.querySelector('#delete-pressings');
 const deleteCountries = document.querySelector('#delete-countries');
 const deleteFavorites = document.querySelector('#delete-favorites');
+const streak = document.querySelector('#streak');
+const streakCount = document.querySelector('#streak-count');
+const streakBest = document.querySelector('#streak-best');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -779,4 +782,10 @@ export function renderDeleteDialog(profile, avatar, { pressings, countries, favo
 
     deleteDialog.returnValue = '';
     deleteDialog.showModal();
+}
+
+export function renderStreak(current, best) {
+    streak.hidden = current === 0;
+    streakCount.textContent = current;
+    streakBest.textContent = `· best ${best}`;
 }

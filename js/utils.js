@@ -41,7 +41,7 @@ export function formatCountdown(ms) {
 
 export function formatTime(seconds) {
     const wholeSeconds = Math.floor(seconds);
-    const minutes = Math.floor(wholeSeconds/ SECONDS_PER_MINUTE);
+    const minutes = Math.floor(wholeSeconds / SECONDS_PER_MINUTE);
     const remainingSeconds = wholeSeconds % SECONDS_PER_MINUTE;
     return `${minutes}:${twoDigits(remainingSeconds)}`;
 }
@@ -65,12 +65,12 @@ export function getCoverUrl(artworkUrl) {
     return artworkUrl.replace(SMALL_COVER_SIZE, LARGE_COVER_SIZE);
 }
 
-export function getSpotifyUrl(song){
+export function getSpotifyUrl(song) {
     const searchText = `${song.trackName} ${song.artistName}`;
     return SPOTIFY_SEARCH_URL + encodeURIComponent(searchText);
 }
 
-export function getShareText(song){
+export function getShareText(song) {
     return `Today I discovered ${song.trackName} by ${song.artistName} 🎧`;
 }
 
@@ -80,11 +80,17 @@ export function formatCatalogNumber(number) {
 
 export function formatShortDate(datekey) {
     const date = new Date(`${datekey}T00:00`);
-    const month = date.toLocaleDateString('en-US', { month: 'short'});
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
     return `${date.getDate()} ${month}`;
 }
 
 export function pickRandom(list) {
     const index = Math.floor(Math.random() * list.length);
     return list[index];
+}
+
+export function addDays(dateKey, amount) {
+    const date = new Date(`${dateKey}T00:00`);
+    date.setDate(date.getDate() + amount);
+    return getDateKey(date);
 }

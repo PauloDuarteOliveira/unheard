@@ -40,6 +40,7 @@
   --menu-bg: rgba(24, 26, 33, 0.98);
   --favorite: #F0997B;
   --danger-ink: #690005;
+  --streak: #EF9F27;
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -212,6 +213,36 @@ h2 {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.streak {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--streak);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.streak .material-symbols-outlined {
+  font-size: 18px;
+  font-variation-settings: 'FILL' 1;
+}
+
+.streak-text,
+.streak-best {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .profile-button {
@@ -2021,6 +2052,19 @@ h2 {
     display: none;
   }
 
+  .streak-text,
+  .streak-best {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .streak-best {
+    color: var(--muted);
+  }
+
   .profile-button {
     padding: 0 12px 0 6px;
     gap: 10px;
@@ -2307,7 +2351,7 @@ h2 {
     box-shadow: inset 0 1px 0 var(--line);
   }
 
-    .collection-view {
+  .collection-view {
     padding: 16px 40px 24px;
     gap: 16px;
   }
@@ -2701,7 +2745,7 @@ h2 {
     align-self: center;
   }
 
-    .collection-view {
+  .collection-view {
     padding-top: 0;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;

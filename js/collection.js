@@ -1,4 +1,5 @@
 import { getMode } from "./modes.js";
+import { addDays } from "./utils.js";
 
 export function addEntry(collection, entry) {
     const others = collection.filter((item) => item.number !== entry.number);
@@ -68,4 +69,35 @@ export function getFavorites(collection) {
 
 export function formatFavorites(favorites) {
     return favorites.map((entry) => `${entry.song.artistName} - ${entry.song.trackName}`).join('\n');
+}
+
+function getDays(collection) {
+    return [...new Set(collection.map((entry) => entry.date))].sort();
+}
+
+export function getStreak(collection, todayKey) {
+    const days = new Set(getDays(collection));
+    let day = days.has(todayKey) ? todayKey : addDays(todayKey, -1);
+    let count = 0;
+
+    while (days.has(day)) {
+        count++;
+        day = addDays(day, -1);
+    }
+
+    return count;
+}
+
+export function getBestStreak(collection) {
+    const days = getDays(collection);
+    let best = 0;
+    let run = 0;
+
+    days.forEach((day, index) => {
+        const followsPrevious = index > 0 && addDays(days[index - 1], 1) === day;
+        run = followsPrevious ? run + 1 : 1;
+        best = Math.max(best, run);
+    });
+
+    return best;
 }

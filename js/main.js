@@ -13,7 +13,7 @@ import {
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
-    renderDeleteDialog
+    renderDeleteDialog, renderStreak
 } from './render.js';
 
 import {
@@ -23,7 +23,7 @@ import {
 
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
-    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites
+    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -261,6 +261,11 @@ function init() {
         store.saveSettings({ ...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked });
     }
 
+    function updateStreak() {
+        const collection = store?.getCollection() ?? [];
+        renderStreak(getStreak(collection, getDateKey()), getBestStreak(collection));
+    }
+
     function getLockedToday() {
         const today = store?.getToday();
         return today && today.date === getDateKey() && today.song ? today : null;
@@ -329,6 +334,7 @@ function init() {
     }
 
     function showCurrentState() {
+        updateStreak();
         const today = getLockedToday();
         isShowingLocked = Boolean(today);
 
