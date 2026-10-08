@@ -1,4 +1,5 @@
 import { getMode } from "./modes.js";
+import { addDays } from "./utils.js";
 
 export function addEntry(collection, entry) {
     const others = collection.filter((item) => item.number !== entry.number);
@@ -9,7 +10,7 @@ export function getFirstDate(collection) {
     return collection.map((entry) => entry.date).sort()[0] ?? null;
 }
 
-export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false};
+export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false };
 
 export function filterCollection(collection, { search, mode, favorites }) {
     const query = search.trim().toLowerCase();
@@ -60,4 +61,43 @@ export function getStats(collection) {
         count), 0);
 
     return { pressings: collection.length, countries: countries.size, favorites };
+}
+
+export function getFavorites(collection) {
+    return sortCollection(collection, 'oldest').filter((entry) => entry.isFavorite);
+}
+
+export function formatFavorites(favorites) {
+    return favorites.map((entry) => `${entry.song.artistName} - ${entry.song.trackName}`).join('\n');
+}
+
+function getDays(collection) {
+    return [...new Set(collection.map((entry) => entry.date))].sort();
+}
+
+export function getStreak(collection, todayKey) {
+    const days = new Set(getDays(collection));
+    let day = days.has(todayKey) ? todayKey : addDays(todayKey, -1);
+    let count = 0;
+
+    while (days.has(day)) {
+        count++;
+        day = addDays(day, -1);
+    }
+
+    return count;
+}
+
+export function getBestStreak(collection) {
+    const days = getDays(collection);
+    let best = 0;
+    let run = 0;
+
+    days.forEach((day, index) => {
+        const followsPrevious = index > 0 && addDays(days[index - 1], 1) === day;
+        run = followsPrevious ? run + 1 : 1;
+        best = Math.max(best, run);
+    });
+
+    return best;
 }

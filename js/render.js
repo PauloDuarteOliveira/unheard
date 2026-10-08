@@ -3,6 +3,7 @@ import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCata
 const DEFAULT_VOLUME = 0.25;
 const PREVIEW_SECONDS = 30;
 const SHARE_FEEDBACK_MS = 2000;
+const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -37,7 +38,6 @@ const createPreviewName = document.querySelector('#create-preview-name');
 const avatarOptions = document.querySelector('#avatar-options');
 const nameHint = document.querySelector('#profile-name-hint');
 const nameInput = document.querySelector('#profile-name');
-const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 const harmonyProfile = document.querySelector('#harmony-profile');
 const genreChips = document.querySelector('#genre-chips');
 const genreCount = document.querySelector('#genre-count');
@@ -52,9 +52,25 @@ const statCountries = document.querySelector('#stat-countries');
 const statFavorites = document.querySelector('#stat-favorites');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
+const settingsName = document.querySelector('#settings-name');
+const settingsNameHint = document.querySelector('#settings-name-hint');
+const settingsAvatar = document.querySelector('#settings-avatar');
+const settingsGenreChips = document.querySelector('#settings-genre-chips');
+const settingsGenreCount = document.querySelector('#settings-genre-count');
+const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
+const exportStatus = document.querySelector('#export-status');
+const deleteDialog = document.querySelector('#delete-dialog');
+const deleteHead = document.querySelector('#delete-head');
+const deleteTitle = document.querySelector('#delete-title');
+const deleteText = document.querySelector('#delete-text');
+const deletePressings = document.querySelector('#delete-pressings');
+const deleteCountries = document.querySelector('#delete-countries');
+const deleteFavorites = document.querySelector('#delete-favorites');
+const streak = document.querySelector('#streak');
+const streakCount = document.querySelector('#streak-count');
+const streakBest = document.querySelector('#streak-best');
 
-
-function createAvatarOption(avatar, isChecked) {
+function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
     input.type = 'radio';
     input.name = 'avatar';
@@ -65,7 +81,7 @@ function createAvatarOption(avatar, isChecked) {
 
     const option = document.createElement('label');
     option.className = 'avatar-option';
-    option.append(input, createRecordAvatar({ name: '?' }, avatar));
+    option.append(input, createRecordAvatar({ name: initial }, avatar));
     return option;
 }
 
@@ -86,10 +102,28 @@ export function renderCreatePreview(name, avatar) {
     });
 }
 
+function setFieldError(input, hint, message) {
+    hint.textContent = message || NAME_HINT;
+    hint.classList.toggle('is-error', Boolean(message));
+    input.setAttribute('aria-invalid', String(Boolean(message)));
+}
+
 export function renderNameError(message) {
-    nameHint.textContent = message || NAME_HINT;
-    nameHint.classList.toggle('is-error', Boolean(message));
-    nameInput.setAttribute('aria-invalid', String(Boolean(message)));
+    setFieldError(nameInput, nameHint, message);
+}
+
+export function renderSettingsNameError(message) {
+    setFieldError(settingsName, settingsNameHint, message);
+}
+
+export function renderSettingsHarmony(genres, blocked, max) {
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    settingsGenreChips.replaceChildren(...chips);
+    renderSettingsGenreLimit(max);
+}
+
+export function renderSettingsGenreLimit(max) {
+    renderGenreLimit(max, settingsGenreChips, settingsGenreCount);
 }
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
@@ -174,12 +208,12 @@ function createGenreChip(genre, isChecked) {
     return chip;
 }
 
-export function renderGenreLimit(max) {
-    const boxes = [...genreChips.querySelectorAll('.genre-checkbox')];
+export function renderGenreLimit(max, chips = genreChips, counter = genreCount) {
+    const boxes = [...chips.querySelectorAll('.genre-checkbox')];
     const count = boxes.filter((box) => box.checked).length;
 
-    genreCount.textContent = `${count} of ${max} used`;
-    genreCount.classList.toggle('is-used', count > 0);
+    counter.textContent = `${count} of ${max} used`;
+    counter.classList.toggle('is-used', count > 0);
     boxes.forEach((box) => {
         box.disabled = !box.checked && count >= max;
     });
@@ -211,6 +245,37 @@ export function renderMenuOpen(isOpen) {
     profileMenu.hidden = !isOpen;
     profileButton.setAttribute('aria-expanded', String(isOpen));
 
+}
+
+export function renderSettingsProfile(profile, avatars) {
+    const initial = profile.name.charAt(0).toUpperCase();
+    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key ===
+        profile.avatar, initial));
+
+    settingsName.value = profile.name;
+    settingsAvatar.replaceChildren(...options);
+    renderSettingsNameError('');
+}
+
+export function renderSettingsInitial(name) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    settingsAvatar.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+    });
+}
+
+export function renderSettingsPreferences(modes, { defaultMode, autoplay }) {
+    const { elements } = settingsPreferencesForm;
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+
+    elements.defaultMode.replaceChildren(...options);
+    elements.defaultMode.value = defaultMode;
+    elements.autoplay.checked = autoplay;
+}
+
+export function playPreview() {
+    revealed.querySelector('audio')?.play()
+        .catch((error) => console.warn('Autoplay was blocked by the browser:', error));
 }
 
 function createTab(mode, isSelected) {
@@ -681,10 +746,46 @@ export function renderModeFilters(modes) {
     binderMode.replaceChildren(createOption('', 'All modes'), ...options);
 }
 
-export function renderBinderFilters ({ search, mode, sort, favorites}) {
+export function renderBinderFilters({ search, mode, sort, favorites }) {
     const { elements } = binderForm;
     elements.search.value = search;
     elements.mode.value = mode;
     elements.sort.value = sort;
     elements.favorites.checked = favorites;
+}
+
+export function downloadTextFile(fileName, text) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+export function renderExportStatus(message) {
+    exportStatus.textContent = message;
+}
+
+export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
+    deleteHead.querySelector('.record-avatar')?.remove();
+    deleteHead.prepend(createRecordAvatar(profile, avatar));
+    deleteTitle.textContent= `Delete ${profile.name}'s profile? This can't be undone.`;
+    deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
+
+    deletePressings.textContent = pressings;
+    deleteCountries.textContent = countries;
+    deleteFavorites.textContent = favorites;
+
+    deleteDialog.returnValue = '';
+    deleteDialog.showModal();
+}
+
+export function renderStreak(current, best) {
+    streak.hidden = current === 0;
+    streakCount.textContent = current;
+    streakBest.textContent = `· best ${best}`;
 }

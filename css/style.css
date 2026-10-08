@@ -39,6 +39,8 @@
   --field-bg: #0a0b0e;
   --menu-bg: rgba(24, 26, 33, 0.98);
   --favorite: #F0997B;
+  --danger-ink: #690005;
+  --streak: #EF9F27;
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -211,6 +213,36 @@ h2 {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.streak {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--streak);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.streak .material-symbols-outlined {
+  font-size: 18px;
+  font-variation-settings: 'FILL' 1;
+}
+
+.streak-text,
+.streak-best {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .profile-button {
@@ -1750,6 +1782,195 @@ h2 {
   outline-offset: 2px;
 }
 
+/* ---------- Settings ---------- */
+
+.settings-view {
+  flex-grow: 1;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-card {
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-text {
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+.settings-text:empty {
+  display: none;
+}
+
+.settings-button {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.settings-card .settings-button {
+  align-self: flex-start;
+}
+
+.preferences-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-row {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.settings-label {
+  font-size: 15px;
+}
+
+.switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: 13px;
+  background: var(--line-strong);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.2s;
+}
+
+.switch:checked {
+  background: rgb(var(--mode-rgb));
+}
+
+.switch:checked::before {
+  transform: translateX(18px);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.settings-button.is-danger {
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.danger-button {
+  height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--danger);
+  color: var(--danger-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.danger-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.delete-dialog {
+  box-sizing: border-box;
+  width: min(100% - 32px, 420px);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--danger-line);
+  background: var(--menu-bg);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 var(--line), 0 30px 60px -10px rgba(0, 0, 0, 0.9);
+}
+
+.delete-dialog::backdrop {
+  background: rgba(5, 6, 8, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.delete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.delete-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.delete-head .record-avatar {
+  --record-size: 52px;
+}
+
+.delete-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.delete-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-actions button {
+  flex-grow: 1;
+  justify-content: center;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {
@@ -1829,6 +2050,19 @@ h2 {
 
   .greeting.is-collected h1 {
     display: none;
+  }
+
+  .streak-text,
+  .streak-best {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .streak-best {
+    color: var(--muted);
   }
 
   .profile-button {
@@ -2117,7 +2351,7 @@ h2 {
     box-shadow: inset 0 1px 0 var(--line);
   }
 
-    .collection-view {
+  .collection-view {
     padding: 16px 40px 24px;
     gap: 16px;
   }
@@ -2140,6 +2374,58 @@ h2 {
   .binder-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 14px;
+  }
+
+  .settings-view {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 16px 40px 24px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "back back back"
+      "title title title"
+      "profile harmony preferences"
+      "profile harmony actions"
+      "data harmony actions";
+    align-content: start;
+    align-items: start;
+    gap: 16px;
+  }
+
+  .settings-view .back-button {
+    grid-area: back;
+    justify-self: start;
+  }
+
+  .settings-view .binder-title {
+    grid-area: title;
+  }
+
+  .settings-profile {
+    grid-area: profile;
+  }
+
+  .settings-harmony {
+    grid-area: harmony;
+  }
+
+  .settings-preferences {
+    grid-area: preferences;
+  }
+
+  .settings-data {
+    grid-area: data;
+  }
+
+  .settings-actions {
+    grid-area: actions;
+  }
+
+  .settings-profile .avatar-options {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
   }
 }
 
@@ -2511,7 +2797,7 @@ h2 {
     align-self: center;
   }
 
-    .collection-view {
+  .collection-view {
     padding-top: 0;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -2568,5 +2854,44 @@ h2 {
     align-self: start;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  .settings-view {
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "back title title"
+      "profile profile harmony"
+      "preferences preferences harmony"
+      "data data actions";
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 12px;
+  }
+
+  .settings-view .binder-title {
+    grid-area: title;
+    align-self: center;
+  }
+
+  .settings-profile {
+    grid-area: profile;
+  }
+
+  .settings-harmony {
+    grid-area: harmony;
+  }
+
+  .settings-preferences {
+    grid-area: preferences;
+  }
+
+  .settings-data {
+    grid-area: data;
+  }
+
+  .settings-actions {
+    grid-area: actions;
   }
 }

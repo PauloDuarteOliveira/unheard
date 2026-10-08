@@ -15,6 +15,7 @@ export default function createStore(profileId) {
     const todayKey = `unheard:${profileId}:today`;
     const settingsKey = `unheard:${profileId}:settings`;
     const collectionKey = `unheard:${profileId}:collection`;
+    const DEFAULT_SETTINGS = { blockedGenres: [], defaultMode: 'random', autoplay: false };
 
     function getToday() {
         return readJson(todayKey);
@@ -29,7 +30,7 @@ export default function createStore(profileId) {
     }
 
     function getSettings() {
-        return readJson(settingsKey, { blockedGenres: [] });
+        return { ...DEFAULT_SETTINGS, ...readJson(settingsKey, {}) };
     }
 
     function saveSettings(settings) {
@@ -44,5 +45,9 @@ export default function createStore(profileId) {
         writeJson(collectionKey, collection);
     }
 
-    return { getToday, saveToday, clearToday, getSettings, saveSettings, getCollection, saveCollection };
+    function clearAll() {
+        [todayKey, settingsKey, collectionKey].forEach((key) => localStorage.removeItem(key));
+    }
+
+    return { getToday, saveToday, clearToday, getSettings, saveSettings, getCollection, saveCollection, clearAll };
 }

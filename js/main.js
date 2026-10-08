@@ -3,16 +3,28 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
+
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats, renderBinderFilters, renderModeFilters
+    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
+    renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
+    renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
+    renderDeleteDialog, renderStreak
 } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
-import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats, DEFAULT_FILTERS, filterCollection } from './collection.js';
+
+import {
+    createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName,
+    MAX_BLOCKED_GENRES, logOut, getProfile, updateProfile, deleteProfile
+} from './profiles.js';
+
+import {
+    addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
+    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak
+} from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -63,6 +75,15 @@ function init() {
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
     const binderForm = document.querySelector('#binder-filters');
+    const settingsButton = document.querySelector('#settings-button');
+    const settingsBackButton = document.querySelector('#settings-back');
+    const settingsLogoutButton = document.querySelector('#settings-logout');
+    const settingsProfileForm = document.querySelector('#settings-profile-form');
+    const settingsHarmonyForm = document.querySelector('#settings-harmony-form');
+    const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
+    const exportButton = document.querySelector('#export-button');
+    const deleteButton = document.querySelector('#delete-button');
+    const deleteDialog = document.querySelector('#delete-dialog');
 
     let store = null;
     let pool = null;
@@ -77,7 +98,7 @@ function init() {
     function enterToday(profile) {
         currentProfile = profile;
         store = createStore(profile.id);
-        selectMode(DEFAULT_MODE);
+        selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
         renderProfileButton(profile, getAvatar(profile.avatar));
@@ -190,6 +211,61 @@ function init() {
         sessionStorage.removeItem(BINDER_FILTER_KEY);
     }
 
+    function showSettings() {
+        const settings = store.getSettings();
+
+        renderSettingsProfile(currentProfile, config?.avatars ?? []);
+        renderSettingsHarmony(pool?.genres ?? [], settings.blockedGenres, MAX_BLOCKED_GENRES);
+        renderSettingsPreferences(MODES, settings);
+        renderMenuOpen(false);
+        renderView('settings');
+        renderExportStatus('');
+    }
+
+    function saveProfileChanges(changes) {
+        currentProfile = updateProfile(currentProfile.id, changes);
+        renderProfileButton(currentProfile, getAvatar(currentProfile.avatar));
+        renderSettingsInitial(currentProfile.name);
+        tick();
+    }
+
+    function handleSettingsProfileChange(event) {
+        const { name, avatar } = settingsProfileForm.elements;
+
+        if (event.target === name) {
+            const message = validateName(name.value, currentProfile.id);
+            renderSettingsNameError(message);
+            if (!message) saveProfileChanges({ name: name.value.trim() });
+            return;
+        }
+
+        saveProfileChanges({ avatar: avatar.value });
+    }
+
+    function handleSettingsProfileInput() {
+        renderSettingsNameError('');
+        renderSettingsInitial(settingsProfileForm.elements.name.value);
+    }
+
+    function handleSettingsHarmonyChange() {
+        const blockedGenres = new FormData(settingsHarmonyForm).getAll('genre');
+        store.saveSettings({ ...store.getSettings(), blockedGenres });
+        renderSettingsGenreLimit(MAX_BLOCKED_GENRES);
+
+        if (blockedGenres.includes(currentOptionKey)) currentOptionKey = '';
+        if (!getLockedToday()) selectMode(currentModeKey, currentOptionKey);
+    }
+
+    function handleSettingsPreferencesChange() {
+        const { defaultMode, autoplay } = settingsPreferencesForm.elements;
+        store.saveSettings({ ...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked });
+    }
+
+    function updateStreak() {
+        const collection = store?.getCollection() ?? [];
+        renderStreak(getStreak(collection, getDateKey()), getBestStreak(collection));
+    }
+
     function getLockedToday() {
         const today = store?.getToday();
         return today && today.date === getDateKey() && today.song ? today : null;
@@ -258,6 +334,7 @@ function init() {
     }
 
     function showCurrentState() {
+        updateStreak();
         const today = getLockedToday();
         isShowingLocked = Boolean(today);
 
@@ -297,6 +374,7 @@ function init() {
             store.saveToday(today);
             store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();
+            if (store.getSettings().autoplay) playPreview();
         } catch (error) {
             console.error('Discovery failed:', error);
             showPhase('error', { message: getErrorTitle(error) });
@@ -400,6 +478,31 @@ function init() {
         handleUnveil();
     }
 
+    function exportFavorites() {
+        const favorites = getFavorites(store.getCollection());
+
+        if (favorites.length === 0) {
+            renderExportStatus('No favorites yet. Tap the heart on a song to add it.');
+            return;
+        }
+
+        downloadTextFile(`unheard-favorites-${getDateKey()}.txt`, formatFavorites(favorites));
+        renderExportStatus(`Exported ${favorites.length} ${favorites.length === 1 ? 'favorite' : 'favorites'}.`);
+    }
+
+    function confirmDelete() {
+        renderDeleteDialog(currentProfile, getAvatar(currentProfile.avatar),
+            getStats(store.getCollection()));
+    }
+
+    function handleDeleteClose() {
+        if (deleteDialog.returnValue !== 'delete') return;
+
+        store.clearAll();
+        deleteProfile(currentProfile.id);
+        handleLogOut();
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -428,6 +531,17 @@ function init() {
     binderGrid.addEventListener('click', handleBinderClick);
     binderForm.addEventListener('input', handleBinderFilterInput);
     binderForm.addEventListener('submit', (event) => event.preventDefault());
+    settingsButton.addEventListener('click', showSettings);
+    settingsBackButton.addEventListener('click', () => renderView('today'));
+    settingsLogoutButton.addEventListener('click', handleLogOut);
+    settingsProfileForm.addEventListener('change', handleSettingsProfileChange);
+    settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
+    settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
+    settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
+    settingsPreferencesForm.addEventListener('change', handleSettingsPreferencesChange);
+    exportButton.addEventListener('click', exportFavorites);
+    deleteButton.addEventListener('click', confirmDelete);
+    deleteDialog.addEventListener('close', handleDeleteClose);
 
     preparePool();
 
