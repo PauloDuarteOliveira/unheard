@@ -26,13 +26,14 @@ export function logOut() {
     localStorage.removeItem(CURRENT_PROFILE_KEY);
 }
 
-export function validateName(name) {
+export function validateName(name, ownId = null) {
     const trimmed = name.trim();
     if (!trimmed) return 'Type a name.';
     if (trimmed.length > MAX_NAME_LENGTH) return `Use ${MAX_NAME_LENGTH} characters or fewer.`;
 
-    const isTaken = getProfiles().some((profile) => profile.name.toLowerCase() ===
-        trimmed.toLowerCase());
+    const isTaken = getProfiles().some((profile) =>
+        profile.id !== ownId && profile.name.toLowerCase() === trimmed.toLowerCase());
+
     if (isTaken) return 'That name is already taken.';
 
     return '';
@@ -42,4 +43,12 @@ export function createProfile(name, avatar) {
     const profile = { id: crypto.randomUUID(), name: name.trim(), avatar };
     writeJson(PROFILES_KEY, [...getProfiles(), profile]);
     return profile;
+}
+
+export function updateProfile(id, changes) {
+    const profiles = getProfiles().map((profile) =>
+        profile.id === id ? { ...profile, ...changes } : profile);
+
+    writeJson(PROFILES_KEY, profiles);
+    return getProfile(id);
 }

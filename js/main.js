@@ -3,16 +3,25 @@ import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
+import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
+
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats, renderBinderFilters, renderModeFilters
+    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile, renderSettingsNameError, renderSettingsInitial
 } from './render.js';
-import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
-import { createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName, MAX_BLOCKED_GENRES, logOut, getProfile } from './profiles.js';
-import { addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats, DEFAULT_FILTERS, filterCollection } from './collection.js';
+
+import {
+    createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName,
+    MAX_BLOCKED_GENRES, logOut, getProfile, updateProfile
+} from './profiles.js';
+
+import {
+    addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
+    DEFAULT_FILTERS, filterCollection
+} from './collection.js';
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
@@ -66,6 +75,7 @@ function init() {
     const settingsButton = document.querySelector('#settings-button');
     const settingsBackButton = document.querySelector('#settings-back');
     const settingsLogoutButton = document.querySelector('#settings-logout');
+    const settingsProfileForm = document.querySelector('#settings-profile-form');
 
     let store = null;
     let pool = null;
@@ -194,8 +204,34 @@ function init() {
     }
 
     function showSettings() {
+        renderSettingsProfile(currentProfile, config?.avatars ?? []);
         renderMenuOpen(false);
         renderView('settings');
+    }
+
+    function saveProfileChanges(changes) {
+        currentProfile = updateProfile(currentProfile.id, changes);
+        renderProfileButton(currentProfile, getAvatar(currentProfile.avatar));
+        renderSettingsInitial(currentProfile.name);
+        tick();
+    }
+
+    function handleSettingsProfileChange(event) {
+        const { name, avatar } = settingsProfileForm.elements;
+
+        if (event.target === name) {
+            const message = validateName(name.value, currentProfile.id);
+            renderSettingsNameError(message);
+            if (!message) saveProfileChanges({ name: name.value.trim() });
+            return;
+        }
+
+        saveProfileChanges({ avatar: avatar.value });
+    }
+
+    function handleSettingsProfileInput() {
+        renderSettingsNameError('');
+        renderSettingsInitial(settingsProfileForm.elements.name.value);
     }
 
     function getLockedToday() {
@@ -439,6 +475,10 @@ function init() {
     settingsButton.addEventListener('click', showSettings);
     settingsBackButton.addEventListener('click', () => renderView('today'));
     settingsLogoutButton.addEventListener('click', handleLogOut);
+    settingsProfileForm.addEventListener('change', handleSettingsProfileChange);
+    settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
+    settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
+
 
     preparePool();
 

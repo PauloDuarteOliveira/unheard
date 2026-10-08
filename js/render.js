@@ -52,9 +52,12 @@ const statCountries = document.querySelector('#stat-countries');
 const statFavorites = document.querySelector('#stat-favorites');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
+const settingsName = document.querySelector('#settings-name');
+const settingsNameHint = document.querySelector('#settings-name-hint');
+const settingsAvatar = document.querySelector('#settings-avatar');
 
 
-function createAvatarOption(avatar, isChecked) {
+function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
     input.type = 'radio';
     input.name = 'avatar';
@@ -65,7 +68,7 @@ function createAvatarOption(avatar, isChecked) {
 
     const option = document.createElement('label');
     option.className = 'avatar-option';
-    option.append(input, createRecordAvatar({ name: '?' }, avatar));
+    option.append(input, createRecordAvatar({ name: initial }, avatar));
     return option;
 }
 
@@ -86,11 +89,20 @@ export function renderCreatePreview(name, avatar) {
     });
 }
 
-export function renderNameError(message) {
-    nameHint.textContent = message || NAME_HINT;
-    nameHint.classList.toggle('is-error', Boolean(message));
-    nameInput.setAttribute('aria-invalid', String(Boolean(message)));
+function setFieldError(input, hint, message) {
+    hint.textContent = message || NAME_HINT;
+    hint.classList.toggle('is-error', Boolean(message));
+    input.setAttribute('aria-invalid', String(Boolean(message)));
 }
+
+export function renderNameError(message) {
+    setFieldError(nameInput, nameHint, message);
+}
+
+export function renderSettingsNameError(message) {
+    setFieldError(settingsName, settingsNameHint, message);
+}
+
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
     const label = document.createElement('span');
@@ -211,6 +223,23 @@ export function renderMenuOpen(isOpen) {
     profileMenu.hidden = !isOpen;
     profileButton.setAttribute('aria-expanded', String(isOpen));
 
+}
+
+export function renderSettingsProfile(profile, avatars) {
+    const initial = profile.name.charAt(0).toUpperCase();
+    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key ===
+        profile.avatar, initial));
+
+    settingsName.value = profile.name;
+    settingsAvatar.replaceChildren(...options);
+    renderSettingsNameError('');
+}
+
+export function renderSettingsInitial(name) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    settingsAvatar.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+    });
 }
 
 function createTab(mode, isSelected) {
@@ -681,7 +710,7 @@ export function renderModeFilters(modes) {
     binderMode.replaceChildren(createOption('', 'All modes'), ...options);
 }
 
-export function renderBinderFilters ({ search, mode, sort, favorites}) {
+export function renderBinderFilters({ search, mode, sort, favorites }) {
     const { elements } = binderForm;
     elements.search.value = search;
     elements.mode.value = mode;

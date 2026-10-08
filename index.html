@@ -254,6 +254,18 @@
 
     <section class="settings-card" aria-labelledby="settings-profile-title">
       <h2 class="stamp" id="settings-profile-title">Profile</h2>
+      <form class="settings-form" id="settings-profile-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="settings-name">Name</label>
+          <input class="field-input" id="settings-name" name="name" type="name" maxlength="20" autocomplete="off"
+            aria-describedby="settings-name-hint">
+          <p class="field-hint" id="settings-name-hint">Up to 20 characters. Shown is your greeting.</p>
+        </div>
+        <fieldset class="avatar-picker">
+          <legend class="field-label">Record</legend>
+          <div class="avatar-options" id="settings-avatar"></div>
+        </fieldset>
+      </form>
     </section>
 
     <section class="settings-card" aria-labelledby="settings-harmony-title">
