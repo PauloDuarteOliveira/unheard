@@ -49,7 +49,7 @@ const binderSummary = document.querySelector('#binder-summary');
 const binderGrid = document.querySelector('#binder-grid');
 const statPressings = document.querySelector('#stat-pressings');
 const statCountries = document.querySelector('#stat-countries');
-const statFavorites = document.querySelector('#stat-favorites');
+const statLegendary = document.querySelector('#stat-legendary');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
 const settingsName = document.querySelector('#settings-name');
@@ -69,6 +69,8 @@ const deleteFavorites = document.querySelector('#delete-favorites');
 const streak = document.querySelector('#streak');
 const streakCount = document.querySelector('#streak-count');
 const streakBest = document.querySelector('#streak-best');
+const binderRarity = document.querySelector('#binder-rarity');
+const rarityLegend = document.querySelector('#rarity-legend');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -746,10 +748,25 @@ export function renderBinderGrid(entries, emptyMessage) {
     binderGrid.replaceChildren(...entries.map(createBinderCard));
 }
 
-export function renderBinderStats({ pressings, countries, favorites }) {
+export function renderBinderStats({ pressings, countries, legendary }) {
     statPressings.textContent = pressings;
     statCountries.textContent = countries;
-    statFavorites.textContent = favorites;
+    statLegendary.textContent = legendary;
+}
+
+export function renderRarityFilter(tiers) {
+    const options = tiers.map((tier) => createOption(tier.key, tier.label));
+    binderRarity.replaceChildren(createOption('', 'All rarities'), ...options);
+}
+
+export function renderRarityLegend(tiers) {
+    const title = document.createElement('span');
+    title.className = 'stamp';
+    title.textContent = 'Rarity';
+
+    const badges = [...tiers].reverse().map((tier) => createRarityBadge({ tier: tier.key },
+        tier.label));
+    rarityLegend.replaceChildren(title, ...badges);
 }
 
 export function renderModeFilters(modes) {
@@ -757,12 +774,13 @@ export function renderModeFilters(modes) {
     binderMode.replaceChildren(createOption('', 'All modes'), ...options);
 }
 
-export function renderBinderFilters({ search, mode, sort, favorites }) {
+export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     const { elements } = binderForm;
     elements.search.value = search;
     elements.mode.value = mode;
     elements.sort.value = sort;
     elements.favorites.checked = favorites;
+    elements.rarity.value = rarity;
 }
 
 export function downloadTextFile(fileName, text) {

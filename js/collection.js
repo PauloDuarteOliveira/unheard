@@ -10,9 +10,9 @@ export function getFirstDate(collection) {
     return collection.map((entry) => entry.date).sort()[0] ?? null;
 }
 
-export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false };
+export const DEFAULT_FILTERS = { search: '', mode: '', rarity: '', sort: 'newest', favorites: false };
 
-export function filterCollection(collection, { search, mode, favorites }) {
+export function filterCollection(collection, { search, mode, rarity, favorites }) {
     const query = search.trim().toLowerCase();
 
     return collection.filter((entry) => {
@@ -20,7 +20,8 @@ export function filterCollection(collection, { search, mode, favorites }) {
         const matchesSearch = text.includes(query);
         const matchesMode = !mode || entry.mode === mode;
         const matchesFavorites = !favorites || entry.isFavorite;
-        return matchesSearch && matchesMode && matchesFavorites;
+        const matchesRarity = !rarity || entry.rarity?.tier === rarity;
+        return matchesSearch && matchesMode && matchesRarity && matchesFavorites;
     });
 }
 
@@ -60,7 +61,9 @@ export function getStats(collection) {
     const favorites = collection.reduce((count, entry) => (entry.isFavorite ? count + 1 :
         count), 0);
 
-    return { pressings: collection.length, countries: countries.size, favorites };
+    const legendary = collection.filter((entry) => entry.rarity?.tier === 'legendary').length;
+
+    return { pressings: collection.length, countries: countries.size, favorites, legendary };
 }
 
 export function getFavorites(collection) {

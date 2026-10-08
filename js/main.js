@@ -14,7 +14,7 @@ import {
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
-    renderDeleteDialog, renderStreak
+    renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend
 } from './render.js';
 
 import {
@@ -315,10 +315,13 @@ function init() {
     function showCollection() {
         const collection = store.getCollection();
         const firstDate = getFirstDate(collection);
+        const tiers = config?.rarity?.tiers ?? [];
 
         renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
         renderBinderStats(getStats(collection));
         renderMenuOpen(false);
+        renderRarityFilter(tiers);
+        renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
         showBinderCards();
         renderView('collection');
@@ -432,8 +435,8 @@ function init() {
     }
 
     function readBinderForm() {
-        const { search, mode, sort, favorites } = binderForm.elements;
-        return { search: search.value, mode: mode.value, sort: sort.value, favorites: favorites.checked };
+        const { search, mode, rarity, sort, favorites } = binderForm.elements;
+        return { search: search.value, mode: mode.value, rarity: rarity.value, sort: sort.value, favorites: favorites.checked };
     }
 
     function showBinderCards() {

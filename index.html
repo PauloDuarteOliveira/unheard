@@ -219,8 +219,8 @@
         <span class="stamp">Countries</span>
       </p>
       <p class="stat">
-        <span class="stat-value" id="stat-favorites">0</span>
-        <span class="stamp">Favorites</span>
+        <span class="stat-value" id="stat-legendary">0</span>
+        <span class="stamp">Legendary</span>
       </p>
     </div>
     <form class="binder-filters" id="binder-filters" role="search">
@@ -233,6 +233,10 @@
       <div class="binder-chips">
         <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
           <option value="">All modes</option>
+        </select>
+
+        <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
+          <option value="">All rarities</option>
         </select>
 
         <select class="binder-select" name="sort" aria-label="Sort pressings">
@@ -248,6 +252,7 @@
         </label>
       </div>
     </form>
+    <div class="rarity-legend" id="rarity-legend"></div>
     <div class="binder-grid" id="binder-grid"></div>
   </section>
 

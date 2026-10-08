@@ -2075,6 +2075,10 @@ h2 {
   box-shadow: 0 0 40px -4px rgba(242, 201, 76, 0.75);
 }
 
+.rarity-legend {
+  display: none;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {
@@ -2531,6 +2535,13 @@ h2 {
   .settings-profile .avatar-options {
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
   }
+
+  .rarity-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -2906,7 +2917,8 @@ h2 {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      "back heading filters"
+      "back heading heading"
+      "filters filters filters"
       "grid grid grid";
     align-items: center;
     column-gap: 10px;
