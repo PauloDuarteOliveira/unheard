@@ -25,6 +25,7 @@ export const MODES = [
         optionsKey: 'decades',
         isReady: true,
         setTitle: 'Decades',
+        setUnit: 'decade',
     },
     {
         key: 'world',
@@ -38,6 +39,7 @@ export const MODES = [
         optionsKey: 'countries',
         isReady: true,
         setTitle: 'World tour',
+        setUnit: 'country',
     },
     {
         key: 'mood',
@@ -51,6 +53,7 @@ export const MODES = [
         optionsKey: 'moods',
         isReady: true,
         setTitle: 'Moods',
+        setUnit: 'mood',
     },
     {
         key: 'genre',
@@ -64,6 +67,7 @@ export const MODES = [
         optionsKey: 'genres',
         isReady: true,
         setTitle: 'Genres',
+        setUnit: 'genre',
     },
 ];
 

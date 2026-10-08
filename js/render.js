@@ -526,7 +526,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '' } = {}) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -579,6 +579,13 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
     meta.append(song.artistName, metaYear);
 
+    if (unlockMessage) {
+        const unlock = document.createElement('span');
+        unlock.className = 'song-unlock';
+        unlock.append(createIcon('star'), unlockMessage);
+        meta.append(unlock);
+    }
+
     const details = createDetails(song);
 
     const dock = createAudioDock(song);
@@ -614,7 +621,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -644,7 +651,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
             revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel }));
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";

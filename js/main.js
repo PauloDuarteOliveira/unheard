@@ -327,7 +327,7 @@ function init() {
         renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
         showBinderCards();
-        renderSets(getSets(collection,pool,getBlockedGenres()));
+        renderSets(getSets(collection, pool, getBlockedGenres()));
         renderBinderTab('pressings');
         renderView('collection');
     }
@@ -356,6 +356,7 @@ function init() {
                 isFavorite: entry?.isFavorite ?? false,
                 rarity: entry?.rarity ?? null,
                 rarityLabel: getTierLabel(entry?.rarity),
+                unlockMessage: getUnlockMessage(entry),
             });
         } else {
             showPhase('idle');
@@ -381,6 +382,17 @@ function init() {
         return config?.rarity?.tiers.find((tier) => tier.key === rarity?.tier)?.label ?? '';
     }
 
+    function getUnlockMessage(entry) {
+        if (!entry?.isNewSlot) return '';
+
+        const mode = getMode(entry.mode);
+        const option = pool?.[mode.optionsKey]?.find((item) => item.key === entry.optionKey);
+        const set = getSets(store.getCollection(), pool, getBlockedGenres()).find((item) => item.key === entry.mode);
+        if (!option || !set) return '';
+
+        return `New ${mode.setUnit} unlocked: ${option.label} · ${set.title} ${set.count}/${set.slots.length}`;
+    }
+
     async function handleUnveil() {
         if (isSearching || getLockedToday()) return;
 
@@ -395,7 +407,9 @@ function init() {
             store.saveToday(today);
             const previous = store.getCollection().filter((entry) => entry.number !== today.number);
             const rarity = config?.rarity ? getRarity(today, previous) : null;
-            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity }));
+            const isNewSlot = Boolean(optionKey) && !previous.some((entry) =>
+                entry.mode === currentModeKey && entry.optionKey === optionKey);
+            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
             showCurrentState();
             if (store.getSettings().autoplay) playPreview();
         } catch (error) {

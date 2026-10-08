@@ -20,8 +20,8 @@
   "longMs": 420000,
   "maxLuck": 3,
   "tiers": [
-    { "key": "legendary", "label": "Legendary", "min": 9 },
-    { "key": "epic", "label": "Epic", "min": 7 },
+    { "key": "legendary", "label": "Legendary", "min": 7 },
+    { "key": "epic", "label": "Epic", "min": 6 },
     { "key": "rare", "label": "Rare", "min": 5 },
     { "key": "uncommon", "label": "Uncommon", "min": 3 },
     { "key": "common", "label": "Common", "min": 0 }
