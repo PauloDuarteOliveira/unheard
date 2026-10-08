@@ -11,7 +11,8 @@ import {
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
-    renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit
+    renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
+    renderSettingsPreferences, playPreview
 } from './render.js';
 
 import {
@@ -78,6 +79,7 @@ function init() {
     const settingsLogoutButton = document.querySelector('#settings-logout');
     const settingsProfileForm = document.querySelector('#settings-profile-form');
     const settingsHarmonyForm = document.querySelector('#settings-harmony-form');
+    const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
 
     let store = null;
     let pool = null;
@@ -92,7 +94,7 @@ function init() {
     function enterToday(profile) {
         currentProfile = profile;
         store = createStore(profile.id);
-        selectMode(DEFAULT_MODE);
+        selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
         renderProfileButton(profile, getAvatar(profile.avatar));
@@ -206,7 +208,11 @@ function init() {
     }
 
     function showSettings() {
+        const settings = store.getSettings();
+
         renderSettingsProfile(currentProfile, config?.avatars ?? []);
+        renderSettingsHarmony(pool?.genres ?? [], settings.blockedGenres, MAX_BLOCKED_GENRES);
+        renderSettingsPreferences(MODES, settings);
         renderMenuOpen(false);
         renderView('settings');
     }
@@ -243,6 +249,11 @@ function init() {
 
         if (blockedGenres.includes(currentOptionKey)) currentOptionKey = '';
         if (!getLockedToday()) selectMode(currentModeKey, currentOptionKey);
+    }
+
+    function handleSettingsPreferencesChange() {
+        const {defaultMode, autoplay} = settingsPreferencesForm.elements;
+        store.saveSettings({...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked});
     }
 
     function getLockedToday() {
@@ -352,6 +363,7 @@ function init() {
             store.saveToday(today);
             store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();
+            if(store.getSettings().autoplay) playPreview();
         } catch (error) {
             console.error('Discovery failed:', error);
             showPhase('error', { message: getErrorTitle(error) });
@@ -490,6 +502,7 @@ function init() {
     settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
     settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
     settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
+    settingsPreferencesForm.addEventListener('change', handleSettingsPreferencesChange);
 
     preparePool();
 

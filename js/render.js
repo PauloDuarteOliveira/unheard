@@ -57,7 +57,7 @@ const settingsNameHint = document.querySelector('#settings-name-hint');
 const settingsAvatar = document.querySelector('#settings-avatar');
 const settingsGenreChips = document.querySelector('#settings-genre-chips');
 const settingsGenreCount = document.querySelector('#settings-genre-count');
-
+const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
 
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
@@ -252,6 +252,20 @@ export function renderSettingsInitial(name) {
     settingsAvatar.querySelectorAll('.record-label').forEach((label) => {
         label.textContent = initial;
     });
+}
+
+export function renderSettingsPreferences(modes, { defaultMode, autoplay }) {
+    const { elements } = settingsPreferencesForm;
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+
+    elements.defaultMode.replaceChildren(...options);
+    elements.defaultMode.value = defaultMode;
+    elements.autoplay.checked = autoplay;
+}
+
+export function playPreview(){
+    revealed.querySelector('audio')?.play()
+        .catch((error) => console.warn('Autoplay was blocked by the browser:', error));
 }
 
 function createTab(mode, isSelected) {

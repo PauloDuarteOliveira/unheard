@@ -284,6 +284,17 @@
 
     <section class="settings-card" aria-labelledby="settings-preferences-title">
       <h2 class="stamp" id="settings-preferences-title">Preferences</h2>
+      <form class="settings-preferences" id="settings-preferences-form">
+        <div class="settings-row">
+          <label class="settings-label" for="settings-default-mode">Default mode</label>
+          <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>
+        </div>
+
+        <label class="settings-row">
+          <span class="settings-label">Play preview on unveil</span>
+          <input class="switch" type="checkbox" role="switch" name="autoplay">
+        </label>
+      </form>
     </section>
 
     <section class="settings-card" aria-labelledby="settings-data-title">
