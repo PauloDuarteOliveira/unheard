@@ -1835,7 +1835,7 @@ h2 {
   align-self: flex-start;
 }
 
-.settings-preferences {
+.preferences-form {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2375,6 +2375,58 @@ h2 {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 14px;
   }
+
+  .settings-view {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 16px 40px 24px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "back back back"
+      "title title title"
+      "profile harmony preferences"
+      "profile harmony actions"
+      "data harmony actions";
+    align-content: start;
+    align-items: start;
+    gap: 16px;
+  }
+
+  .settings-view .back-button {
+    grid-area: back;
+    justify-self: start;
+  }
+
+  .settings-view .binder-title {
+    grid-area: title;
+  }
+
+  .settings-profile {
+    grid-area: profile;
+  }
+
+  .settings-harmony {
+    grid-area: harmony;
+  }
+
+  .settings-preferences {
+    grid-area: preferences;
+  }
+
+  .settings-data {
+    grid-area: data;
+  }
+
+  .settings-actions {
+    grid-area: actions;
+  }
+
+  .settings-profile .avatar-options {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -2802,5 +2854,44 @@ h2 {
     align-self: start;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  .settings-view {
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "back title title"
+      "profile profile harmony"
+      "preferences preferences harmony"
+      "data data actions";
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 12px;
+  }
+
+  .settings-view .binder-title {
+    grid-area: title;
+    align-self: center;
+  }
+
+  .settings-profile {
+    grid-area: profile;
+  }
+
+  .settings-harmony {
+    grid-area: harmony;
+  }
+
+  .settings-preferences {
+    grid-area: preferences;
+  }
+
+  .settings-data {
+    grid-area: data;
+  }
+
+  .settings-actions {
+    grid-area: actions;
   }
 }
