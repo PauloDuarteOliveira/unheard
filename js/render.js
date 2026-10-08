@@ -521,7 +521,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, isFavorite) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '' } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -539,7 +539,12 @@ function createSongCard(song, mode, number, isFavorite) {
 
     const header = document.createElement('div');
     header.className = 'song-header';
-    header.append(modeTag, catalog);
+    const headerTags = document.createElement('span');
+    headerTags.className = 'song-header-tags';
+    headerTags.append(catalog);
+    if (rarity) headerTags.append(createRarityBadge(rarity, rarityLabel));
+
+    header.append(modeTag, headerTags);
 
     const cover = document.createElement('img');
     cover.className = 'song-cover';
@@ -604,7 +609,7 @@ function createSongCard(song, mode, number, isFavorite) {
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '' }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -633,7 +638,8 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             break;
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
-            revealed.replaceChildren(...createSongCard(song, mode, number, isFavorite));
+            revealed.dataset.rarity = rarity?.tier ?? '';
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -698,6 +704,11 @@ function createBinderCard(entry) {
     card.dataset.mode = entry.mode;
     card.dataset.number = entry.number;
     card.append(art, info);
+
+    if (entry.rarity) {
+        card.dataset.rarity = entry.rarity.tier;
+        art.append(createRarityBadge(entry.rarity, entry.rarityLabel));
+    }
     return card;
 }
 
@@ -773,7 +784,7 @@ export function renderExportStatus(message) {
 export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
     deleteHead.querySelector('.record-avatar')?.remove();
     deleteHead.prepend(createRecordAvatar(profile, avatar));
-    deleteTitle.textContent= `Delete ${profile.name}'s profile? This can't be undone.`;
+    deleteTitle.textContent = `Delete ${profile.name}'s profile? This can't be undone.`;
     deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
 
     deletePressings.textContent = pressings;
@@ -788,4 +799,13 @@ export function renderStreak(current, best) {
     streak.hidden = current === 0;
     streakCount.textContent = current;
     streakBest.textContent = `· best ${best}`;
+}
+
+function createRarityBadge(rarity, label) {
+    const badge = document.createElement('span');
+    badge.className = 'rarity-badge';
+    badge.dataset.rarity = rarity.tier;
+    if (rarity.tier === 'legendary') badge.append(createIcon('star'));
+    badge.append(label);
+    return badge;
 }

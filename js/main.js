@@ -343,8 +343,11 @@ function init() {
             const entry = store.getCollection().find((item) => item.number === today.number);
             selectMode(today.mode, today.optionKey);
             showPhase('revealed', {
-                song: today.song, number: today.number, isFavorite:
-                    entry?.isFavorite ?? false
+                song: today.song,
+                number: today.number,
+                isFavorite: entry?.isFavorite ?? false,
+                rarity: entry?.rarity ?? null,
+                rarityLabel: getTierLabel(entry?.rarity),
             });
         } else {
             showPhase('idle');
@@ -364,6 +367,10 @@ function init() {
     function getRarity(entry, collection) {
         const points = scoreSong(entry, collection, config.rarity);
         return { points, tier: getTier(points, config.rarity).key };
+    }
+
+    function getTierLabel(rarity) {
+        return config?.rarity?.tiers.find((tier) => tier.key === rarity?.tier)?.label ?? '';
     }
 
     async function handleUnveil() {
@@ -432,8 +439,9 @@ function init() {
     function showBinderCards() {
         const filters = getBinderFilters();
         const tagged = store.getCollection().map((entry) => ({
-            ...entry, tag:
-                getEntryTag(entry, pool)
+            ...entry,
+            tag: getEntryTag(entry, pool),
+            rarityLabel: getTierLabel(entry.rarity),
         }));
         const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
         renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
