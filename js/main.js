@@ -10,7 +10,8 @@ import {
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile, renderSettingsNameError, renderSettingsInitial
+    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
+    renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit
 } from './render.js';
 
 import {
@@ -76,6 +77,7 @@ function init() {
     const settingsBackButton = document.querySelector('#settings-back');
     const settingsLogoutButton = document.querySelector('#settings-logout');
     const settingsProfileForm = document.querySelector('#settings-profile-form');
+    const settingsHarmonyForm = document.querySelector('#settings-harmony-form');
 
     let store = null;
     let pool = null;
@@ -232,6 +234,15 @@ function init() {
     function handleSettingsProfileInput() {
         renderSettingsNameError('');
         renderSettingsInitial(settingsProfileForm.elements.name.value);
+    }
+
+    function handleSettingsHarmonyChange() {
+        const blockedGenres = new FormData(settingsHarmonyForm).getAll('genre');
+        store.saveSettings({ ...store.getSettings(), blockedGenres });
+        renderSettingsGenreLimit(MAX_BLOCKED_GENRES);
+
+        if (blockedGenres.includes(currentOptionKey)) currentOptionKey = '';
+        if (!getLockedToday()) selectMode(currentModeKey, currentOptionKey);
     }
 
     function getLockedToday() {
@@ -478,7 +489,7 @@ function init() {
     settingsProfileForm.addEventListener('change', handleSettingsProfileChange);
     settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
     settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
-
+    settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
 
     preparePool();
 

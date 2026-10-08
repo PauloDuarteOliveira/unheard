@@ -55,6 +55,9 @@ const binderMode = document.querySelector('#binder-mode');
 const settingsName = document.querySelector('#settings-name');
 const settingsNameHint = document.querySelector('#settings-name-hint');
 const settingsAvatar = document.querySelector('#settings-avatar');
+const settingsGenreChips = document.querySelector('#settings-genre-chips');
+const settingsGenreCount = document.querySelector('#settings-genre-count');
+
 
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
@@ -103,6 +106,15 @@ export function renderSettingsNameError(message) {
     setFieldError(settingsName, settingsNameHint, message);
 }
 
+export function renderSettingsHarmony(genres, blocked, max) {
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    settingsGenreChips.replaceChildren(...chips);
+    renderSettingsGenreLimit(max);
+}
+
+export function renderSettingsGenreLimit(max) {
+    renderGenreLimit(max, settingsGenreChips, settingsGenreCount);
+}
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
     const label = document.createElement('span');
@@ -186,12 +198,12 @@ function createGenreChip(genre, isChecked) {
     return chip;
 }
 
-export function renderGenreLimit(max) {
-    const boxes = [...genreChips.querySelectorAll('.genre-checkbox')];
+export function renderGenreLimit(max, chips = genreChips, counter = genreCount) {
+    const boxes = [...chips.querySelectorAll('.genre-checkbox')];
     const count = boxes.filter((box) => box.checked).length;
 
-    genreCount.textContent = `${count} of ${max} used`;
-    genreCount.classList.toggle('is-used', count > 0);
+    counter.textContent = `${count} of ${max} used`;
+    counter.classList.toggle('is-used', count > 0);
     boxes.forEach((box) => {
         box.disabled = !box.checked && count >= max;
     });

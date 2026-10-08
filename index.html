@@ -257,9 +257,9 @@
       <form class="settings-form" id="settings-profile-form" novalidate>
         <div class="field">
           <label class="field-label" for="settings-name">Name</label>
-          <input class="field-input" id="settings-name" name="name" type="name" maxlength="20" autocomplete="off"
+          <input class="field-input" id="settings-name" name="name" type="text" maxlength="20" autocomplete="off"
             aria-describedby="settings-name-hint">
-          <p class="field-hint" id="settings-name-hint">Up to 20 characters. Shown is your greeting.</p>
+          <p class="field-hint" id="settings-name-hint">Up to 20 characters. Shown in your greeting.</p>
         </div>
         <fieldset class="avatar-picker">
           <legend class="field-label">Record</legend>
@@ -271,6 +271,15 @@
     <section class="settings-card" aria-labelledby="settings-harmony-title">
       <h2 class="stamp" id="settings-harmony-title">Negative harmony</h2>
       <p class="settings-text">Genres you never want to hear. They won't appear in any mode or in the Genre list</p>
+      <form class="settings-harmony-form" id="settings-harmony-form">
+        <fieldset class="genre-picker">
+          <legend class="genre-legend">
+            <span>Blocked genres</span>
+            <span class="genre-count" id="settings-genre-count" aria-live="polite">0 of 3 used</span>
+          </legend>
+          <div class="genre-chips" id="settings-genre-chips"></div>
+        </fieldset>
+      </form>
     </section>
 
     <section class="settings-card" aria-labelledby="settings-preferences-title">
