@@ -71,6 +71,9 @@ const streakCount = document.querySelector('#streak-count');
 const streakBest = document.querySelector('#streak-best');
 const binderRarity = document.querySelector('#binder-rarity');
 const rarityLegend = document.querySelector('#rarity-legend');
+const binderTabs = document.querySelectorAll('.binder-tab');
+const binderPressings = document.querySelector('#binder-pressings');
+const binderSets = document.querySelector('#binder-sets');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -826,4 +829,60 @@ function createRarityBadge(rarity, label) {
     if (rarity.tier === 'legendary') badge.append(createIcon('star'));
     badge.append(label);
     return badge;
+}
+
+function createSetCard(set) {
+    const total = set.slots.length;
+
+    const title = document.createElement('h2');
+    title.className = 'set-title';
+    title.textContent = set.title;
+
+    const count = document.createElement('span');
+    count.className = 'stamp set-count';
+    count.textContent = `${set.count}/${total}`;
+
+    const head = document.createElement('div');
+    head.className = 'set-head';
+    head.append(title, count);
+
+    const fill = document.createElement('div');
+    fill.className = 'set-fill';
+    fill.style.width = `${total ? (set.count / total) * 100 : 0}%`;
+
+    const bar = document.createElement('div');
+    bar.className = 'set-bar';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', `${set.title} progress`);
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', String(total));
+    bar.setAttribute('aria-valuenow', String(set.count));
+    bar.append(fill);
+
+    const slots = document.createElement('ul');
+    slots.className = 'set-slots';
+    set.slots.forEach((slot) => {
+        const item = document.createElement('li');
+        item.className = 'set-slot';
+        item.classList.toggle('is-found', slot.isFound);
+        item.textContent = slot.isFound ? slot.label : '?';
+        if (!slot.isFound) item.setAttribute('aria-label', 'Not found yet');
+        slots.append(item);
+    });
+
+    const card = document.createElement('section');
+    card.className = 'set-card';
+    card.dataset.mode = set.key;
+    card.append(head, bar, slots);
+    return card;
+}
+
+export function renderSets(sets) {
+    binderSets.replaceChildren(...sets.map(createSetCard));
+}
+
+export function renderBinderTab(tabName) {
+    binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
+    binderPressings.hidden = tabName !== 'pressings';
+    binderSets.hidden = tabName !== 'sets';
 }

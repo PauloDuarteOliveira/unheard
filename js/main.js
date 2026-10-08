@@ -14,7 +14,8 @@ import {
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
-    renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend
+    renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
+    renderSets, renderBinderTab
 } from './render.js';
 
 import {
@@ -24,7 +25,8 @@ import {
 
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
-    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak
+    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak,
+    getSets
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -85,6 +87,7 @@ function init() {
     const exportButton = document.querySelector('#export-button');
     const deleteButton = document.querySelector('#delete-button');
     const deleteDialog = document.querySelector('#delete-dialog');
+    const binderTabList = document.querySelector('#binder-tabs');
 
     let store = null;
     let pool = null;
@@ -324,6 +327,8 @@ function init() {
         renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
         showBinderCards();
+        renderSets(getSets(collection,pool,getBlockedGenres()));
+        renderBinderTab('pressings');
         renderView('collection');
     }
 
@@ -522,6 +527,11 @@ function init() {
         handleLogOut();
     }
 
+    function handleBinderTabClick(event) {
+        const tab = event.target.closest('[data-tab]');
+        if (tab) renderBinderTab(tab.dataset.tab);
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -561,6 +571,7 @@ function init() {
     exportButton.addEventListener('click', exportFavorites);
     deleteButton.addEventListener('click', confirmDelete);
     deleteDialog.addEventListener('close', handleDeleteClose);
+    binderTabList.addEventListener('click', handleBinderTabClick);
 
     preparePool();
 

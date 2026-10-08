@@ -1,4 +1,4 @@
-import { getMode } from "./modes.js";
+import { MODES, getMode } from "./modes.js";
 import { addDays } from "./utils.js";
 
 export function addEntry(collection, entry) {
@@ -103,4 +103,23 @@ export function getBestStreak(collection) {
     });
 
     return best;
+}
+
+export function getSets(collection, pool, blockedGenres = []) {
+    return MODES
+        .filter((mode) => mode.setTitle)
+        .map((mode) => {
+            const found = new Set(
+                collection.filter((entry) => entry.mode === mode.key).map((entry) => entry.optionKey));
+            const options = (pool?.[mode.optionsKey] ?? [])
+                .filter((option) => mode.key !== 'genre' || !blockedGenres.includes(option.key));
+            const slots = options.map((option) => ({ label: option.label, isFound: found.has(option.key) }));
+
+            return {
+                key: mode.key,
+                title: mode.setTitle,
+                slots,
+                count: slots.filter((slot) => slot.isFound).length,
+            };
+        });
 }
