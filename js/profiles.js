@@ -52,3 +52,7 @@ export function updateProfile(id, changes) {
     writeJson(PROFILES_KEY, profiles);
     return getProfile(id);
 }
+
+export function deleteProfile(id) {
+    writeJson(PROFILES_KEY, getProfiles().filter((profile) => profile.id !== id));
+}

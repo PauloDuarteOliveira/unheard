@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,download,error,expand_more,favorite,hourglass_empty,library_music,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,delete,download,error,expand_more,favorite,hourglass_empty,library_music,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -313,6 +313,12 @@
         <span class="material-symbols-outlined" aria-hidden="true">logout</span>
         Log out
       </button>
+      <button class="settings-button is-danger" id="delete-button" type="button">
+        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+        Delete profile
+      </button>
+      <p class="settings-text">Deleting removes this profile's collection, favorites and settings.
+        Other profiles are not affected.</p>
     </section>
   </section>
 
@@ -328,6 +334,35 @@
     <span class="credit">Previews provided by Apple</span>
   </footer>
 
+  <dialog class="delete-dialog" id="delete-dialog" aria-labelledby="delete-title">
+    <form class="delete-form" method="dialog">
+      <div class="delete-head" id="delete-head">
+        <h2 class="delete-title" id="delete-title"></h2>
+      </div>
+
+      <p class="settings-text" id="delete-text"></p>
+
+      <div class="delete-stats">
+        <p class="stat">
+          <span class="stat-value" id="delete-pressings">0</span>
+          <span class="stamp">Pressings</span>
+        </p>
+        <p class="stat">
+          <span class="stat-value" id="delete-countries">0</span>
+          <span class="stamp">Countries</span>
+        </p>
+        <p class="stat">
+          <span class="stat-value" id="delete-favorites">0</span>
+          <span class="stamp">Favorites</span>
+        </p>
+      </div>
+
+      <div class="delete-actions">
+        <button class="settings-button" value="cancel" autofocus>Cancel</button>
+        <button class="danger-button" value="delete">Delete profile</button>
+      </div>
+    </form>
+  </dialog>
   <script type="module" src="js/main.js"></script>
 </body>
 

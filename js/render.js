@@ -3,6 +3,7 @@ import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCata
 const DEFAULT_VOLUME = 0.25;
 const PREVIEW_SECONDS = 30;
 const SHARE_FEEDBACK_MS = 2000;
+const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -37,7 +38,6 @@ const createPreviewName = document.querySelector('#create-preview-name');
 const avatarOptions = document.querySelector('#avatar-options');
 const nameHint = document.querySelector('#profile-name-hint');
 const nameInput = document.querySelector('#profile-name');
-const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 const harmonyProfile = document.querySelector('#harmony-profile');
 const genreChips = document.querySelector('#genre-chips');
 const genreCount = document.querySelector('#genre-count');
@@ -59,6 +59,13 @@ const settingsGenreChips = document.querySelector('#settings-genre-chips');
 const settingsGenreCount = document.querySelector('#settings-genre-count');
 const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
 const exportStatus = document.querySelector('#export-status');
+const deleteDialog = document.querySelector('#delete-dialog');
+const deleteHead = document.querySelector('#delete-head');
+const deleteTitle = document.querySelector('#delete-title');
+const deleteText = document.querySelector('#delete-text');
+const deletePressings = document.querySelector('#delete-pressings');
+const deleteCountries = document.querySelector('#delete-countries');
+const deleteFavorites = document.querySelector('#delete-favorites');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -758,4 +765,18 @@ export function downloadTextFile(fileName, text) {
 
 export function renderExportStatus(message) {
     exportStatus.textContent = message;
+}
+
+export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
+    deleteHead.querySelector('.record-avatar')?.remove();
+    deleteHead.prepend(createRecordAvatar(profile, avatar));
+    deleteTitle.textContent= `Delete ${profile.name}'s profile? This can't be undone.`;
+    deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
+
+    deletePressings.textContent = pressings;
+    deleteCountries.textContent = countries;
+    deleteFavorites.textContent = favorites;
+
+    deleteDialog.returnValue = '';
+    deleteDialog.showModal();
 }

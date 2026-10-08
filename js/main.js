@@ -12,12 +12,13 @@ import {
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
-    renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus
+    renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
+    renderDeleteDialog
 } from './render.js';
 
 import {
     createProfile, getCurrentProfile, getProfiles, setCurrentProfile, validateName,
-    MAX_BLOCKED_GENRES, logOut, getProfile, updateProfile
+    MAX_BLOCKED_GENRES, logOut, getProfile, updateProfile, deleteProfile
 } from './profiles.js';
 
 import {
@@ -81,6 +82,8 @@ function init() {
     const settingsHarmonyForm = document.querySelector('#settings-harmony-form');
     const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
     const exportButton = document.querySelector('#export-button');
+    const deleteButton = document.querySelector('#delete-button');
+    const deleteDialog = document.querySelector('#delete-dialog');
 
     let store = null;
     let pool = null;
@@ -481,6 +484,19 @@ function init() {
         renderExportStatus(`Exported ${favorites.length} ${favorites.length === 1 ? 'favorite' : 'favorites'}.`);
     }
 
+    function confirmDelete() {
+        renderDeleteDialog(currentProfile, getAvatar(currentProfile.avatar),
+            getStats(store.getCollection()));
+    }
+
+    function handleDeleteClose() {
+        if (deleteDialog.returnValue !== 'delete') return;
+
+        store.clearAll();
+        deleteProfile(currentProfile.id);
+        handleLogOut();
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -518,6 +534,8 @@ function init() {
     settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
     settingsPreferencesForm.addEventListener('change', handleSettingsPreferencesChange);
     exportButton.addEventListener('click', exportFavorites);
+    deleteButton.addEventListener('click', confirmDelete);
+    deleteDialog.addEventListener('close', handleDeleteClose);
 
     preparePool();
 
