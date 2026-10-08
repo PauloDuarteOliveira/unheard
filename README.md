@@ -25,7 +25,8 @@ Several people can share one browser, each with their own profile:
 - **Who's listening?** shows every profile as a record, plus a tile to add a new one.
 - **Create your profile** asks for a name (up to 20 characters, no duplicates) and a record color, with a live preview of the record.
 - **Negative harmony** is an optional second step: block up to 3 genres you never want to hear. Blocked genres are removed from every mode's results, and they disappear from the Genre dial.
-- **The profile menu** in the header shows who is logged in, opens the **Collection**, and has **Log out**. Settings is marked "Soon".
+- **The profile menu** in the header shows who is logged in, opens the **Collection** and **Settings**, and has **Log out**.
+- **The streak** (🔥) in the header counts the days in a row with a discovery. It is calculated from the collection dates, so it never goes out of sync, and a day without a discovery yet does not break it until midnight. On desktop it also shows the best streak.
 
 Each profile has its own daily lock and catalog numbers, so two people can each discover a song on the same day. The app remembers the last profile and opens straight on its Today screen.
 
@@ -35,7 +36,7 @@ Each profile has its own daily lock and catalog numbers, so two people can each 
 | `unheard:currentProfile` | The id of the logged-in profile |
 | `unheard:<id>:today` | That profile's discovery of the day: date, mode, option, song and catalog number |
 | `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag |
-| `unheard:<id>:settings` | That profile's settings, for now the blocked genres |
+| `unheard:<id>:settings` | That profile's settings: blocked genres, default mode and preview autoplay |
 
 To block a genre, the app looks up its `matches` in `data/pool.json` (the genre names iTunes uses, for example Hip-Hop is `"Hip-Hop/Rap"`) and drops every song whose `primaryGenreName` is on that list. "Hard Rock" is listed under both Rock and Metal, so blocking Metal also removes Hard Rock songs.
 
@@ -49,6 +50,20 @@ Every discovery becomes a card in the profile's binder, opened from the profile 
 - **Search** by title, artist or tag, **filter** by mode or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
 
 The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title, search and filters share one row.
+
+## Settings
+
+Opened from the profile menu. There is no Save button: every change is saved as soon as it is made.
+
+- **Profile:** change the name (validated like on creation, but a profile may keep its own name) and the record color. The records preview the new initial while typing.
+- **Negative harmony:** the same genre chips and 3-genre limit as when creating a profile. Blocking the genre picked in the Genre dial resets the dial to "Surprise me".
+- **Preferences:** the default mode selected after logging in, and **Play preview on unveil**. It is off by default, because browsers may block sound that starts by itself; if they do, the preview simply waits for the play button.
+- **Your data:** **Export favorites** downloads a text file (`unheard-favorites-<date>.txt`) with one `Artist - Title` per line, oldest first, ready to paste into a playlist import tool. It is built in the browser with a `Blob`.
+- **Delete profile** opens a confirmation dialog (`<dialog>`) showing what will be lost. It removes only that profile's keys, never `localStorage.clear()`, because every GitHub Pages project of the same account shares one `localStorage`.
+
+New settings fields are read with defaults (`{ ...DEFAULT_SETTINGS, ...saved }`), so profiles saved before a field existed keep working.
+
+Settings uses three columns on desktop, placed with CSS grid areas, and two columns in landscape.
 
 ## Discovery modes
 
@@ -81,15 +96,15 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `data/pool.json` | Search terms for every mode: random words, decades, countries, moods and genres (with the iTunes genre names each genre matches) |
 | `data/config.json` | The six avatar record colors |
 | `js/main.js` | Entry point: connects all the modules and handles clicks |
-| `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter and sort |
-| `js/profiles.js` | Profile list, logged-in profile, name validation and profile creation |
+| `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter, sort, favorites export and streaks |
+| `js/profiles.js` | Profile list, logged-in profile, name validation, and creating, editing and deleting profiles |
 | `js/api.js` | iTunes Search API requests and the preview check |
 | `js/modes.js` | The list of discovery modes and one query-building function per mode |
 | `js/picker.js` | Picks a candidate without repeats, removes blocked genres and runs the discovery loop |
 | `js/store.js` | Safe JSON reading and writing (in `localStorage` or `sessionStorage`), and one store per profile |
 | `js/render.js` | Everything that changes the page, including the audio player |
 | `js/theme.js` | Applies the selected mode's color |
-| `js/utils.js` | Dates, countdown, greeting, links and other small helpers |
+| `js/utils.js` | Dates (including moving a date by days), countdown, greeting, links and other small helpers |
 
 ## Screen sizes
 
@@ -128,10 +143,10 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Time Machine, World Explorer, Mood and Genre modes, each with its setup dial
 - Profiles: Who's listening, create profile with live preview, Negative harmony, profile menu with log out, a daily lock per profile, and blocked genres kept out of every mode
 - Collector binder: cards, favorites, stats, search, filters and sort, in the three layouts
+- Settings: edit name and record, Negative harmony, default mode, preview autoplay, export favorites, delete profile with confirmation, and the daily streak in the header
 
 **Next**
 
-- Settings, delete profile and streak
 - Rarity tiers and binder sets
 - Feature freeze, final README and deploy
 
