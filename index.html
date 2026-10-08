@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,delete,download,error,expand_more,favorite,hourglass_empty,library_music,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,delete,download,error,expand_more,favorite,hourglass_empty,library_music,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -209,49 +209,63 @@
       <h1 class="binder-title">Collector binder</h1>
       <p class="stamp" id="binder-summary"></p>
     </div>
-    <div class="binder-stats">
-      <p class="stat">
-        <span class="stat-value" id="stat-pressings">0</span>
-        <span class="stamp">Pressings</span>
-      </p>
-      <p class="stat">
-        <span class="stat-value" id="stat-countries">0</span>
-        <span class="stamp">Countries</span>
-      </p>
-      <p class="stat">
-        <span class="stat-value" id="stat-favorites">0</span>
-        <span class="stamp">Favorites</span>
-      </p>
+    <div class="binder-tabs" id="binder-tabs" role="tablist" aria-label="Binder view">
+      <button class="binder-tab" id="tab-pressings" type="button" role="tab" data-tab="pressings"
+        aria-controls="binder-pressings" aria-selected="true">Pressings</button>
+      <button class="binder-tab" id="tab-sets" type="button" role="tab" data-tab="sets"
+        aria-controls="binder-sets" aria-selected="false">Sets</button>
     </div>
-    <form class="binder-filters" id="binder-filters" role="search">
-      <label class="binder-search">
-        <span class="material-symbols-outlined" aria-hidden="true">search</span>
-        <input class="binder-search-input" name="search" type="search" placeholder="Search your collection"
-          aria-label="Search your collection" autocomplete="off">
-      </label>
-
-      <div class="binder-chips">
-        <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
-          <option value="">All modes</option>
-        </select>
-
-        <select class="binder-select" name="sort" aria-label="Sort pressings">
-          <option value="newest">Newest</option>
-          <option value="oldest">Oldest</option>
-          <option value="title">A-Z</option>
-        </select>
-
-        <label class="binder-toggle">
-          <input type="checkbox" name="favorites">
-          <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-          Favorites
-        </label>
+    <div class="binder-pressings" id="binder-pressings" role="tabpanel" aria-labelledby="tab-pressings">
+      <div class="binder-stats">
+        <p class="stat">
+          <span class="stat-value" id="stat-pressings">0</span>
+          <span class="stamp">Pressings</span>
+        </p>
+        <p class="stat">
+          <span class="stat-value" id="stat-countries">0</span>
+          <span class="stamp">Countries</span>
+        </p>
+        <p class="stat">
+          <span class="stat-value" id="stat-legendary">0</span>
+          <span class="stamp">Legendary</span>
+        </p>
       </div>
-    </form>
-    <div class="binder-grid" id="binder-grid"></div>
+      <form class="binder-filters" id="binder-filters" role="search">
+        <label class="binder-search">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+          <input class="binder-search-input" name="search" type="search" placeholder="Search your collection"
+            aria-label="Search your collection" autocomplete="off">
+        </label>
+
+        <div class="binder-chips">
+          <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
+            <option value="">All modes</option>
+          </select>
+
+          <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
+            <option value="">All rarities</option>
+          </select>
+
+          <select class="binder-select" name="sort" aria-label="Sort pressings">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="title">A-Z</option>
+          </select>
+
+          <label class="binder-toggle">
+            <input type="checkbox" name="favorites">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+            Favorites
+          </label>
+        </div>
+      </form>
+      <div class="rarity-legend" id="rarity-legend"></div>
+      <div class="binder-grid" id="binder-grid"></div>
+    </div>
+    <div class="binder-sets" id="binder-sets" role="tabpanel" aria-labelledby="tab-sets" hidden></div>
   </section>
 
-  <section class="view settings-view" id="view-settings" data-view=" settings" hidden>
+  <section class="view settings-view" id="view-settings" data-view="settings" hidden>
     <button class="button-ghost back-button" id="settings-back" type="button">
       <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       <span class="back-label">Back to today</span>

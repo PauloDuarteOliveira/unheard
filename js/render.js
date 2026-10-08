@@ -49,7 +49,7 @@ const binderSummary = document.querySelector('#binder-summary');
 const binderGrid = document.querySelector('#binder-grid');
 const statPressings = document.querySelector('#stat-pressings');
 const statCountries = document.querySelector('#stat-countries');
-const statFavorites = document.querySelector('#stat-favorites');
+const statLegendary = document.querySelector('#stat-legendary');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
 const settingsName = document.querySelector('#settings-name');
@@ -69,6 +69,11 @@ const deleteFavorites = document.querySelector('#delete-favorites');
 const streak = document.querySelector('#streak');
 const streakCount = document.querySelector('#streak-count');
 const streakBest = document.querySelector('#streak-best');
+const binderRarity = document.querySelector('#binder-rarity');
+const rarityLegend = document.querySelector('#rarity-legend');
+const binderTabs = document.querySelectorAll('.binder-tab');
+const binderPressings = document.querySelector('#binder-pressings');
+const binderSets = document.querySelector('#binder-sets');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -521,7 +526,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, isFavorite) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -539,7 +544,12 @@ function createSongCard(song, mode, number, isFavorite) {
 
     const header = document.createElement('div');
     header.className = 'song-header';
-    header.append(modeTag, catalog);
+    const headerTags = document.createElement('span');
+    headerTags.className = 'song-header-tags';
+    headerTags.append(catalog);
+    if (rarity) headerTags.append(createRarityBadge(rarity, rarityLabel));
+
+    header.append(modeTag, headerTags);
 
     const cover = document.createElement('img');
     cover.className = 'song-cover';
@@ -568,6 +578,13 @@ function createSongCard(song, mode, number, isFavorite) {
     metaYear.className = 'song-meta-year';
     metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
     meta.append(song.artistName, metaYear);
+
+    if (unlockMessage) {
+        const unlock = document.createElement('span');
+        unlock.className = 'song-unlock';
+        unlock.append(createIcon('star'), unlockMessage);
+        meta.append(unlock);
+    }
 
     const details = createDetails(song);
 
@@ -604,7 +621,7 @@ function createSongCard(song, mode, number, isFavorite) {
     return [header, sleeve, title, meta, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -633,7 +650,8 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
             break;
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
-            revealed.replaceChildren(...createSongCard(song, mode, number, isFavorite));
+            revealed.dataset.rarity = rarity?.tier ?? '';
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -698,6 +716,11 @@ function createBinderCard(entry) {
     card.dataset.mode = entry.mode;
     card.dataset.number = entry.number;
     card.append(art, info);
+
+    if (entry.rarity) {
+        card.dataset.rarity = entry.rarity.tier;
+        art.append(createRarityBadge(entry.rarity, entry.rarityLabel));
+    }
     return card;
 }
 
@@ -735,10 +758,25 @@ export function renderBinderGrid(entries, emptyMessage) {
     binderGrid.replaceChildren(...entries.map(createBinderCard));
 }
 
-export function renderBinderStats({ pressings, countries, favorites }) {
+export function renderBinderStats({ pressings, countries, legendary }) {
     statPressings.textContent = pressings;
     statCountries.textContent = countries;
-    statFavorites.textContent = favorites;
+    statLegendary.textContent = legendary;
+}
+
+export function renderRarityFilter(tiers) {
+    const options = tiers.map((tier) => createOption(tier.key, tier.label));
+    binderRarity.replaceChildren(createOption('', 'All rarities'), ...options);
+}
+
+export function renderRarityLegend(tiers) {
+    const title = document.createElement('span');
+    title.className = 'stamp';
+    title.textContent = 'Rarity';
+
+    const badges = [...tiers].reverse().map((tier) => createRarityBadge({ tier: tier.key },
+        tier.label));
+    rarityLegend.replaceChildren(title, ...badges);
 }
 
 export function renderModeFilters(modes) {
@@ -746,12 +784,13 @@ export function renderModeFilters(modes) {
     binderMode.replaceChildren(createOption('', 'All modes'), ...options);
 }
 
-export function renderBinderFilters({ search, mode, sort, favorites }) {
+export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     const { elements } = binderForm;
     elements.search.value = search;
     elements.mode.value = mode;
     elements.sort.value = sort;
     elements.favorites.checked = favorites;
+    elements.rarity.value = rarity;
 }
 
 export function downloadTextFile(fileName, text) {
@@ -773,7 +812,7 @@ export function renderExportStatus(message) {
 export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
     deleteHead.querySelector('.record-avatar')?.remove();
     deleteHead.prepend(createRecordAvatar(profile, avatar));
-    deleteTitle.textContent= `Delete ${profile.name}'s profile? This can't be undone.`;
+    deleteTitle.textContent = `Delete ${profile.name}'s profile? This can't be undone.`;
     deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
 
     deletePressings.textContent = pressings;
@@ -788,4 +827,69 @@ export function renderStreak(current, best) {
     streak.hidden = current === 0;
     streakCount.textContent = current;
     streakBest.textContent = `· best ${best}`;
+}
+
+function createRarityBadge(rarity, label) {
+    const badge = document.createElement('span');
+    badge.className = 'rarity-badge';
+    badge.dataset.rarity = rarity.tier;
+    if (rarity.tier === 'legendary') badge.append(createIcon('star'));
+    badge.append(label);
+    return badge;
+}
+
+function createSetCard(set) {
+    const total = set.slots.length;
+
+    const title = document.createElement('h2');
+    title.className = 'set-title';
+    title.textContent = set.title;
+
+    const count = document.createElement('span');
+    count.className = 'stamp set-count';
+    count.textContent = `${set.count}/${total}`;
+
+    const head = document.createElement('div');
+    head.className = 'set-head';
+    head.append(title, count);
+
+    const fill = document.createElement('div');
+    fill.className = 'set-fill';
+    fill.style.width = `${total ? (set.count / total) * 100 : 0}%`;
+
+    const bar = document.createElement('div');
+    bar.className = 'set-bar';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', `${set.title} progress`);
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', String(total));
+    bar.setAttribute('aria-valuenow', String(set.count));
+    bar.append(fill);
+
+    const slots = document.createElement('ul');
+    slots.className = 'set-slots';
+    set.slots.forEach((slot) => {
+        const item = document.createElement('li');
+        item.className = 'set-slot';
+        item.classList.toggle('is-found', slot.isFound);
+        item.textContent = slot.isFound ? slot.label : '?';
+        if (!slot.isFound) item.setAttribute('aria-label', 'Not found yet');
+        slots.append(item);
+    });
+
+    const card = document.createElement('section');
+    card.className = 'set-card';
+    card.dataset.mode = set.key;
+    card.append(head, bar, slots);
+    return card;
+}
+
+export function renderSets(sets) {
+    binderSets.replaceChildren(...sets.map(createSetCard));
+}
+
+export function renderBinderTab(tabName) {
+    binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
+    binderPressings.hidden = tabName !== 'pressings';
+    binderSets.hidden = tabName !== 'sets';
 }

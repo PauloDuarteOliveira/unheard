@@ -41,6 +41,10 @@
   --favorite: #F0997B;
   --danger-ink: #690005;
   --streak: #EF9F27;
+
+  --gold: #F2C94C;
+  --silver: #CDD6DF;
+  --holo: linear-gradient(135deg, rgba(240, 153, 123, 0.95) 0%, rgba(175, 169, 236, 0.9) 35%, rgba(93, 202, 165, 0.95) 70%, rgba(133, 183, 235, 0.9) 100%);
 }
 
 /* ---------- Mode colors: written as "r, g, b" so any opacity can be used ---------- */
@@ -1782,6 +1786,120 @@ h2 {
   outline-offset: 2px;
 }
 
+.binder-pressings {
+  display: contents;
+}
+
+.binder-pressings[hidden],
+.binder-sets[hidden] {
+  display: none;
+}
+
+.binder-tabs {
+  align-self: flex-start;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  gap: 4px;
+}
+
+.binder-tab {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.binder-tab[aria-selected="true"] {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.binder-tab:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.binder-sets {
+  display: grid;
+  gap: 12px;
+}
+
+.set-card {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.set-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.set-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.set-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.set-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: rgb(var(--mode-rgb));
+}
+
+.set-slots {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.set-slot {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.set-slot.is-found {
+  border-style: solid;
+  border-color: rgba(var(--mode-rgb), 0.5);
+  background: rgba(var(--mode-rgb), 0.1);
+  color: var(--text);
+}
+
 /* ---------- Settings ---------- */
 
 .settings-view {
@@ -1969,6 +2087,124 @@ h2 {
 .delete-actions button {
   flex-grow: 1;
   justify-content: center;
+}
+
+/* ---------- Rarity ---------- */
+
+.rarity-badge {
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+  background: rgba(13, 14, 18, 0.8);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.rarity-badge[data-rarity="uncommon"] {
+  color: var(--silver);
+}
+
+.rarity-badge[data-rarity="rare"] {
+  color: var(--gold);
+}
+
+.rarity-badge[data-rarity="epic"],
+.rarity-badge[data-rarity="legendary"] {
+  border-color: transparent;
+  background: linear-gradient(#121318, #121318) padding-box, var(--holo) border-box;
+  color: var(--text);
+}
+
+.rarity-badge[data-rarity="legendary"] {
+  color: var(--gold);
+}
+
+.rarity-badge .material-symbols-outlined {
+  font-size: 12px;
+  font-variation-settings: 'FILL' 1;
+}
+
+.binder-art .rarity-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.song-header-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.binder-card[data-rarity="uncommon"] {
+  border-color: rgba(205, 214, 223, 0.45);
+}
+
+.binder-card[data-rarity="rare"] {
+  border-color: rgba(242, 201, 76, 0.75);
+  box-shadow: 0 0 22px -8px rgba(242, 201, 76, 0.7);
+}
+
+.binder-card[data-rarity="epic"],
+.binder-card[data-rarity="legendary"] {
+  border-color: transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--holo) border-box;
+}
+
+.binder-card[data-rarity="epic"] {
+  box-shadow: 0 0 22px -8px rgba(175, 169, 236, 0.8);
+}
+
+.binder-card[data-rarity="legendary"] {
+  border-width: 2px;
+  box-shadow: 0 0 34px -6px rgba(242, 201, 76, 0.65);
+}
+
+.binder-card[data-rarity="legendary"] .binder-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.16) 48%, transparent 60%);
+  pointer-events: none;
+}
+
+.revealed[data-rarity="rare"] .song-cover {
+  box-shadow: 0 0 34px -6px rgba(242, 201, 76, 0.6);
+}
+
+.revealed[data-rarity="epic"] .song-cover {
+  box-shadow: 0 0 34px -6px rgba(175, 169, 236, 0.7);
+}
+
+.revealed[data-rarity="legendary"] .song-cover {
+  box-shadow: 0 0 40px -4px rgba(242, 201, 76, 0.75);
+}
+
+.rarity-legend {
+  display: none;
+}
+
+.song-unlock {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.song-unlock .material-symbols-outlined {
+  font-size: 14px;
+  font-variation-settings: 'FILL' 1;
 }
 
 /* ---------- Desktop ---------- */
@@ -2376,6 +2612,10 @@ h2 {
     gap: 14px;
   }
 
+  .binder-sets {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
   .settings-view {
     box-sizing: border-box;
     width: 100%;
@@ -2426,6 +2666,13 @@ h2 {
 
   .settings-profile .avatar-options {
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  }
+
+  .rarity-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
   }
 }
 
@@ -2802,7 +3049,8 @@ h2 {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      "back heading filters"
+      "back heading tabs"
+      "filters filters filters"
       "grid grid grid";
     align-items: center;
     column-gap: 10px;
@@ -2854,6 +3102,15 @@ h2 {
     align-self: start;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  .binder-tabs {
+    grid-area: tabs;
+  }
+
+  .binder-sets {
+    grid-area: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .settings-view {

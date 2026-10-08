@@ -4,6 +4,7 @@ import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
 import { applyMode } from './theme.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
+import { scoreSong, getTier } from './rarity.js';
 
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
@@ -13,7 +14,8 @@ import {
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
-    renderDeleteDialog, renderStreak
+    renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
+    renderSets, renderBinderTab
 } from './render.js';
 
 import {
@@ -23,7 +25,8 @@ import {
 
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
-    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak
+    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak,
+    getSets
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -84,6 +87,7 @@ function init() {
     const exportButton = document.querySelector('#export-button');
     const deleteButton = document.querySelector('#delete-button');
     const deleteDialog = document.querySelector('#delete-dialog');
+    const binderTabList = document.querySelector('#binder-tabs');
 
     let store = null;
     let pool = null;
@@ -314,12 +318,17 @@ function init() {
     function showCollection() {
         const collection = store.getCollection();
         const firstDate = getFirstDate(collection);
+        const tiers = config?.rarity?.tiers ?? [];
 
         renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
         renderBinderStats(getStats(collection));
         renderMenuOpen(false);
+        renderRarityFilter(tiers);
+        renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
         showBinderCards();
+        renderSets(getSets(collection, pool, getBlockedGenres()));
+        renderBinderTab('pressings');
         renderView('collection');
     }
 
@@ -342,8 +351,12 @@ function init() {
             const entry = store.getCollection().find((item) => item.number === today.number);
             selectMode(today.mode, today.optionKey);
             showPhase('revealed', {
-                song: today.song, number: today.number, isFavorite:
-                    entry?.isFavorite ?? false
+                song: today.song,
+                number: today.number,
+                isFavorite: entry?.isFavorite ?? false,
+                rarity: entry?.rarity ?? null,
+                rarityLabel: getTierLabel(entry?.rarity),
+                unlockMessage: getUnlockMessage(entry),
             });
         } else {
             showPhase('idle');
@@ -360,6 +373,26 @@ function init() {
         }
     }
 
+    function getRarity(entry, collection) {
+        const points = scoreSong(entry, collection, config.rarity);
+        return { points, tier: getTier(points, config.rarity).key };
+    }
+
+    function getTierLabel(rarity) {
+        return config?.rarity?.tiers.find((tier) => tier.key === rarity?.tier)?.label ?? '';
+    }
+
+    function getUnlockMessage(entry) {
+        if (!entry?.isNewSlot) return '';
+
+        const mode = getMode(entry.mode);
+        const option = pool?.[mode.optionsKey]?.find((item) => item.key === entry.optionKey);
+        const set = getSets(store.getCollection(), pool, getBlockedGenres()).find((item) => item.key === entry.mode);
+        if (!option || !set) return '';
+
+        return `New ${mode.setUnit} unlocked: ${option.label} · ${set.title} ${set.count}/${set.slots.length}`;
+    }
+
     async function handleUnveil() {
         if (isSearching || getLockedToday()) return;
 
@@ -372,7 +405,11 @@ function init() {
 
             const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
             store.saveToday(today);
-            store.saveCollection(addEntry(store.getCollection(), today));
+            const previous = store.getCollection().filter((entry) => entry.number !== today.number);
+            const rarity = config?.rarity ? getRarity(today, previous) : null;
+            const isNewSlot = Boolean(optionKey) && !previous.some((entry) =>
+                entry.mode === currentModeKey && entry.optionKey === optionKey);
+            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
             showCurrentState();
             if (store.getSettings().autoplay) playPreview();
         } catch (error) {
@@ -417,15 +454,16 @@ function init() {
     }
 
     function readBinderForm() {
-        const { search, mode, sort, favorites } = binderForm.elements;
-        return { search: search.value, mode: mode.value, sort: sort.value, favorites: favorites.checked };
+        const { search, mode, rarity, sort, favorites } = binderForm.elements;
+        return { search: search.value, mode: mode.value, rarity: rarity.value, sort: sort.value, favorites: favorites.checked };
     }
 
     function showBinderCards() {
         const filters = getBinderFilters();
         const tagged = store.getCollection().map((entry) => ({
-            ...entry, tag:
-                getEntryTag(entry, pool)
+            ...entry,
+            tag: getEntryTag(entry, pool),
+            rarityLabel: getTierLabel(entry.rarity),
         }));
         const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
         renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
@@ -503,6 +541,11 @@ function init() {
         handleLogOut();
     }
 
+    function handleBinderTabClick(event) {
+        const tab = event.target.closest('[data-tab]');
+        if (tab) renderBinderTab(tab.dataset.tab);
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -542,6 +585,7 @@ function init() {
     exportButton.addEventListener('click', exportFavorites);
     deleteButton.addEventListener('click', confirmDelete);
     deleteDialog.addEventListener('close', handleDeleteClose);
+    binderTabList.addEventListener('click', handleBinderTabClick);
 
     preparePool();
 

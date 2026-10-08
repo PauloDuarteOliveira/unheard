@@ -6,5 +6,25 @@
     { "key": "coral", "label": "Coral", "color": "#F0997B", "ink": "#3B1507" },
     { "key": "blue", "label": "Blue", "color": "#85B7EB", "ink": "#0A2A4A" },
     { "key": "gold", "label": "Gold", "color": "#F2C94C", "ink": "#3A2B00" }
+  ],
+  "rarity": {
+  "yearPoints": [
+    { "before": 1970, "points": 3 },
+    { "before": 1990, "points": 2 },
+    { "before": 2010, "points": 1 }
+  ],
+  "firstCountryPoints": 2,
+  "firstGenrePoints": 2,
+  "lengthPoints": 1,
+  "shortMs": 120000,
+  "longMs": 420000,
+  "maxLuck": 3,
+  "tiers": [
+    { "key": "legendary", "label": "Legendary", "min": 7 },
+    { "key": "epic", "label": "Epic", "min": 6 },
+    { "key": "rare", "label": "Rare", "min": 5 },
+    { "key": "uncommon", "label": "Uncommon", "min": 3 },
+    { "key": "common", "label": "Common", "min": 0 }
   ]
+}
 }
