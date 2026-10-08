@@ -63,6 +63,9 @@ function init() {
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
     const binderForm = document.querySelector('#binder-filters');
+    const settingsButton = document.querySelector('#settings-button');
+    const settingsBackButton = document.querySelector('#settings-back');
+    const settingsLogoutButton = document.querySelector('#settings-logout');
 
     let store = null;
     let pool = null;
@@ -188,6 +191,11 @@ function init() {
         renderMenuOpen(false);
         showProfiles();
         sessionStorage.removeItem(BINDER_FILTER_KEY);
+    }
+
+    function showSettings() {
+        renderMenuOpen(false);
+        renderView('settings');
     }
 
     function getLockedToday() {
@@ -428,6 +436,9 @@ function init() {
     binderGrid.addEventListener('click', handleBinderClick);
     binderForm.addEventListener('input', handleBinderFilterInput);
     binderForm.addEventListener('submit', (event) => event.preventDefault());
+    settingsButton.addEventListener('click', showSettings);
+    settingsBackButton.addEventListener('click', () => renderView('today'));
+    settingsLogoutButton.addEventListener('click', handleLogOut);
 
     preparePool();
 

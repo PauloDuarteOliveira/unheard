@@ -96,7 +96,7 @@
     </form>
   </section>
 
-  <header class="app-header" data-view="today collection">
+  <header class="app-header" data-view="today collection settings">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <div class="brand-text">
@@ -118,10 +118,9 @@
           <span class="material-symbols-outlined" aria-hidden="true">library_music</span>
           <span class="menu-label">Collection</span>
         </button>
-        <button class="menu-item" type="button" role="menuitem" disabled>
+        <button class="menu-item" id="settings-button" type="button" role="menuitem">
           <span class="material-symbols-outlined" aria-hidden="true">settings</span>
           <span class="menu-label">Settings</span>
-          <span class="menu-note">Soon</span>
         </button>
         <div class="menu-divider"></div>
         <button class="menu-item" id="logout-button" type="button" role="menuitem">
@@ -221,7 +220,7 @@
       <label class="binder-search">
         <span class="material-symbols-outlined" aria-hidden="true">search</span>
         <input class="binder-search-input" name="search" type="search" placeholder="Search your collection"
-        aria-label="Search your collection" autocomplete="off">
+          aria-label="Search your collection" autocomplete="off">
       </label>
 
       <div class="binder-chips">
@@ -243,6 +242,41 @@
       </div>
     </form>
     <div class="binder-grid" id="binder-grid"></div>
+  </section>
+
+  <section class="view settings-view" id="view-settings" data-view=" settings" hidden>
+    <button class="button-ghost back-button" id="settings-back" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      <span class="back-label">Back to today</span>
+    </button>
+
+    <h1 class="binder-title"> Settings</h1>
+
+    <section class="settings-card" aria-labelledby="settings-profile-title">
+      <h2 class="stamp" id="settings-profile-title">Profile</h2>
+    </section>
+
+    <section class="settings-card" aria-labelledby="settings-harmony-title">
+      <h2 class="stamp" id="settings-harmony-title">Negative harmony</h2>
+      <p class="settings-text">Genres you never want to hear. They won't appear in any mode or in the Genre list</p>
+    </section>
+
+    <section class="settings-card" aria-labelledby="settings-preferences-title">
+      <h2 class="stamp" id="settings-preferences-title">Preferences</h2>
+    </section>
+
+    <section class="settings-card" aria-labelledby="settings-data-title">
+      <h2 class="stamp" id="settings-data-title">Your data</h2>
+      <p class="settings-text">Export your favorites as a text list to past into a playlist.</p>
+    </section>
+
+    <section class="settings-card" aria-labelledby="settings-action-title">
+      <h2 class="stamp" id="settings-action-title">Profile actions</h2>
+      <button class="settings-button" id="settings-logout" type="button">
+        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+        Log out
+      </button>
+    </section>
   </section>
 
   <footer class="app-footer" data-view="today">
