@@ -58,7 +58,7 @@ const settingsAvatar = document.querySelector('#settings-avatar');
 const settingsGenreChips = document.querySelector('#settings-genre-chips');
 const settingsGenreCount = document.querySelector('#settings-genre-count');
 const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
-
+const exportStatus = document.querySelector('#export-status');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -263,7 +263,7 @@ export function renderSettingsPreferences(modes, { defaultMode, autoplay }) {
     elements.autoplay.checked = autoplay;
 }
 
-export function playPreview(){
+export function playPreview() {
     revealed.querySelector('audio')?.play()
         .catch((error) => console.warn('Autoplay was blocked by the browser:', error));
 }
@@ -742,4 +742,20 @@ export function renderBinderFilters({ search, mode, sort, favorites }) {
     elements.mode.value = mode;
     elements.sort.value = sort;
     elements.favorites.checked = favorites;
+}
+
+export function downloadTextFile(fileName, text) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+export function renderExportStatus(message) {
+    exportStatus.textContent = message;
 }

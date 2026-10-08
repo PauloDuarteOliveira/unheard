@@ -12,7 +12,7 @@ import {
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
-    renderSettingsPreferences, playPreview
+    renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus
 } from './render.js';
 
 import {
@@ -22,7 +22,7 @@ import {
 
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
-    DEFAULT_FILTERS, filterCollection
+    DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -80,6 +80,7 @@ function init() {
     const settingsProfileForm = document.querySelector('#settings-profile-form');
     const settingsHarmonyForm = document.querySelector('#settings-harmony-form');
     const settingsPreferencesForm = document.querySelector('#settings-preferences-form');
+    const exportButton = document.querySelector('#export-button');
 
     let store = null;
     let pool = null;
@@ -215,6 +216,7 @@ function init() {
         renderSettingsPreferences(MODES, settings);
         renderMenuOpen(false);
         renderView('settings');
+        renderExportStatus('');
     }
 
     function saveProfileChanges(changes) {
@@ -252,8 +254,8 @@ function init() {
     }
 
     function handleSettingsPreferencesChange() {
-        const {defaultMode, autoplay} = settingsPreferencesForm.elements;
-        store.saveSettings({...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked});
+        const { defaultMode, autoplay } = settingsPreferencesForm.elements;
+        store.saveSettings({ ...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked });
     }
 
     function getLockedToday() {
@@ -363,7 +365,7 @@ function init() {
             store.saveToday(today);
             store.saveCollection(addEntry(store.getCollection(), today));
             showCurrentState();
-            if(store.getSettings().autoplay) playPreview();
+            if (store.getSettings().autoplay) playPreview();
         } catch (error) {
             console.error('Discovery failed:', error);
             showPhase('error', { message: getErrorTitle(error) });
@@ -467,6 +469,18 @@ function init() {
         handleUnveil();
     }
 
+    function exportFavorites() {
+        const favorites = getFavorites(store.getCollection());
+
+        if (favorites.length === 0) {
+            renderExportStatus('No favorites yet. Tap the heart on a song to add it.');
+            return;
+        }
+
+        downloadTextFile(`unheard-favorites-${getDateKey()}.txt`, formatFavorites(favorites));
+        renderExportStatus(`Exported ${favorites.length} ${favorites.length === 1 ? 'favorite' : 'favorites'}.`);
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -503,6 +517,7 @@ function init() {
     settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
     settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
     settingsPreferencesForm.addEventListener('change', handleSettingsPreferencesChange);
+    exportButton.addEventListener('click', exportFavorites);
 
     preparePool();
 

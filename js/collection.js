@@ -9,7 +9,7 @@ export function getFirstDate(collection) {
     return collection.map((entry) => entry.date).sort()[0] ?? null;
 }
 
-export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false};
+export const DEFAULT_FILTERS = { search: '', mode: '', sort: 'newest', favorites: false };
 
 export function filterCollection(collection, { search, mode, favorites }) {
     const query = search.trim().toLowerCase();
@@ -60,4 +60,12 @@ export function getStats(collection) {
         count), 0);
 
     return { pressings: collection.length, countries: countries.size, favorites };
+}
+
+export function getFavorites(collection) {
+    return sortCollection(collection, 'oldest').filter((entry) => entry.isFavorite);
+}
+
+export function formatFavorites(favorites) {
+    return favorites.map((entry) => `${entry.song.artistName} - ${entry.song.trackName}`).join('\n');
 }
