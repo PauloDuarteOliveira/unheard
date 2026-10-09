@@ -15,7 +15,7 @@ import {
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
-    renderSets, renderBinderTab
+    renderSets, renderBinderTab, renderRating
 } from './render.js';
 
 import {
@@ -26,7 +26,7 @@ import {
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
     DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak,
-    getSets
+    getSets, setRating
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -174,7 +174,7 @@ function init() {
 
     function showHarmony() {
         const avatar = getAvatar(pendingProfile.avatar);
-        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], [], MAX_BLOCKED_GENRES);
+        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], pendingProfile.blockedGenres ?? [], MAX_BLOCKED_GENRES);
         renderView('harmony');
     }
 
@@ -363,6 +363,7 @@ function init() {
                 rarity: entry?.rarity ?? null,
                 rarityLabel: getTierLabel(entry?.rarity),
                 unlockMessage: getUnlockMessage(entry),
+                rating: entry?.rating ?? 0,
             });
         } else {
             showPhase('idle');
@@ -506,6 +507,9 @@ function init() {
             case 'favorite':
                 handleFavoriteClick(actionButton);
                 break;
+            case 'rate':
+                rateToday(actionButton);
+                break;
         }
     }
 
@@ -559,6 +563,15 @@ function init() {
         if (tab) renderBinderTab(tab.dataset.tab);
     }
 
+    function rateToday(button) {
+        const today = getLockedToday();
+        if (!today) return;
+
+        const collection = setRating(store.getCollection(), today.number, Number(button.dataset.stars));
+        store.saveCollection(collection);
+        renderRating(collection.find((entry) => entry.number === today.number)?.rating ?? 0);
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -577,7 +590,6 @@ function init() {
     harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
     harmonyForm.addEventListener('submit', handleHarmonySubmit);
     harmonyBackButton.addEventListener('click', handleHarmonyBack);
-    harmonyBackButton.addEventListener('click', () => renderView('create'));
     harmonySkipButton.addEventListener('click', () => finishCreate([]));
     profileButton.addEventListener('click', toggleMenu);
     document.addEventListener('click', closeMenuOnOutsideClick);

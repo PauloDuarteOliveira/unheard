@@ -123,3 +123,10 @@ export function getSets(collection, pool, blockedGenres = []) {
             };
         });
 }
+
+export function setRating(collection, number, stars) {
+    return collection.map((entry) => {
+        if (entry.number !== number) return entry;
+        return { ...entry, rating: entry.rating === stars ? 0 : stars };
+    });
+}

@@ -2208,6 +2208,44 @@ h2 {
   font-variation-settings: 'FILL' 1;
 }
 
+/* ---------- Rating ---------- */
+
+.song-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.star-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.star-button .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.star-button.is-on {
+  color: rgb(var(--mode-rgb));
+}
+
+.star-button.is-on .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}
+
+.star-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) and (min-height: 501px) {
@@ -2377,13 +2415,14 @@ h2 {
     max-width: 1047px;
     display: grid;
     grid-template-columns: minmax(0, 435px) minmax(0, 540px);
-    grid-template-rows: 1fr auto auto auto auto auto 1fr auto;
+    grid-template-rows: 1fr auto auto auto auto auto auto 1fr auto;
     grid-template-areas:
       "sleeve ."
       "sleeve header"
       "sleeve title"
       "sleeve meta"
       "sleeve details"
+      "sleeve rating"
       "sleeve actions"
       "sleeve ."
       "dock   dock";
@@ -2420,6 +2459,10 @@ h2 {
   .song-meta {
     grid-area: meta;
     font-size: 20px;
+  }
+
+  .song-rating {
+    grid-area: rating;
   }
 
   .song-details {
@@ -2766,12 +2809,13 @@ h2 {
     max-width: none;
     display: grid;
     grid-template-columns: 277px minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto auto auto auto 1fr;
+    grid-template-rows: 1fr auto auto auto auto auto auto 1fr;
     grid-template-areas:
       "sleeve ."
       "sleeve header"
       "sleeve title"
       "sleeve meta"
+      "sleeve rating"
       "sleeve dock"
       "sleeve actions"
       "sleeve .";
@@ -2779,6 +2823,11 @@ h2 {
     row-gap: 8px;
   }
 
+  .star-button {
+    width: 32px;
+    height: 32px;
+  }
+  
   .song-header {
     grid-area: header;
     justify-content: flex-start;
@@ -2805,6 +2854,10 @@ h2 {
   .song-meta {
     grid-area: meta;
     font-size: 14px;
+  }
+
+  .song-rating {
+    grid-area: rating;
   }
 
   .audio-dock {
