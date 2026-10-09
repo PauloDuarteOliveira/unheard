@@ -63,7 +63,10 @@ export function getStats(collection) {
 
     const legendary = collection.filter((entry) => entry.rarity?.tier === 'legendary').length;
 
-    return { pressings: collection.length, countries: countries.size, favorites, legendary };
+    const ratings = collection.map((entry) => entry.rating ?? 0).filter((rating) => rating > 0);
+    const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0;
+
+    return { pressings: collection.length, countries: countries.size, favorites, legendary, averageRating };
 }
 
 export function getFavorites(collection) {

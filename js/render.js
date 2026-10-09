@@ -76,6 +76,7 @@ const binderTabs = document.querySelectorAll('.binder-tab');
 const binderPressings = document.querySelector('#binder-pressings');
 const binderSets = document.querySelector('#binder-sets');
 const themeButton = document.querySelector('#theme-button');
+const statRating = document.querySelector('#stat-rating');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -781,10 +782,11 @@ export function renderBinderGrid(entries, emptyMessage) {
     binderGrid.replaceChildren(...entries.map(createBinderCard));
 }
 
-export function renderBinderStats({ pressings, countries, legendary }) {
+export function renderBinderStats({ pressings, countries, legendary, averageRating }) {
     statPressings.textContent = pressings;
     statCountries.textContent = countries;
     statLegendary.textContent = legendary;
+    statRating.textContent = averageRating ? averageRating.toFixed(1) : '–';
 }
 
 export function renderRarityFilter(tiers) {
@@ -907,14 +909,11 @@ function createSetCard(set) {
     return card;
 }
 
-export function renderSets(sets) {
-    binderSets.replaceChildren(...sets.map(createSetCard));
-}
 
 export function renderBinderTab(tabName) {
     binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
-    binderPressings.hidden = tabName !== 'pressings';
-    binderSets.hidden = tabName !== 'sets';
+    binderPressings.classList.toggle('is-hidden', tabName !== 'pressings');
+    binderSets.classList.toggle('is-hidden', tabName !== 'sets');
 }
 
 function setRatingState(group, rating) {
@@ -949,4 +948,23 @@ function createRating(trackName, rating) {
 export function renderRating(rating) {
     const group = revealed.querySelector('.song-rating');
     if (group) setRatingState(group, rating);
+}
+
+export function renderSets(sets) {
+    const found = sets.reduce((sum, set) => sum + set.count, 0);
+    const total = sets.reduce((sum, set) => sum + set.slots.length, 0);
+
+    const title = document.createElement('span');
+    title.className = 'stamp';
+    title.textContent = 'Binder sets';
+
+    const count = document.createElement('span');
+    count.className = 'sets-total';
+    count.textContent = `${found} / ${total} slots`;
+
+    const head = document.createElement('div');
+    head.className = 'sets-head';
+    head.append(title, count);
+
+    binderSets.replaceChildren(head, ...sets.map(createSetCard));
 }
