@@ -597,13 +597,19 @@ h2 {
 }
 
 .icon-spinner,
-.unveil.is-searching .icon-play {
+.icon-error,
+.unveil.is-searching .icon-play,
+.unveil.is-error .icon-play {
   display: none;
 }
 
 .unveil.is-searching .icon-spinner {
   display: block;
   animation: spin 0.9s linear infinite;
+}
+
+.unveil.is-error .icon-error {
+  display: block;
 }
 
 .unveil.is-error {
