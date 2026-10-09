@@ -399,26 +399,33 @@ function init() {
         isSearching = true;
         showPhase('searching', { message: getSearchingMessage() });
 
+        let found;
         try {
             pool = pool ?? await loadPool();
-            const { song, optionKey } = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
-
-            const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
-            store.saveToday(today);
-            const previous = store.getCollection().filter((entry) => entry.number !== today.number);
-            const rarity = config?.rarity ? getRarity(today, previous) : null;
-            const isNewSlot = Boolean(optionKey) && !previous.some((entry) =>
-                entry.mode === currentModeKey && entry.optionKey === optionKey);
-            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
-            showCurrentState();
-            if (store.getSettings().autoplay) playPreview();
+            found = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
         } catch (error) {
             console.error('Discovery failed:', error);
             showPhase('error', { message: getErrorTitle(error) });
+            return;
         } finally {
             isSearching = false;
             tick();
         }
+
+        saveDiscovery(found.song, found.optionKey);
+        showCurrentState();
+        tick();
+        if (store.getSettings().autoplay) playPreview();
+    }
+
+    function saveDiscovery(song, optionKey) {
+        const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
+        const previous = store.getCollection().filter((entry) => entry.number !== today.number);
+        const rarity = config?.rarity ? getRarity(today, previous) : null;
+        const isNewSlot = Boolean(optionKey) && !previous.some((entry) => entry.mode === currentModeKey && entry.optionKey === optionKey);
+
+        store.saveToday(today);
+        store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
     }
 
     function handleTabClick(event) {
