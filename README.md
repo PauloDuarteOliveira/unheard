@@ -177,6 +177,18 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Feature freeze: polish and bug fixes
 - Final README and deploy check
 
+## How Unheard differs from similar apps
+
+Two other apps share the name, and both help you find music, but in different ways:
+
+| | unheardmusic.app | unheard.fm | This project |
+|---|---|---|---|
+| Starting point | A song you already like | Your own rules and filters | A discovery mode |
+| How much | Up to 5 suggestions | Whole playlists | One song per day |
+| Core idea | Similarity | Control, no repeats | A daily habit, and collecting |
+
+The others start from what you already know. Unheard starts from somewhere you would not have looked (a random word, a decade, a country, a mood or a genre), gives you only one song, and turns each day's discovery into a card in your collection.
+
 ## Credits
 
 Song data and previews provided by Apple through the iTunes Search API. Icons are Google Material Symbols.
