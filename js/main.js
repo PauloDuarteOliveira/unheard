@@ -5,6 +5,7 @@ import createStore, { readJson, writeJson } from './store.js';
 import { applyMode, applyTheme } from './theme.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { scoreSong, getTier } from './rarity.js';
+import createPreviewPlayer from './player.js';
 
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
@@ -15,7 +16,8 @@ import {
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
-    renderSets, renderBinderTab, renderRating, renderThemeControls,
+    renderSets, renderBinderTab, renderRating, renderThemeControls, renderBinderPlayback,
+    pauseRevealedPreview,
 } from './render.js';
 
 import {
@@ -89,6 +91,7 @@ function init() {
     const deleteDialog = document.querySelector('#delete-dialog');
     const binderTabList = document.querySelector('#binder-tabs');
     const themeButton = document.querySelector('#theme-button');
+    const binderPlayer = createPreviewPlayer(renderBinderPlayback);
 
     let store = null;
     let pool = null;
@@ -226,6 +229,7 @@ function init() {
     }
 
     function handleLogOut() {
+        binderPlayer.stop();
         logOut();
         currentProfile = null;
         store = null;
@@ -236,6 +240,7 @@ function init() {
     }
 
     function showSettings() {
+        binderPlayer.stop();
         const settings = store.getSettings();
 
         renderSettingsProfile(currentProfile, config?.avatars ?? []);
@@ -500,6 +505,7 @@ function init() {
         }));
         const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
         renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+        renderBinderPlayback(binderPlayer.getState());
     }
 
     function handleBinderFilterInput() {
@@ -508,8 +514,31 @@ function init() {
     }
 
     function handleBinderClick(event) {
-        const button = event.target.closest('[data-action="favorite"]');
-        if (button) handleFavoriteClick(button);
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        switch (button.dataset.action) {
+            case 'favorite':
+                handleFavoriteClick(button);
+                break;
+            case 'preview':
+                playBinderPreview(button);
+                break;
+        }
+    }
+
+    function playBinderPreview(button) {
+        const number = Number(button.dataset.number);
+        const entry = store.getCollection().find((item) => item.number === number);
+        if (!entry) return;
+
+        pauseRevealedPreview();
+        binderPlayer.toggle(number, entry.song.previewUrl);
+    }
+
+    function leaveCollection() {
+        binderPlayer.stop();
+        renderView('today');
     }
 
     function handleRevealedClick(event) {
@@ -615,7 +644,7 @@ function init() {
     document.addEventListener('keydown', closeMenuOnEscape);
     logoutButton.addEventListener('click', handleLogOut);
     collectionButton.addEventListener('click', showCollection);
-    collectionBackButton.addEventListener('click', () => renderView('today'));
+    collectionBackButton.addEventListener('click', leaveCollection);
     binderGrid.addEventListener('click', handleBinderClick);
     binderForm.addEventListener('input', handleBinderFilterInput);
     binderForm.addEventListener('submit', (event) => event.preventDefault());

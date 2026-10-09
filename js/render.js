@@ -716,6 +716,10 @@ function createPreviewButton(entry) {
     return button;
 }
 
+export function pauseRevealedPreview() {
+    revealed.querySelector('audio')?.pause();
+}
+
 export function renderBinderPlayback({ number = null, isPlaying = false, progress = 0 } = {}) {
     binderGrid.querySelectorAll('.binder-card').forEach((card) => {
         const isCurrent = Number(card.dataset.number) === number;
