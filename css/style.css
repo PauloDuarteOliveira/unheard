@@ -1690,6 +1690,7 @@ h2 {
 }
 
 .binder-search {
+  box-sizing: border-box;
   height: 44px;
   padding: 0 12px;
   border-radius: 8px;
@@ -2866,7 +2867,7 @@ h2 {
   }
 
   .mode-setup {
-    width: 210px;
+    width: 230px;
     flex-shrink: 0;
   }
 

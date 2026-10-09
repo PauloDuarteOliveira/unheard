@@ -138,6 +138,7 @@ function init() {
     }
 
     function showCreate() {
+        pendingProfile = null;
         const avatars = config?.avatars ?? [];
         const usedKeys = getProfiles().map((profile) => profile.avatar);
         const firstFree = avatars.find((avatar) => !usedKeys.includes(avatar.key)) ?? avatars[0];
@@ -167,7 +168,7 @@ function init() {
             return;
         }
 
-        pendingProfile = { name: name.value.trim(), avatar: avatar.value };
+        pendingProfile = { ...pendingProfile, name: name.value.trim(), avatar: avatar.value };
         showHarmony();
     }
 
@@ -188,6 +189,11 @@ function init() {
         event.preventDefault();
         const blockedGenres = new FormData(harmonyForm).getAll('genre');
         finishCreate(blockedGenres);
+    }
+
+    function handleHarmonyBack() {
+        pendingProfile = { ...pendingProfile, blockedGenres: new FormData(harmonyForm).getAll('genre') };
+        renderView('create');
     }
 
     function toggleMenu() {
@@ -570,6 +576,7 @@ function init() {
     createBackButton.addEventListener('click', showProfiles);
     harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
     harmonyForm.addEventListener('submit', handleHarmonySubmit);
+    harmonyBackButton.addEventListener('click', handleHarmonyBack);
     harmonyBackButton.addEventListener('click', () => renderView('create'));
     harmonySkipButton.addEventListener('click', () => finishCreate([]));
     profileButton.addEventListener('click', toggleMenu);
