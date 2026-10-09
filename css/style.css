@@ -309,6 +309,10 @@ h2 {
   white-space: nowrap;
 }
 
+.theme-button {
+  display: none;
+}
+
 .profile-button {
   height: 44px;
   padding: 0 8px 0 4px;
@@ -2456,6 +2460,25 @@ h2 {
 
   .streak-best {
     color: var(--muted);
+  }
+
+  .theme-button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .theme-button:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
   }
 
   .profile-button {

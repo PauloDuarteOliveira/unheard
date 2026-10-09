@@ -75,6 +75,7 @@ const rarityLegend = document.querySelector('#rarity-legend');
 const binderTabs = document.querySelectorAll('.binder-tab');
 const binderPressings = document.querySelector('#binder-pressings');
 const binderSets = document.querySelector('#binder-sets');
+const themeButton = document.querySelector('#theme-button');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -304,6 +305,13 @@ function createTab(mode, isSelected) {
 
     tab.append(createIcon(mode.icon), shortName, name);
     return tab;
+}
+
+export function renderThemeControls(theme) {
+    const isLight = theme === 'light';
+    themeButton.querySelector('.material-symbols-outlined').textContent = isLight ? 'light_mode' : 'dark_mode';
+    themeButton.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+    settingsPreferencesForm.elements.theme.value = theme;
 }
 
 export function renderView(viewName) {
