@@ -4,6 +4,7 @@ const DEFAULT_VOLUME = 0.25;
 const PREVIEW_SECONDS = 30;
 const SHARE_FEEDBACK_MS = 2000;
 const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
+const MAX_STARS = 5;
 
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
@@ -269,13 +270,14 @@ export function renderSettingsInitial(name) {
     });
 }
 
-export function renderSettingsPreferences(modes, { defaultMode, autoplay }) {
+export function renderSettingsPreferences(modes, { defaultMode, autoplay, theme }) {
     const { elements } = settingsPreferencesForm;
     const options = modes.map((mode) => createOption(mode.key, mode.name));
 
     elements.defaultMode.replaceChildren(...options);
     elements.defaultMode.value = defaultMode;
     elements.autoplay.checked = autoplay;
+    elements.theme.value = theme;
 }
 
 export function playPreview() {
@@ -526,7 +528,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' } = {}) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -586,6 +588,8 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
         meta.append(unlock);
     }
 
+    const ratingGroup = createRating(song.trackName, rating);
+
     const details = createDetails(song);
 
     const dock = createAudioDock(song);
@@ -618,10 +622,10 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     actions.className = 'song-actions';
     actions.append(spotifyLink, appleLink, favoriteButton, shareButton);
 
-    return [header, sleeve, title, meta, details, dock, actions];
+    return [header, sleeve, title, meta, ratingGroup, details, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '' }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -651,7 +655,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
             revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage }));
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -892,4 +896,38 @@ export function renderBinderTab(tabName) {
     binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
     binderPressings.hidden = tabName !== 'pressings';
     binderSets.hidden = tabName !== 'sets';
+}
+
+function setRatingState(group, rating) {
+    group.querySelectorAll('.star-button').forEach((button) => {
+        const stars = Number(button.dataset.stars);
+        button.classList.toggle('is-on', stars <= rating);
+        button.setAttribute('aria-pressed', String(stars === rating));
+    });
+}
+
+function createRating(trackName, rating) {
+    const group = document.createElement('div');
+    group.className = 'song-rating';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', `Rate ${trackName}`);
+
+    for (let stars = 1; stars <= MAX_STARS; stars++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'star-button';
+        button.dataset.action = 'rate';
+        button.dataset.stars = stars;
+        button.setAttribute('aria-label', `${stars} ${stars === 1 ? 'star' : 'stars'}`);
+        button.append(createIcon('star'));
+        group.append(button);
+    }
+
+    setRatingState(group, rating);
+    return group;
+}
+
+export function renderRating(rating) {
+    const group = revealed.querySelector('.song-rating');
+    if (group) setRatingState(group, rating);
 }

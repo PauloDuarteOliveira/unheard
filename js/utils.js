@@ -78,8 +78,8 @@ export function formatCatalogNumber(number) {
     return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
 }
 
-export function formatShortDate(datekey) {
-    const date = new Date(`${datekey}T00:00`);
+export function formatShortDate(dateKey) {
+    const date = new Date(`${dateKey}T00:00`);
     const month = date.toLocaleDateString('en-US', { month: 'short' });
     return `${date.getDate()} ${month}`;
 }

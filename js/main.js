@@ -2,7 +2,7 @@ import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
-import { applyMode } from './theme.js';
+import { applyMode, applyTheme } from './theme.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { scoreSong, getTier } from './rarity.js';
 
@@ -15,7 +15,7 @@ import {
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
-    renderSets, renderBinderTab
+    renderSets, renderBinderTab, renderRating
 } from './render.js';
 
 import {
@@ -26,7 +26,7 @@ import {
 import {
     addEntry, getFirstDate, getEntryTag, sortCollection, toggleFavorite, getStats,
     DEFAULT_FILTERS, filterCollection, getFavorites, formatFavorites, getStreak, getBestStreak,
-    getSets
+    getSets, setRating
 } from './collection.js';
 
 const TICK_MS = 1000;
@@ -102,6 +102,7 @@ function init() {
     function enterToday(profile) {
         currentProfile = profile;
         store = createStore(profile.id);
+        applyTheme(store.getSettings().theme);
         selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
@@ -138,6 +139,7 @@ function init() {
     }
 
     function showCreate() {
+        pendingProfile = null;
         const avatars = config?.avatars ?? [];
         const usedKeys = getProfiles().map((profile) => profile.avatar);
         const firstFree = avatars.find((avatar) => !usedKeys.includes(avatar.key)) ?? avatars[0];
@@ -167,13 +169,13 @@ function init() {
             return;
         }
 
-        pendingProfile = { name: name.value.trim(), avatar: avatar.value };
+        pendingProfile = { ...pendingProfile, name: name.value.trim(), avatar: avatar.value };
         showHarmony();
     }
 
     function showHarmony() {
         const avatar = getAvatar(pendingProfile.avatar);
-        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], [], MAX_BLOCKED_GENRES);
+        renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], pendingProfile.blockedGenres ?? [], MAX_BLOCKED_GENRES);
         renderView('harmony');
     }
 
@@ -188,6 +190,11 @@ function init() {
         event.preventDefault();
         const blockedGenres = new FormData(harmonyForm).getAll('genre');
         finishCreate(blockedGenres);
+    }
+
+    function handleHarmonyBack() {
+        pendingProfile = { ...pendingProfile, blockedGenres: new FormData(harmonyForm).getAll('genre') };
+        renderView('create');
     }
 
     function toggleMenu() {
@@ -210,6 +217,7 @@ function init() {
         logOut();
         currentProfile = null;
         store = null;
+        applyTheme('dark');
         renderMenuOpen(false);
         showProfiles();
         sessionStorage.removeItem(BINDER_FILTER_KEY);
@@ -261,8 +269,14 @@ function init() {
     }
 
     function handleSettingsPreferencesChange() {
-        const { defaultMode, autoplay } = settingsPreferencesForm.elements;
-        store.saveSettings({ ...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked });
+        const { defaultMode, autoplay, theme } = settingsPreferencesForm.elements;
+        store.saveSettings({
+            ...store.getSettings(),
+            defaultMode: defaultMode.value,
+            autoplay: autoplay.checked,
+            theme: theme.value,
+        });
+        applyTheme(theme.value);
     }
 
     function updateStreak() {
@@ -357,6 +371,7 @@ function init() {
                 rarity: entry?.rarity ?? null,
                 rarityLabel: getTierLabel(entry?.rarity),
                 unlockMessage: getUnlockMessage(entry),
+                rating: entry?.rating ?? 0,
             });
         } else {
             showPhase('idle');
@@ -399,26 +414,33 @@ function init() {
         isSearching = true;
         showPhase('searching', { message: getSearchingMessage() });
 
+        let found;
         try {
             pool = pool ?? await loadPool();
-            const { song, optionKey } = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
-
-            const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
-            store.saveToday(today);
-            const previous = store.getCollection().filter((entry) => entry.number !== today.number);
-            const rarity = config?.rarity ? getRarity(today, previous) : null;
-            const isNewSlot = Boolean(optionKey) && !previous.some((entry) =>
-                entry.mode === currentModeKey && entry.optionKey === optionKey);
-            store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
-            showCurrentState();
-            if (store.getSettings().autoplay) playPreview();
+            found = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
         } catch (error) {
             console.error('Discovery failed:', error);
             showPhase('error', { message: getErrorTitle(error) });
+            return;
         } finally {
             isSearching = false;
             tick();
         }
+
+        saveDiscovery(found.song, found.optionKey);
+        showCurrentState();
+        tick();
+        if (store.getSettings().autoplay) playPreview();
+    }
+
+    function saveDiscovery(song, optionKey) {
+        const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
+        const previous = store.getCollection().filter((entry) => entry.number !== today.number);
+        const rarity = config?.rarity ? getRarity(today, previous) : null;
+        const isNewSlot = Boolean(optionKey) && !previous.some((entry) => entry.mode === currentModeKey && entry.optionKey === optionKey);
+
+        store.saveToday(today);
+        store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
     }
 
     function handleTabClick(event) {
@@ -493,6 +515,9 @@ function init() {
             case 'favorite':
                 handleFavoriteClick(actionButton);
                 break;
+            case 'rate':
+                rateToday(actionButton);
+                break;
         }
     }
 
@@ -546,6 +571,15 @@ function init() {
         if (tab) renderBinderTab(tab.dataset.tab);
     }
 
+    function rateToday(button) {
+        const today = getLockedToday();
+        if (!today) return;
+
+        const collection = setRating(store.getCollection(), today.number, Number(button.dataset.stars));
+        store.saveCollection(collection);
+        renderRating(collection.find((entry) => entry.number === today.number)?.rating ?? 0);
+    }
+
     selectMode(currentModeKey);
     showCurrentState();
     tick();
@@ -563,7 +597,7 @@ function init() {
     createBackButton.addEventListener('click', showProfiles);
     harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
     harmonyForm.addEventListener('submit', handleHarmonySubmit);
-    harmonyBackButton.addEventListener('click', () => renderView('create'));
+    harmonyBackButton.addEventListener('click', handleHarmonyBack);
     harmonySkipButton.addEventListener('click', () => finishCreate([]));
     profileButton.addEventListener('click', toggleMenu);
     document.addEventListener('click', closeMenuOnOutsideClick);
