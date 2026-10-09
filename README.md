@@ -35,7 +35,7 @@ Each profile has its own daily lock and catalog numbers, so two people can each 
 | `unheard:profiles` | The list of profiles: id, name and avatar color |
 | `unheard:currentProfile` | The id of the logged-in profile |
 | `unheard:<id>:today` | That profile's discovery of the day: date, mode, option, song and catalog number |
-| `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag |
+| `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag, rarity and whether it filled a new set slot |
 | `unheard:<id>:settings` | That profile's settings: blocked genres, default mode and preview autoplay |
 
 To block a genre, the app looks up its `matches` in `data/pool.json` (the genre names iTunes uses, for example Hip-Hop is `"Hip-Hop/Rap"`) and drops every song whose `primaryGenreName` is on that list. "Hard Rock" is listed under both Rock and Metal, so blocking Metal also removes Hard Rock songs.
@@ -44,12 +44,37 @@ To block a genre, the app looks up its `matches` in `data/pool.json` (the genre 
 
 Every discovery becomes a card in the profile's binder, opened from the profile menu:
 
-- **Cards** show the cover, catalog number, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
+- **Cards** show the cover, catalog number, rarity badge, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
 - **Favorites:** a heart on each card and on the Revealed screen. Both hearts stay in sync.
-- **Stats:** pressings, countries visited with World Explorer, and favorites.
-- **Search** by title, artist or tag, **filter** by mode or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
+- **Stats:** pressings, countries visited with World Explorer, and Legendary cards.
+- **Search** by title, artist or tag, **filter** by mode, rarity or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
+- **Sets** (second tab): World tour (24 countries), Decades (7), Moods (8) and Genres (18, minus the profile's blocked genres), each with a progress bar and a "?" for every slot still missing. A slot is filled by a discovery in that mode with that option.
 
-The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title, search and filters share one row.
+The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title and the tabs share the first row and the search and filters the second.
+
+## Rarity
+
+Every discovery gets a rarity tier the moment it is found. It is saved with the card and never recalculated, because some factors (like "first song from this country") are only true on that day.
+
+| Factor | Points |
+|---|---|
+| Released before 1970 / 1970–1989 / 1990–2009 | +3 / +2 / +1 |
+| First World Explorer song from this country in the collection | +2 |
+| First song from this genre in the collection | +2 |
+| Shorter than 2:00 or longer than 7:00 | +1 |
+| Luck | +0 to +3 |
+
+| Points | Tier | Look |
+|---|---|---|
+| 0–2 | Common | plain frame |
+| 3–4 | Uncommon | silver frame |
+| 5 | Rare | gold frame and glow |
+| 6 | Epic | thin holographic rim |
+| 7+ | Legendary | thick holographic rim, gold glow, a shine across the cover and a star |
+
+All the rules and thresholds are in `data/config.json`. They were tuned by scoring 89 real iTunes songs: because iTunes mostly returns recent music, the highest score was 7, so Legendary starts at 7 and Epic at 6. That gives roughly 42% Common, 30% Uncommon, 18% Rare, 9% Epic and 1% Legendary. The scoring function takes the luck as an optional parameter, so it can be tested with fixed numbers.
+
+When a discovery fills a new set slot, the Revealed screen says so, for example "New country unlocked: Japan · World tour 3/24".
 
 ## Settings
 
@@ -94,9 +119,10 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `index.html` | The single page of the app |
 | `css/style.css` | Styles. Every color is a CSS variable, and each mode swaps its own color |
 | `data/pool.json` | Search terms for every mode: random words, decades, countries, moods and genres (with the iTunes genre names each genre matches) |
-| `data/config.json` | The six avatar record colors |
+| `data/config.json` | The six avatar record colors, and the rarity rules and tiers |
 | `js/main.js` | Entry point: connects all the modules and handles clicks |
-| `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter, sort, favorites export and streaks |
+| `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter, sort, sets, favorites export and streaks |
+| `js/rarity.js` | Scores a discovery and finds its rarity tier |
 | `js/profiles.js` | Profile list, logged-in profile, name validation, and creating, editing and deleting profiles |
 | `js/api.js` | iTunes Search API requests and the preview check |
 | `js/modes.js` | The list of discovery modes and one query-building function per mode |
@@ -144,11 +170,12 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Profiles: Who's listening, create profile with live preview, Negative harmony, profile menu with log out, a daily lock per profile, and blocked genres kept out of every mode
 - Collector binder: cards, favorites, stats, search, filters and sort, in the three layouts
 - Settings: edit name and record, Negative harmony, default mode, preview autoplay, export favorites, delete profile with confirmation, and the daily streak in the header
+- Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
 
 **Next**
 
-- Rarity tiers and binder sets
-- Feature freeze, final README and deploy
+- Feature freeze: polish and bug fixes
+- Final README and deploy check
 
 ## Credits
 
