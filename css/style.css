@@ -2297,7 +2297,7 @@ h2 {
 }
 
 .song-unlock {
-  margin-top: 6px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2346,6 +2346,22 @@ h2 {
 .star-button:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 2px;
+}
+
+.song-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.song-rate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.song-rate .favorite-button {
+  margin-left: auto;
 }
 
 /* ---------- Desktop ---------- */
@@ -2563,7 +2579,7 @@ h2 {
     font-size: 20px;
   }
 
-  .song-rating {
+  .song-extras {
     grid-area: rating;
   }
 
@@ -2958,7 +2974,7 @@ h2 {
     font-size: 14px;
   }
 
-  .song-rating {
+  .song-extras {
     grid-area: rating;
   }
 

@@ -581,14 +581,28 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
     meta.append(song.artistName, metaYear);
 
+    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
+    favoriteButton.classList.add('song-link', 'song-share');
+
+    const rateLabel = document.createElement('span');
+    rateLabel.className = 'stamp';
+    rateLabel.textContent = 'Rate it';
+
+    const rateRow = document.createElement('div');
+    rateRow.className = 'song-rate';
+    rateRow.append(rateLabel, createRating(song.trackName, rating), favoriteButton);
+
+    const extras = document.createElement('div');
+    extras.className = 'song-extras';
+
     if (unlockMessage) {
-        const unlock = document.createElement('span');
+        const unlock = document.createElement('p');
         unlock.className = 'song-unlock';
         unlock.append(createIcon('star'), unlockMessage);
-        meta.append(unlock);
+        extras.append(unlock);
     }
 
-    const ratingGroup = createRating(song.trackName, rating);
+    extras.append(rateRow);
 
     const details = createDetails(song);
 
@@ -615,14 +629,11 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     shareButton.setAttribute('aria-label', "Share today's discovery");
     shareButton.append(createIcon('share'));
 
-    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
-    favoriteButton.classList.add('song-link', 'song-share');
-
     const actions = document.createElement('div');
     actions.className = 'song-actions';
-    actions.append(spotifyLink, appleLink, favoriteButton, shareButton);
+    actions.append(spotifyLink, appleLink, shareButton);
 
-    return [header, sleeve, title, meta, ratingGroup, details, dock, actions];
+    return [header, sleeve, title, meta, details, extras, dock, actions];
 }
 
 export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 }) {
