@@ -270,13 +270,14 @@ export function renderSettingsInitial(name) {
     });
 }
 
-export function renderSettingsPreferences(modes, { defaultMode, autoplay }) {
+export function renderSettingsPreferences(modes, { defaultMode, autoplay, theme }) {
     const { elements } = settingsPreferencesForm;
     const options = modes.map((mode) => createOption(mode.key, mode.name));
 
     elements.defaultMode.replaceChildren(...options);
     elements.defaultMode.value = defaultMode;
     elements.autoplay.checked = autoplay;
+    elements.theme.value = theme;
 }
 
 export function playPreview() {

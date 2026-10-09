@@ -2150,6 +2150,48 @@ h2 {
   justify-content: center;
 }
 
+.segmented {
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  display: flex;
+  gap: 4px;
+}
+
+.segment {
+  position: relative;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.segment input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.segment:has(input:checked) {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.segment:has(input:focus-visible) {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 /* ---------- Rarity ---------- */
 
 .rarity-badge {

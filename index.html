@@ -212,8 +212,8 @@
     <div class="binder-tabs" id="binder-tabs" role="tablist" aria-label="Binder view">
       <button class="binder-tab" id="tab-pressings" type="button" role="tab" data-tab="pressings"
         aria-controls="binder-pressings" aria-selected="true">Pressings</button>
-      <button class="binder-tab" id="tab-sets" type="button" role="tab" data-tab="sets"
-        aria-controls="binder-sets" aria-selected="false">Sets</button>
+      <button class="binder-tab" id="tab-sets" type="button" role="tab" data-tab="sets" aria-controls="binder-sets"
+        aria-selected="false">Sets</button>
     </div>
     <div class="binder-pressings" id="binder-pressings" role="tabpanel" aria-labelledby="tab-pressings">
       <div class="binder-stats">
@@ -306,6 +306,19 @@
     <section class="settings-card settings-preferences" aria-labelledby="settings-preferences-title">
       <h2 class="stamp" id="settings-preferences-title">Preferences</h2>
       <form class="preferences-form" id="settings-preferences-form">
+        <div class="settings-row">
+          <span class="settings-label" id="theme-label">Theme</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="theme-label">
+            <label class="segment">
+              <input type="radio" name="theme" value="dark">
+              Dark
+            </label>
+            <label class="segment">
+              <input type="radio" name="theme" value="light">
+              Light
+            </label>
+          </div>
+        </div>
         <div class="settings-row">
           <label class="settings-label" for="settings-default-mode">Default mode</label>
           <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>

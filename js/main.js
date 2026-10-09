@@ -2,7 +2,7 @@ import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
 import createStore, { readJson, writeJson } from './store.js';
-import { applyMode } from './theme.js';
+import { applyMode, applyTheme } from './theme.js';
 import { getDateKey, getGreeting, getMsUntilMidnight, getShareText, formatShortDate } from './utils.js';
 import { scoreSong, getTier } from './rarity.js';
 
@@ -102,6 +102,7 @@ function init() {
     function enterToday(profile) {
         currentProfile = profile;
         store = createStore(profile.id);
+        applyTheme(store.getSettings().theme);
         selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
@@ -216,6 +217,7 @@ function init() {
         logOut();
         currentProfile = null;
         store = null;
+        applyTheme('dark');
         renderMenuOpen(false);
         showProfiles();
         sessionStorage.removeItem(BINDER_FILTER_KEY);
@@ -267,8 +269,14 @@ function init() {
     }
 
     function handleSettingsPreferencesChange() {
-        const { defaultMode, autoplay } = settingsPreferencesForm.elements;
-        store.saveSettings({ ...store.getSettings(), defaultMode: defaultMode.value, autoplay: autoplay.checked });
+        const { defaultMode, autoplay, theme } = settingsPreferencesForm.elements;
+        store.saveSettings({
+            ...store.getSettings(),
+            defaultMode: defaultMode.value,
+            autoplay: autoplay.checked,
+            theme: theme.value,
+        });
+        applyTheme(theme.value);
     }
 
     function updateStreak() {
