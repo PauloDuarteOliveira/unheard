@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,delete,download,error,expand_more,favorite,hourglass_empty,library_music,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,dark_mode,delete,download,error,expand_more,favorite,hourglass_empty,library_music,light_mode,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -112,6 +112,10 @@
         <span class="streak-best" id="streak-best"></span>
       </p>
 
+      <button class="theme-button" id="theme-button" type="button" aria-label="Switch to light theme">
+        <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
+      </button>
+
       <button class="profile-button" id="profile-button" type="button" aria-haspopup="menu" aria-expanded="false"
         aria-controls="profile-menu">
         <span class="profile-button-name" id="profile-button-name"></span>
@@ -155,6 +159,7 @@
           <span class="unveil-icon" aria-hidden="true">
             <span class="material-symbols-outlined icon-play">play_arrow</span>
             <span class="material-symbols-outlined icon-spinner">progress_activity</span>
+            <span class="material-symbols-outlined icon-error">error</span>
           </span>
           <span class="unveil-title" id="unveil-title">Unveil</span>
           <span class="stamp" id="unveil-subtitle">Today's pressing</span>
@@ -229,6 +234,10 @@
           <span class="stat-value" id="stat-legendary">0</span>
           <span class="stamp">Legendary</span>
         </p>
+        <p class="stat stat-rating">
+          <span class="stat-value" id="stat-rating">–</span>
+          <span class="stamp">Avg rating</span>
+        </p>
       </div>
       <form class="binder-filters" id="binder-filters" role="search">
         <label class="binder-search">
@@ -262,7 +271,7 @@
       <div class="rarity-legend" id="rarity-legend"></div>
       <div class="binder-grid" id="binder-grid"></div>
     </div>
-    <div class="binder-sets" id="binder-sets" role="tabpanel" aria-labelledby="tab-sets" hidden></div>
+    <div class="binder-sets is-hidden" id="binder-sets" role="tabpanel" aria-labelledby="tab-sets"></div>
   </section>
 
   <section class="view settings-view" id="view-settings" data-view="settings" hidden>

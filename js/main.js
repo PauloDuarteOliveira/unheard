@@ -15,7 +15,7 @@ import {
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
-    renderSets, renderBinderTab, renderRating
+    renderSets, renderBinderTab, renderRating, renderThemeControls,
 } from './render.js';
 
 import {
@@ -88,6 +88,7 @@ function init() {
     const deleteButton = document.querySelector('#delete-button');
     const deleteDialog = document.querySelector('#delete-dialog');
     const binderTabList = document.querySelector('#binder-tabs');
+    const themeButton = document.querySelector('#theme-button');
 
     let store = null;
     let pool = null;
@@ -99,10 +100,21 @@ function init() {
     let pendingProfile = null;
     let currentProfile = null;
 
+    function setTheme(theme) {
+        store.saveSettings({ ...store.getSettings(), theme });
+        applyTheme(theme);
+        renderThemeControls(theme);
+    }
+
+    function toggleTheme() {
+        setTheme(store.getSettings().theme === 'light' ? 'dark' : 'light');
+    }
+
     function enterToday(profile) {
         currentProfile = profile;
         store = createStore(profile.id);
         applyTheme(store.getSettings().theme);
+        renderThemeControls(store.getSettings().theme);
         selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
@@ -274,9 +286,8 @@ function init() {
             ...store.getSettings(),
             defaultMode: defaultMode.value,
             autoplay: autoplay.checked,
-            theme: theme.value,
         });
-        applyTheme(theme.value);
+        setTheme(theme.value);
     }
 
     function updateStreak() {
@@ -620,6 +631,7 @@ function init() {
     deleteButton.addEventListener('click', confirmDelete);
     deleteDialog.addEventListener('close', handleDeleteClose);
     binderTabList.addEventListener('click', handleBinderTabClick);
+    themeButton.addEventListener('click', toggleTheme);
 
     preparePool();
 
