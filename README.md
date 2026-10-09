@@ -17,6 +17,7 @@ A failed attempt never uses up the daily discovery: the lock is saved only after
 - **If something fails**, an error card explains what happened (no connection, no playable song, or the search terms could not load) and offers **Try again**.
 - **If a preview stops working after the day is locked**, the player shows **Re-roll**, which finds a new song in the same mode and keeps the same catalog number.
 - **Share** copies "Today I discovered … by … 🎧" to the clipboard.
+- **Rate it:** five stars under the song, next to the favorite heart. Tapping the same star again clears the rating. The rating is saved with the song in the collection.
 
 ## Profiles
 
@@ -45,12 +46,19 @@ To block a genre, the app looks up its `matches` in `data/pool.json` (the genre 
 Every discovery becomes a card in the profile's binder, opened from the profile menu:
 
 - **Cards** show the cover, catalog number, rarity badge, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
+- **Play the previews:** every cover has a play button. While a card plays, its button turns into a pause button in the mode's color, a glowing line along the bottom of the cover shows the progress, and the card's info is tinted. Only one preview plays at a time: the binder has a single audio player (`js/player.js`), so starting another card stops the previous one immediately. It also pauses today's song on the Revealed screen, and stops when you leave the binder.
 - **Favorites:** a heart on each card and on the Revealed screen. Both hearts stay in sync.
-- **Stats:** pressings, countries visited with World Explorer, and Legendary cards.
+- **Stats:** pressings, countries visited with World Explorer, Legendary cards, and on desktop the average star rating.
 - **Search** by title, artist or tag, **filter** by mode, rarity or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
-- **Sets** (second tab): World tour (24 countries), Decades (7), Moods (8) and Genres (18, minus the profile's blocked genres), each with a progress bar and a "?" for every slot still missing. A slot is filled by a discovery in that mode with that option.
+- **Sets** (a second tab on phones, a side panel on desktop): World tour (24 countries), Decades (7), Moods (8) and Genres (18, minus the profile's blocked genres), each with a progress bar and a "?" for every slot still missing. A slot is filled by a discovery in that mode with that option.
 
-The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title and the tabs share the first row and the search and filters the second.
+The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title and the tabs share the first row and the search and filters the second. On desktop there are no tabs: the cards fill the left column, and a 320 px panel on the right holds the four stats and the sets.
+
+## Light theme
+
+The app is dark by default. Each profile can switch to a light theme in Settings, or with the sun/moon button in the desktop header. Both controls always show the same choice.
+
+Every color in `css/style.css` is a CSS variable in `:root`, so the light theme is a second set of values in `:root[data-theme="light"]`, switched on by one attribute on `<html>`. The mode colors get deeper versions for the light page, chosen to keep a contrast of at least 4.5:1 for text. `color-scheme` makes the browser's own parts (dropdown lists, scrollbars) follow the theme. Logging out goes back to dark.
 
 ## Rarity
 
@@ -82,7 +90,7 @@ Opened from the profile menu. There is no Save button: every change is saved as 
 
 - **Profile:** change the name (validated like on creation, but a profile may keep its own name) and the record color. The records preview the new initial while typing.
 - **Negative harmony:** the same genre chips and 3-genre limit as when creating a profile. Blocking the genre picked in the Genre dial resets the dial to "Surprise me".
-- **Preferences:** the default mode selected after logging in, and **Play preview on unveil**. It is off by default, because browsers may block sound that starts by itself; if they do, the preview simply waits for the play button.
+- **Preferences:** the **theme** (dark by default, or light), the default mode selected after logging in, and **Play preview on unveil**. It is off by default, because browsers may block sound that starts by itself; if they do, the preview simply waits for the play button.
 - **Your data:** **Export favorites** downloads a text file (`unheard-favorites-<date>.txt`) with one `Artist - Title` per line, oldest first, ready to paste into a playlist import tool. It is built in the browser with a `Blob`.
 - **Delete profile** opens a confirmation dialog (`<dialog>`) showing what will be lost. It removes only that profile's keys, never `localStorage.clear()`, because every GitHub Pages project of the same account shares one `localStorage`.
 
@@ -129,7 +137,8 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `js/picker.js` | Picks a candidate without repeats, removes blocked genres and runs the discovery loop |
 | `js/store.js` | Safe JSON reading and writing (in `localStorage` or `sessionStorage`), and one store per profile |
 | `js/render.js` | Everything that changes the page, including the audio player |
-| `js/theme.js` | Applies the selected mode's color |
+| `js/theme.js` | Applies the selected mode's color and the dark or light theme |
+| `js/player.js` | The binder's single preview player, as a closure: play, pause, stop and progress |
 | `js/utils.js` | Dates (including moving a date by days), countdown, greeting, links and other small helpers |
 
 ## Screen sizes
@@ -171,11 +180,11 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Collector binder: cards, favorites, stats, search, filters and sort, in the three layouts
 - Settings: edit name and record, Negative harmony, default mode, preview autoplay, export favorites, delete profile with confirmation, and the daily streak in the header
 - Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
+- Polish: star ratings, a light theme (Settings and the desktop header), the binder preview player, the desktop binder side panel, and a clearer error state
 
 **Next**
 
-- Feature freeze: polish and bug fixes
-- Final README and deploy check
+- Final checks on a real phone, and the presentation
 
 ## How Unheard differs from similar apps
 
