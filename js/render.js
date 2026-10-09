@@ -698,6 +698,37 @@ export function renderBinderSummary(count, since) {
     binderSummary.textContent = since ? `${count} ${word} · since ${since}` : 'No pressings yet';
 }
 
+function setPreviewState(button, isPlaying) {
+    button.querySelector('.material-symbols-outlined').textContent = isPlaying ? 'pause' : 'play_arrow';
+    button.setAttribute('aria-label', `${isPlaying ? 'Pause' : 'Play'} preview of ${button.dataset.title}`);
+    button.setAttribute('aria-pressed', String(isPlaying));
+}
+
+function createPreviewButton(entry) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'preview-button';
+    button.dataset.action = 'preview';
+    button.dataset.number = entry.number;
+    button.dataset.title = entry.song.trackName;
+    button.append(createIcon('play_arrow'));
+    setPreviewState(button, false);
+    return button;
+}
+
+export function pauseRevealedPreview() {
+    revealed.querySelector('audio')?.pause();
+}
+
+export function renderBinderPlayback({ number = null, isPlaying = false, progress = 0 } = {}) {
+    binderGrid.querySelectorAll('.binder-card').forEach((card) => {
+        const isCurrent = Number(card.dataset.number) === number;
+        card.classList.toggle('is-playing', isCurrent && isPlaying);
+        card.style.setProperty('--progress', isCurrent ? progress : 0);
+        setPreviewState(card.querySelector('.preview-button'), isCurrent && isPlaying);
+    });
+}
+
 function createBinderCard(entry) {
     const { song } = entry;
 
@@ -711,9 +742,13 @@ function createBinderCard(entry) {
     number.className = 'binder-number';
     number.textContent = formatCatalogNumber(entry.number);
 
+    const progress = document.createElement('span');
+    progress.className = 'preview-progress';
+    progress.setAttribute('aria-hidden', 'true');
+
     const art = document.createElement('div');
     art.className = 'binder-art';
-    art.append(cover, number);
+    art.append(cover, number, createPreviewButton(entry), progress);
 
     const title = document.createElement('h3');
     title.className = 'binder-song';
