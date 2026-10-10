@@ -128,8 +128,8 @@ export function renderCreatePreview(name, avatar) {
     createPreviewName.textContent = name.trim() || 'Your name';
     avatarOptions.querySelectorAll('.record-label').forEach((label) => {
         label.textContent = initial;
-        createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
     });
+    createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
 }
 
 function setFieldError(input, hint, message) {
