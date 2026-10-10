@@ -118,6 +118,7 @@ function init() {
         store = createStore(profile.id);
         applyTheme(store.getSettings().theme);
         renderThemeControls(store.getSettings().theme);
+        binderPlayer.setVolume(store.getSettings().volume);
         selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
@@ -388,6 +389,7 @@ function init() {
                 rarityLabel: getTierLabel(entry?.rarity),
                 unlockMessage: getUnlockMessage(entry),
                 rating: entry?.rating ?? 0,
+                volume: store.getSettings().volume,
             });
         } else {
             showPhase('idle');

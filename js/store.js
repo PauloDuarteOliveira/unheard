@@ -15,7 +15,7 @@ export default function createStore(profileId) {
     const todayKey = `unheard:${profileId}:today`;
     const settingsKey = `unheard:${profileId}:settings`;
     const collectionKey = `unheard:${profileId}:collection`;
-    const DEFAULT_SETTINGS = { blockedGenres: [], defaultMode: 'random', autoplay: false, theme: 'dark' };
+    const DEFAULT_SETTINGS = { blockedGenres: [], defaultMode: 'random', autoplay: false, theme: 'dark', volume: 0.25 };
 
     function getToday() {
         return readJson(todayKey);

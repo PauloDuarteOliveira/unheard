@@ -35,6 +35,10 @@ export default function createPreviewPlayer(onChange) {
         audio.play().catch(handlePlayError);
     }
 
+    function setVolume(volume) {
+        audio.volume = volume;
+    }
+
     function stop() {
         audio.pause();
         currentNumber = null;
@@ -49,5 +53,5 @@ export default function createPreviewPlayer(onChange) {
         notify();
     });
 
-    return { toggle, stop, getState };
+    return { toggle, stop, getState, setVolume };
 }

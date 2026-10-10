@@ -413,10 +413,10 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
-function createAudioDock(song) {
+function createAudioDock(song, volume) {
     const audio = document.createElement('audio');
     audio.src = song.previewUrl;
-    audio.volume = DEFAULT_VOLUME
+    audio.volume = volume;
 
     const playButton = document.createElement('button');
     playButton.type = 'button';
@@ -537,7 +537,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 } = {}) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -615,7 +615,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
 
     const details = createDetails(song);
 
-    const dock = createAudioDock(song);
+    const dock = createAudioDock(song, volume);
 
     const spotifyLink = document.createElement('a');
     spotifyLink.className = 'song-link song-link-primary';
@@ -645,7 +645,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     return [header, sleeve, title, meta, details, extras, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -675,7 +675,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
             revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating }));
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
