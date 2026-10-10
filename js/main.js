@@ -10,7 +10,7 @@ import createPreviewPlayer from './player.js';
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
-    renderAvatarOptions, renderCreatePreview, renderHarmony, renderGenreLimit,
+    renderAvatarOptions, renderAvatarTab, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
     renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
@@ -70,6 +70,8 @@ function init() {
     const dialSelect = document.querySelector('#setup-select');
     const profileGrid = document.querySelector('#profile-grid');
     const createForm = document.querySelector('#create-form');
+    const avatarPicker = document.querySelector('#avatar-picker');
+    const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
     const createBackButton = document.querySelector('#create-back');
     const harmonyForm = document.querySelector('#harmony-form');
     const harmonyBackButton = document.querySelector('#harmony-back');
@@ -186,8 +188,9 @@ function init() {
     function showCreate() {
         pendingProfile = null;
         const avatars = config?.avatars ?? [];
+        const records = avatars.filter((avatar) => !avatar.image);
         const usedKeys = getProfiles().map((profile) => profile.avatar);
-        const firstFree = avatars.find((avatar) => !usedKeys.includes(avatar.key)) ?? avatars[0];
+        const firstFree = records.find((record) => !usedKeys.includes(record.key)) ?? records[0];
 
         createForm.reset();
         renderNameError('');
@@ -201,6 +204,11 @@ function init() {
         const { name, avatar } = createForm.elements;
         renderCreatePreview(name.value, getAvatar(avatar.value));
         renderNameError('');
+    }
+
+    function handleAvatarTabClick(event) {
+        const tab = event.target.closest('[role="tab"]');
+        if (tab) renderAvatarTab(event.currentTarget, tab.dataset.tab);
     }
 
     function handleCreateSubmit(event) {
@@ -682,6 +690,8 @@ function init() {
     dialSelect.addEventListener('change', handleOptionChange);
     createForm.addEventListener('input', handleCreateInput);
     createForm.addEventListener('submit', handleCreateSubmit);
+    avatarPicker.addEventListener('click', handleAvatarTabClick);
+    settingsAvatarPicker.addEventListener('click', handleAvatarTabClick);
     createBackButton.addEventListener('click', showProfiles);
     harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
     harmonyForm.addEventListener('submit', handleHarmonySubmit);

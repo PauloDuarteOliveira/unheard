@@ -37,6 +37,7 @@ const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
 const profileGrid = document.querySelector('#profile-grid');
 const createPreview = document.querySelector('#create-preview');
 const createPreviewName = document.querySelector('#create-preview-name');
+const avatarPicker = document.querySelector('#avatar-picker');
 const avatarOptions = document.querySelector('#avatar-options');
 const nameHint = document.querySelector('#profile-name-hint');
 const nameInput = document.querySelector('#profile-name');
@@ -56,6 +57,7 @@ const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
 const settingsName = document.querySelector('#settings-name');
 const settingsNameHint = document.querySelector('#settings-name-hint');
+const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
 const settingsAvatar = document.querySelector('#settings-avatar');
 const settingsGenreChips = document.querySelector('#settings-genre-chips');
 const settingsGenreCount = document.querySelector('#settings-genre-count');
@@ -86,7 +88,7 @@ function createAvatarOption(avatar, isChecked, initial = '?') {
     input.value = avatar.key;
     input.checked = isChecked;
     input.className = 'avatar-radio';
-    input.setAttribute('aria-label', `${avatar.label} record`);
+    input.setAttribute('aria-label', `${avatar.label} ${avatar.image ? 'avatar' : 'record'}`);
 
     const option = document.createElement('label');
     option.className = 'avatar-option';
@@ -94,9 +96,28 @@ function createAvatarOption(avatar, isChecked, initial = '?') {
     return option;
 }
 
+function fillAvatarPicker(picker, avatars, selectedKey, initial) {
+    const toOption = (avatar) => createAvatarOption(avatar, avatar.key === selectedKey, initial);
+    const records = avatars.filter((avatar) => !avatar.image).map(toOption);
+    const images = avatars.filter((avatar) => avatar.image).map(toOption);
+    picker.querySelector('[data-panel="records"]').replaceChildren(...records);
+    picker.querySelector('[data-panel="avatars"]').replaceChildren(...images);
+
+    const selected = avatars.find((avatar) => avatar.key === selectedKey);
+    renderAvatarTab(picker, selected?.image ? 'avatars' : 'records');
+}
+
+export function renderAvatarTab(picker, tabName) {
+    picker.querySelectorAll('[role="tab"]').forEach((tab) => {
+        tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName));
+    });
+    picker.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+        panel.classList.toggle('is-hidden', panel.dataset.panel !== tabName);
+    });
+}
+
 export function renderAvatarOptions(avatars, selectedKey) {
-    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key === selectedKey));
-    avatarOptions.replaceChildren(...options);
+    fillAvatarPicker(avatarPicker, avatars, selectedKey);
 }
 
 export function renderCreatePreview(name, avatar) {
@@ -107,8 +128,8 @@ export function renderCreatePreview(name, avatar) {
     createPreviewName.textContent = name.trim() || 'Your name';
     avatarOptions.querySelectorAll('.record-label').forEach((label) => {
         label.textContent = initial;
-        createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
     });
+    createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
 }
 
 function setFieldError(input, hint, message) {
@@ -136,15 +157,24 @@ export function renderSettingsGenreLimit(max) {
 }
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
+    const record = document.createElement('span');
+    record.className = 'record-avatar';
+    record.setAttribute('aria-hidden', 'true');
+
+    if (avatar.image) {
+        const image = document.createElement('img');
+        image.className = 'record-image';
+        image.src = avatar.image;
+        image.alt = '';
+        record.append(image);
+        return record;
+    }
+
     const label = document.createElement('span');
     label.className = 'record-label';
     label.textContent = profile.name.charAt(0).toUpperCase();
     label.style.setProperty('--avatar-color', avatar.color);
     label.style.setProperty('--avatar-ink', avatar.ink);
-
-    const record = document.createElement('span');
-    record.className = 'record-avatar';
-    record.setAttribute('aria-hidden', 'true');
     record.append(label);
     return record;
 }
@@ -258,11 +288,9 @@ export function renderMenuOpen(isOpen) {
 
 export function renderSettingsProfile(profile, avatars) {
     const initial = profile.name.charAt(0).toUpperCase();
-    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key ===
-        profile.avatar, initial));
 
     settingsName.value = profile.name;
-    settingsAvatar.replaceChildren(...options);
+    fillAvatarPicker(settingsAvatarPicker, avatars, profile.avatar, initial);
     renderSettingsNameError('');
 }
 

@@ -5,7 +5,18 @@
     { "key": "lavender", "label": "Lavender", "color": "#AFA9EC", "ink": "#221C57" },
     { "key": "coral", "label": "Coral", "color": "#F0997B", "ink": "#3B1507" },
     { "key": "blue", "label": "Blue", "color": "#85B7EB", "ink": "#0A2A4A" },
-    { "key": "gold", "label": "Gold", "color": "#F2C94C", "ink": "#3A2B00" }
+    { "key": "gold", "label": "Gold", "color": "#F2C94C", "ink": "#3A2B00" },
+    { "key": "adriana", "label": "Adriana", "color": "#E8C872", "image": "assets/avatars/adriana.webp" },
+    { "key": "bruno", "label": "Bruno", "color": "#B58AE8", "image": "assets/avatars/bruno.webp" },
+    { "key": "carlos", "label": "Carlos", "color": "#8CCB6E", "image": "assets/avatars/carlos.webp" },
+    { "key": "diogo", "label": "Diogo", "color": "#5DCAA5", "image": "assets/avatars/diogo.webp" },
+    { "key": "ellen", "label": "Ellen", "color": "#F0997B", "image": "assets/avatars/ellen.webp" },
+    { "key": "fred", "label": "Fred", "color": "#E8665A", "image": "assets/avatars/fred.webp" },
+    { "key": "matilde", "label": "Matilde", "color": "#9FE07A", "image": "assets/avatars/matilde.webp" },
+    { "key": "paulo", "label": "Paulo", "color": "#AFA9EC", "image": "assets/avatars/paulo.webp" },
+    { "key": "rui", "label": "Rui", "color": "#7FD6C2", "image": "assets/avatars/rui.webp" },
+    { "key": "tarik", "label": "Tarik", "color": "#E3B26B", "image": "assets/avatars/tarik.webp" },
+    { "key": "vitor", "label": "Vitor", "color": "#85B7EB", "image": "assets/avatars/vitor.webp" }
   ],
   "rarity": {
   "yearPoints": [
