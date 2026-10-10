@@ -86,7 +86,7 @@ function createAvatarOption(avatar, isChecked, initial = '?') {
     input.value = avatar.key;
     input.checked = isChecked;
     input.className = 'avatar-radio';
-    input.setAttribute('aria-label', `${avatar.label} record`);
+    input.setAttribute('aria-label', `${avatar.label} ${avatar.image ? 'avatar' : 'record'}`);
 
     const option = document.createElement('label');
     option.className = 'avatar-option';
@@ -136,15 +136,24 @@ export function renderSettingsGenreLimit(max) {
 }
 
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
+    const record = document.createElement('span');
+    record.className = 'record-avatar';
+    record.setAttribute('aria-hidden', 'true');
+
+    if (avatar.image) {
+        const image = document.createElement('img');
+        image.className = 'record-image';
+        image.src = avatar.image;
+        image.alt = '';
+        record.append(image);
+        return record;
+    }
+
     const label = document.createElement('span');
     label.className = 'record-label';
     label.textContent = profile.name.charAt(0).toUpperCase();
     label.style.setProperty('--avatar-color', avatar.color);
     label.style.setProperty('--avatar-ink', avatar.ink);
-
-    const record = document.createElement('span');
-    record.className = 'record-avatar';
-    record.setAttribute('aria-hidden', 'true');
     record.append(label);
     return record;
 }
