@@ -259,6 +259,7 @@ function init() {
     }
 
     function handleLogOut() {
+        pauseRevealedPreview();
         binderPlayer.stop();
         logOut();
         currentProfile = null;
@@ -270,6 +271,7 @@ function init() {
     }
 
     function showSettings() {
+        pauseRevealedPreview();
         binderPlayer.stop();
         const settings = store.getSettings();
 
@@ -376,6 +378,7 @@ function init() {
     }
 
     function showCollection() {
+        pauseRevealedPreview();
         const collection = store.getCollection();
         const firstDate = getFirstDate(collection);
         const tiers = config?.rarity?.tiers ?? [];
