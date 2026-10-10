@@ -33,6 +33,8 @@ export function sortCollection(collection, sort) {
             return sorted.sort((a, b) => a.number - b.number);
         case 'title':
             return sorted.sort((a, b) => a.song.trackName.localeCompare(b.song.trackName));
+        case 'rating':
+            return sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.number - a.number);
         default:
             return sorted.sort((a, b) => b.number - a.number);
     }
