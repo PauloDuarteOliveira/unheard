@@ -17,6 +17,7 @@ const unveilTitle = document.querySelector('#unveil-title');
 const unveilSubtitle = document.querySelector('#unveil-subtitle');
 const statusText = document.querySelector('#status');
 const revealed = document.querySelector('#revealed');
+const binderVolume = document.querySelector('#binder-volume');
 const modeCard = document.querySelector('#mode-card');
 const modeStamp = document.querySelector('#mode-stamp');
 const modeDescription = document.querySelector('#mode-description');
@@ -447,11 +448,15 @@ export function renderVolume(volume) {
     const audio = revealed.querySelector('audio');
     if (audio) audio.volume = volume;
 
-    const slider = revealed.querySelector('.volume-slider');
-    if (slider) slider.value = String(Math.round(volume * 100));
+    document.querySelectorAll('.volume-slider').forEach((slider) => {
+        slider.value = String(Math.round(volume * 100));
+    });
 
-    const muteButton = revealed.querySelector('.audio-mute');
-    if (muteButton) setMuteState(muteButton, volume);
+    document.querySelectorAll('.audio-mute').forEach((muteButton) => setMuteState(muteButton, volume));
+}
+
+export function renderBinderVolume(volume) {
+    binderVolume.replaceChildren(createVolumeControl(volume));
 }
 
 function createAudioDock(song, volume) {

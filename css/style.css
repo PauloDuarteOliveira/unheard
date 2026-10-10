@@ -836,6 +836,10 @@ h2 {
   display: none;
 }
 
+.binder-volume {
+  display: contents;
+}
+
 .audio-play {
   width: 44px;
   height: 44px;
@@ -2764,6 +2768,10 @@ h2 {
     margin: 0;
     accent-color: rgb(var(--mode-rgb));
     cursor: pointer;
+  }
+
+  .binder-volume .volume-slider {
+    accent-color: var(--text);
   }
 
   .mode-card {

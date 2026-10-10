@@ -17,7 +17,7 @@ import {
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
     renderSets, renderBinderTab, renderRating, renderThemeControls, renderBinderPlayback,
-    pauseRevealedPreview, renderVolume,
+    pauseRevealedPreview, renderVolume, renderBinderVolume,
 } from './render.js';
 
 import {
@@ -81,6 +81,7 @@ function init() {
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
     const binderForm = document.querySelector('#binder-filters');
+    const binderVolume = document.querySelector('#binder-volume');
     const settingsButton = document.querySelector('#settings-button');
     const settingsBackButton = document.querySelector('#settings-back');
     const settingsLogoutButton = document.querySelector('#settings-logout');
@@ -111,9 +112,13 @@ function init() {
         renderVolume(volume);
     }
 
-    function handleRevealedInput(event) {
+    function handleVolumeInput(event) {
         if (event.target.dataset.action !== 'volume') return;
         setVolume(Number(event.target.value) / 100);
+    }
+
+    function handleBinderVolumeClick(event) {
+        if (event.target.closest('[data-action="mute"]')) toggleMute();
     }
 
     function toggleMute() {
@@ -381,6 +386,7 @@ function init() {
         renderRarityFilter(tiers);
         renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
+        renderBinderVolume(store.getSettings().volume);
         showBinderCards();
         renderSets(getSets(collection, pool, getBlockedGenres()));
         renderBinderTab('pressings');
@@ -534,7 +540,8 @@ function init() {
         renderBinderPlayback(binderPlayer.getState());
     }
 
-    function handleBinderFilterInput() {
+    function handleBinderFilterInput(event) {
+        if (event.target.dataset.action === 'volume') return;
         writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
         showBinderCards();
     }
@@ -659,7 +666,9 @@ function init() {
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
-    revealed.addEventListener('input', handleRevealedInput);
+    revealed.addEventListener('input', handleVolumeInput);
+    binderVolume.addEventListener('input', handleVolumeInput);
+    binderVolume.addEventListener('click', handleBinderVolumeClick);
     retryButton.addEventListener('click', handleUnveil)
     dialSelect.addEventListener('change', handleOptionChange);
     createForm.addEventListener('input', handleCreateInput);
