@@ -934,6 +934,26 @@ export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     elements.rarity.value = rarity;
 }
 
+function setFilterState(select, value, defaultValue, colorKey) {
+    const wrap = select.closest('.select-wrap');
+    const isActive = value !== defaultValue;
+    wrap.classList.toggle('is-active', isActive);
+    if (!colorKey) return;
+
+    if (isActive) {
+        wrap.dataset[colorKey] = value;
+    } else {
+        delete wrap.dataset[colorKey];
+    }
+}
+
+export function renderFilterState({ mode, rarity, sort }, defaults) {
+    const { elements } = binderForm;
+    setFilterState(elements.mode, mode, defaults.mode, 'mode');
+    setFilterState(elements.rarity, rarity, defaults.rarity, 'rarity');
+    setFilterState(elements.sort, sort, defaults.sort);
+}
+
 export function downloadTextFile(fileName, text) {
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

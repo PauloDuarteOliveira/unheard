@@ -1885,6 +1885,38 @@ h2 {
   color: inherit;
 }
 
+.select-wrap.is-active {
+  color: var(--text);
+}
+
+.select-wrap.is-active .binder-select {
+  border-color: currentColor;
+  background-color: var(--surface-raised);
+}
+
+.select-wrap.is-active[data-mode] {
+  color: rgb(var(--mode-rgb));
+}
+
+.select-wrap.is-active[data-mode] .binder-select {
+  background-color: rgba(var(--mode-rgb), 0.1);
+}
+
+.select-wrap.is-active[data-rarity="uncommon"] {
+  color: var(--silver);
+}
+
+.select-wrap.is-active[data-rarity="rare"],
+.select-wrap.is-active[data-rarity="legendary"] {
+  color: var(--gold);
+}
+
+.select-wrap.is-active[data-rarity="epic"] .binder-select,
+.select-wrap.is-active[data-rarity="legendary"] .binder-select {
+  border-color: transparent;
+  background: linear-gradient(var(--badge-bg), var(--badge-bg)) padding-box, var(--holo) border-box;
+}
+
 .select-wrap::after {
   content: '';
   position: absolute;

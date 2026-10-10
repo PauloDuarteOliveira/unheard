@@ -12,7 +12,7 @@ import {
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderAvatarTab, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
+    renderBinderStats, renderBinderFilters, renderFilterState, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
@@ -548,6 +548,7 @@ function init() {
         }));
         const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
         renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+        renderFilterState(filters, DEFAULT_FILTERS);
         renderBinderPlayback(binderPlayer.getState());
     }
 
