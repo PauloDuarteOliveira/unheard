@@ -413,6 +413,47 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
+function setMuteState(button, volume) {
+    const isMuted = volume === 0;
+    button.querySelector('.material-symbols-outlined').textContent = isMuted ? 'volume_off' : 'volume_up';
+    button.setAttribute('aria-label', isMuted ? 'Unmute previews' : 'Mute previews');
+    button.setAttribute('aria-pressed', String(isMuted));
+}
+
+function createVolumeControl(volume) {
+    const muteButton = document.createElement('button');
+    muteButton.type = 'button';
+    muteButton.className = 'audio-mute';
+    muteButton.dataset.action = 'mute';
+    muteButton.append(createIcon('volume_up'));
+    setMuteState(muteButton, volume);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'volume-slider';
+    slider.min = '0';
+    slider.max = '100';
+    slider.value = String(Math.round(volume * 100));
+    slider.dataset.action = 'volume';
+    slider.setAttribute('aria-label', 'Preview volume');
+
+    const group = document.createElement('div');
+    group.className = 'audio-volume';
+    group.append(muteButton, slider);
+    return group;
+}
+
+export function renderVolume(volume) {
+    const audio = revealed.querySelector('audio');
+    if (audio) audio.volume = volume;
+
+    const slider = revealed.querySelector('.volume-slider');
+    if (slider) slider.value = String(Math.round(volume * 100));
+
+    const muteButton = revealed.querySelector('.audio-mute');
+    if (muteButton) setMuteState(muteButton, volume);
+}
+
 function createAudioDock(song, volume) {
     const audio = document.createElement('audio');
     audio.src = song.previewUrl;
@@ -464,7 +505,7 @@ function createAudioDock(song, volume) {
 
     const dock = document.createElement('div');
     dock.className = 'audio-dock';
-    dock.append(audio, playButton, info, progress, time, rerollButton);
+    dock.append(audio, playButton, info, progress, time, createVolumeControl(volume), rerollButton);
 
     function getDuration() {
         return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;

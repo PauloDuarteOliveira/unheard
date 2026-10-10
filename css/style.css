@@ -832,6 +832,10 @@ h2 {
   gap: 12px;
 }
 
+.audio-volume {
+  display: none;
+}
+
 .audio-play {
   width: 44px;
   height: 44px;
@@ -2724,6 +2728,42 @@ h2 {
     margin-top: 16px;
     padding: 8px 20px 8px 8px;
     gap: 16px;
+  }
+
+  .audio-volume {
+    flex-shrink: 0;
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .audio-mute {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .audio-mute:focus-visible,
+  .volume-slider:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+
+  .volume-slider {
+    width: 96px;
+    margin: 0;
+    accent-color: rgb(var(--mode-rgb));
+    cursor: pointer;
   }
 
   .mode-card {

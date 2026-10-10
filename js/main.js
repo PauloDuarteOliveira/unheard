@@ -17,7 +17,7 @@ import {
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
     renderSets, renderBinderTab, renderRating, renderThemeControls, renderBinderPlayback,
-    pauseRevealedPreview,
+    pauseRevealedPreview, renderVolume,
 } from './render.js';
 
 import {
@@ -33,6 +33,7 @@ import {
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
+const UNMUTE_VOLUME = 0.25;
 const DEV_MODE_KEY = 'unheard:devMode';
 const BINDER_FILTER_KEY = 'unheard:binderFilters';
 const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
@@ -100,8 +101,31 @@ function init() {
     let isShowingLocked = false;
     let currentOptionKey = '';
     let config = null;
+    let volumeBeforeMute = UNMUTE_VOLUME;
     let pendingProfile = null;
     let currentProfile = null;
+
+    function setVolume(volume) {
+        store.saveSettings({ ...store.getSettings(), volume });
+        binderPlayer.setVolume(volume);
+        renderVolume(volume);
+    }
+
+    function handleRevealedInput(event) {
+        if (event.target.dataset.action !== 'volume') return;
+        setVolume(Number(event.target.value) / 100);
+    }
+
+    function toggleMute() {
+        const { volume } = store.getSettings();
+
+        if (volume > 0) {
+            volumeBeforeMute = volume;
+            setVolume(0);
+        } else {
+            setVolume(volumeBeforeMute);
+        }
+    }
 
     function setTheme(theme) {
         store.saveSettings({ ...store.getSettings(), theme });
@@ -560,6 +584,9 @@ function init() {
             case 'rate':
                 rateToday(actionButton);
                 break;
+            case 'mute':
+                toggleMute();
+                break;
         }
     }
 
@@ -632,6 +659,7 @@ function init() {
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
+    revealed.addEventListener('input', handleRevealedInput);
     retryButton.addEventListener('click', handleUnveil)
     dialSelect.addEventListener('change', handleOptionChange);
     createForm.addEventListener('input', handleCreateInput);
