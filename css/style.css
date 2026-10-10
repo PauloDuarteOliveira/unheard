@@ -1874,6 +1874,30 @@ h2 {
   appearance: none;
 }
 
+.select-wrap {
+  position: relative;
+  display: inline-flex;
+  color: var(--text-soft);
+}
+
+.select-wrap .binder-select {
+  padding-right: 32px;
+  color: inherit;
+}
+
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
 .binder-select option {
   background: var(--surface);
 }

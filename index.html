@@ -256,19 +256,25 @@
         </label>
 
         <div class="binder-chips">
-          <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
-            <option value="">All modes</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
+              <option value="">All modes</option>
+            </select>
+          </span>
 
-          <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
-            <option value="">All rarities</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
+              <option value="">All rarities</option>
+            </select>
+          </span>
 
-          <select class="binder-select" name="sort" aria-label="Sort pressings">
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="title">A-Z</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="sort" aria-label="Sort pressings">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title">A-Z</option>
+            </select>
+          </span>
 
           <label class="binder-toggle">
             <input type="checkbox" name="favorites">
@@ -350,7 +356,9 @@
         </div>
         <div class="settings-row">
           <label class="settings-label" for="settings-default-mode">Default mode</label>
-          <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>
+          <span class="select-wrap">
+            <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>
+          </span>
         </div>
 
         <label class="settings-row">
