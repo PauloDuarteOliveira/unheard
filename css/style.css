@@ -1693,9 +1693,9 @@ h2 {
 
 .binder-info {
   min-width: 0;
-  padding: 10px 4px 10px 10px;
+  padding: 10px 6px 8px 10px;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 4px;
 }
 
@@ -1722,7 +1722,28 @@ h2 {
 }
 
 .binder-card .favorite-button {
-  margin-top: -8px;
+  width: 36px;
+  height: 36px;
+}
+
+.binder-rate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.binder-rate .song-rating {
+  margin-left: -4px;
+}
+
+.binder-card .star-button {
+  width: 22px;
+  height: 30px;
+}
+
+.binder-card .star-button .material-symbols-outlined {
+  font-size: 15px;
 }
 
 .favorite-button[aria-pressed="true"] {

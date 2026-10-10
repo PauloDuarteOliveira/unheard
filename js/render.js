@@ -645,7 +645,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
 
     const rateRow = document.createElement('div');
     rateRow.className = 'song-rate';
-    rateRow.append(rateLabel, createRating(song.trackName, rating), favoriteButton);
+    rateRow.append(rateLabel, createRating(number, song.trackName, rating), favoriteButton);
 
     const extras = document.createElement('div');
     extras.className = 'song-extras';
@@ -812,9 +812,16 @@ function createBinderCard(entry) {
     text.className = 'binder-text';
     text.append(title, artist, tag);
 
+    const rateRow = document.createElement('div');
+    rateRow.className = 'binder-rate';
+    rateRow.append(
+        createRating(entry.number, song.trackName, entry.rating ?? 0),
+        createFavoriteButton(entry.number, song.trackName, entry.isFavorite)
+    );
+
     const info = document.createElement('div');
     info.className = 'binder-info';
-    info.append(text, createFavoriteButton(entry.number, song.trackName, entry.isFavorite));
+    info.append(text, rateRow);
 
     const card = document.createElement('article');
     card.className = 'binder-card';
@@ -1005,9 +1012,10 @@ function setRatingState(group, rating) {
     });
 }
 
-function createRating(trackName, rating) {
+function createRating(number, trackName, rating) {
     const group = document.createElement('div');
     group.className = 'song-rating';
+    group.dataset.number = number;
     group.setAttribute('role', 'group');
     group.setAttribute('aria-label', `Rate ${trackName}`);
 
@@ -1026,9 +1034,9 @@ function createRating(trackName, rating) {
     return group;
 }
 
-export function renderRating(rating) {
-    const group = revealed.querySelector('.song-rating');
-    if (group) setRatingState(group, rating);
+export function renderRating(number, rating) {
+    document.querySelectorAll(`.song-rating[data-number="${number}"]`)
+        .forEach((group) => setRatingState(group, rating));
 }
 
 export function renderSets(sets) {

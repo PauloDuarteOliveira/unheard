@@ -557,6 +557,9 @@ function init() {
             case 'preview':
                 playBinderPreview(button);
                 break;
+            case 'rate':
+                rateEntry(Number(button.closest('.song-rating').dataset.number), Number(button.dataset.stars));
+                break;
         }
     }
 
@@ -647,13 +650,16 @@ function init() {
         if (tab) renderBinderTab(tab.dataset.tab);
     }
 
+    function rateEntry(number, stars) {
+        const collection = setRating(store.getCollection(), number, stars);
+        store.saveCollection(collection);
+        renderRating(number, collection.find((entry) => entry.number === number)?.rating ?? 0);
+        renderBinderStats(getStats(collection));
+    }
+
     function rateToday(button) {
         const today = getLockedToday();
-        if (!today) return;
-
-        const collection = setRating(store.getCollection(), today.number, Number(button.dataset.stars));
-        store.saveCollection(collection);
-        renderRating(collection.find((entry) => entry.number === today.number)?.rating ?? 0);
+        if (today) rateEntry(today.number, Number(button.dataset.stars));
     }
 
     selectMode(currentModeKey);
