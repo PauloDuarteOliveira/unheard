@@ -17,6 +17,7 @@ const unveilTitle = document.querySelector('#unveil-title');
 const unveilSubtitle = document.querySelector('#unveil-subtitle');
 const statusText = document.querySelector('#status');
 const revealed = document.querySelector('#revealed');
+const binderVolume = document.querySelector('#binder-volume');
 const modeCard = document.querySelector('#mode-card');
 const modeStamp = document.querySelector('#mode-stamp');
 const modeDescription = document.querySelector('#mode-description');
@@ -413,10 +414,55 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
-function createAudioDock(song) {
+function setMuteState(button, volume) {
+    const isMuted = volume === 0;
+    button.querySelector('.material-symbols-outlined').textContent = isMuted ? 'volume_off' : 'volume_up';
+    button.setAttribute('aria-label', isMuted ? 'Unmute previews' : 'Mute previews');
+    button.setAttribute('aria-pressed', String(isMuted));
+}
+
+function createVolumeControl(volume) {
+    const muteButton = document.createElement('button');
+    muteButton.type = 'button';
+    muteButton.className = 'audio-mute';
+    muteButton.dataset.action = 'mute';
+    muteButton.append(createIcon('volume_up'));
+    setMuteState(muteButton, volume);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'volume-slider';
+    slider.min = '0';
+    slider.max = '100';
+    slider.value = String(Math.round(volume * 100));
+    slider.dataset.action = 'volume';
+    slider.setAttribute('aria-label', 'Preview volume');
+
+    const group = document.createElement('div');
+    group.className = 'audio-volume';
+    group.append(muteButton, slider);
+    return group;
+}
+
+export function renderVolume(volume) {
+    const audio = revealed.querySelector('audio');
+    if (audio) audio.volume = volume;
+
+    document.querySelectorAll('.volume-slider').forEach((slider) => {
+        slider.value = String(Math.round(volume * 100));
+    });
+
+    document.querySelectorAll('.audio-mute').forEach((muteButton) => setMuteState(muteButton, volume));
+}
+
+export function renderBinderVolume(volume) {
+    binderVolume.replaceChildren(createVolumeControl(volume));
+}
+
+function createAudioDock(song, volume) {
     const audio = document.createElement('audio');
     audio.src = song.previewUrl;
-    audio.volume = DEFAULT_VOLUME
+    audio.volume = volume;
 
     const playButton = document.createElement('button');
     playButton.type = 'button';
@@ -464,7 +510,7 @@ function createAudioDock(song) {
 
     const dock = document.createElement('div');
     dock.className = 'audio-dock';
-    dock.append(audio, playButton, info, progress, time, rerollButton);
+    dock.append(audio, playButton, info, progress, time, createVolumeControl(volume), rerollButton);
 
     function getDuration() {
         return Number.isFinite(audio.duration) ? audio.duration : PREVIEW_SECONDS;
@@ -537,7 +583,7 @@ function createDetails(song) {
     return list;
 }
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 } = {}) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode'
 
@@ -599,7 +645,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
 
     const rateRow = document.createElement('div');
     rateRow.className = 'song-rate';
-    rateRow.append(rateLabel, createRating(song.trackName, rating), favoriteButton);
+    rateRow.append(rateLabel, createRating(number, song.trackName, rating), favoriteButton);
 
     const extras = document.createElement('div');
     extras.className = 'song-extras';
@@ -615,7 +661,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
 
     const details = createDetails(song);
 
-    const dock = createAudioDock(song);
+    const dock = createAudioDock(song, volume);
 
     const spotifyLink = document.createElement('a');
     spotifyLink.className = 'song-link song-link-primary';
@@ -645,7 +691,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     return [header, sleeve, title, meta, details, extras, dock, actions];
 }
 
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0 }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -675,7 +721,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
             revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating }));
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -766,9 +812,16 @@ function createBinderCard(entry) {
     text.className = 'binder-text';
     text.append(title, artist, tag);
 
+    const rateRow = document.createElement('div');
+    rateRow.className = 'binder-rate';
+    rateRow.append(
+        createRating(entry.number, song.trackName, entry.rating ?? 0),
+        createFavoriteButton(entry.number, song.trackName, entry.isFavorite)
+    );
+
     const info = document.createElement('div');
     info.className = 'binder-info';
-    info.append(text, createFavoriteButton(entry.number, song.trackName, entry.isFavorite));
+    info.append(text, rateRow);
 
     const card = document.createElement('article');
     card.className = 'binder-card';
@@ -959,9 +1012,10 @@ function setRatingState(group, rating) {
     });
 }
 
-function createRating(trackName, rating) {
+function createRating(number, trackName, rating) {
     const group = document.createElement('div');
     group.className = 'song-rating';
+    group.dataset.number = number;
     group.setAttribute('role', 'group');
     group.setAttribute('aria-label', `Rate ${trackName}`);
 
@@ -980,9 +1034,9 @@ function createRating(trackName, rating) {
     return group;
 }
 
-export function renderRating(rating) {
-    const group = revealed.querySelector('.song-rating');
-    if (group) setRatingState(group, rating);
+export function renderRating(number, rating) {
+    document.querySelectorAll(`.song-rating[data-number="${number}"]`)
+        .forEach((group) => setRatingState(group, rating));
 }
 
 export function renderSets(sets) {

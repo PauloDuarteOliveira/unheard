@@ -17,7 +17,7 @@ import {
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
     renderSets, renderBinderTab, renderRating, renderThemeControls, renderBinderPlayback,
-    pauseRevealedPreview,
+    pauseRevealedPreview, renderVolume, renderBinderVolume,
 } from './render.js';
 
 import {
@@ -33,6 +33,7 @@ import {
 
 const TICK_MS = 1000;
 const DEFAULT_MODE = 'random';
+const UNMUTE_VOLUME = 0.25;
 const DEV_MODE_KEY = 'unheard:devMode';
 const BINDER_FILTER_KEY = 'unheard:binderFilters';
 const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
@@ -80,6 +81,7 @@ function init() {
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
     const binderForm = document.querySelector('#binder-filters');
+    const binderVolume = document.querySelector('#binder-volume');
     const settingsButton = document.querySelector('#settings-button');
     const settingsBackButton = document.querySelector('#settings-back');
     const settingsLogoutButton = document.querySelector('#settings-logout');
@@ -100,8 +102,35 @@ function init() {
     let isShowingLocked = false;
     let currentOptionKey = '';
     let config = null;
+    let volumeBeforeMute = UNMUTE_VOLUME;
     let pendingProfile = null;
     let currentProfile = null;
+
+    function setVolume(volume) {
+        store.saveSettings({ ...store.getSettings(), volume });
+        binderPlayer.setVolume(volume);
+        renderVolume(volume);
+    }
+
+    function handleVolumeInput(event) {
+        if (event.target.dataset.action !== 'volume') return;
+        setVolume(Number(event.target.value) / 100);
+    }
+
+    function handleBinderVolumeClick(event) {
+        if (event.target.closest('[data-action="mute"]')) toggleMute();
+    }
+
+    function toggleMute() {
+        const { volume } = store.getSettings();
+
+        if (volume > 0) {
+            volumeBeforeMute = volume;
+            setVolume(0);
+        } else {
+            setVolume(volumeBeforeMute);
+        }
+    }
 
     function setTheme(theme) {
         store.saveSettings({ ...store.getSettings(), theme });
@@ -118,6 +147,7 @@ function init() {
         store = createStore(profile.id);
         applyTheme(store.getSettings().theme);
         renderThemeControls(store.getSettings().theme);
+        binderPlayer.setVolume(store.getSettings().volume);
         selectMode(store.getSettings().defaultMode);
         showCurrentState();
         setCurrentProfile(profile.id);
@@ -356,6 +386,7 @@ function init() {
         renderRarityFilter(tiers);
         renderRarityLegend(tiers);
         renderBinderFilters(getBinderFilters());
+        renderBinderVolume(store.getSettings().volume);
         showBinderCards();
         renderSets(getSets(collection, pool, getBlockedGenres()));
         renderBinderTab('pressings');
@@ -388,6 +419,7 @@ function init() {
                 rarityLabel: getTierLabel(entry?.rarity),
                 unlockMessage: getUnlockMessage(entry),
                 rating: entry?.rating ?? 0,
+                volume: store.getSettings().volume,
             });
         } else {
             showPhase('idle');
@@ -508,7 +540,8 @@ function init() {
         renderBinderPlayback(binderPlayer.getState());
     }
 
-    function handleBinderFilterInput() {
+    function handleBinderFilterInput(event) {
+        if (event.target.dataset.action === 'volume') return;
         writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
         showBinderCards();
     }
@@ -523,6 +556,9 @@ function init() {
                 break;
             case 'preview':
                 playBinderPreview(button);
+                break;
+            case 'rate':
+                rateEntry(Number(button.closest('.song-rating').dataset.number), Number(button.dataset.stars));
                 break;
         }
     }
@@ -557,6 +593,9 @@ function init() {
                 break;
             case 'rate':
                 rateToday(actionButton);
+                break;
+            case 'mute':
+                toggleMute();
                 break;
         }
     }
@@ -611,13 +650,16 @@ function init() {
         if (tab) renderBinderTab(tab.dataset.tab);
     }
 
+    function rateEntry(number, stars) {
+        const collection = setRating(store.getCollection(), number, stars);
+        store.saveCollection(collection);
+        renderRating(number, collection.find((entry) => entry.number === number)?.rating ?? 0);
+        renderBinderStats(getStats(collection));
+    }
+
     function rateToday(button) {
         const today = getLockedToday();
-        if (!today) return;
-
-        const collection = setRating(store.getCollection(), today.number, Number(button.dataset.stars));
-        store.saveCollection(collection);
-        renderRating(collection.find((entry) => entry.number === today.number)?.rating ?? 0);
+        if (today) rateEntry(today.number, Number(button.dataset.stars));
     }
 
     selectMode(currentModeKey);
@@ -630,6 +672,9 @@ function init() {
     unveilButton.addEventListener('click', handleUnveil);
     tabList.addEventListener('click', handleTabClick);
     revealed.addEventListener('click', handleRevealedClick);
+    revealed.addEventListener('input', handleVolumeInput);
+    binderVolume.addEventListener('input', handleVolumeInput);
+    binderVolume.addEventListener('click', handleBinderVolumeClick);
     retryButton.addEventListener('click', handleUnveil)
     dialSelect.addEventListener('change', handleOptionChange);
     createForm.addEventListener('input', handleCreateInput);
