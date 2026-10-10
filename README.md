@@ -17,7 +17,8 @@ A failed attempt never uses up the daily discovery: the lock is saved only after
 - **If something fails**, an error card explains what happened (no connection, no playable song, or the search terms could not load) and offers **Try again**.
 - **If a preview stops working after the day is locked**, the player shows **Re-roll**, which finds a new song in the same mode and keeps the same catalog number.
 - **Share** copies "Today I discovered … by … 🎧" to the clipboard.
-- **Rate it:** five stars under the song, next to the favorite heart. Tapping the same star again clears the rating. The rating is saved with the song in the collection.
+- **Rate it:** five stars under the song, next to the favorite heart. Tapping the same star again clears the rating. The rating is saved with the song in the collection, and can also be changed later from the binder.
+- **Volume (desktop):** the player ends with a mute button and a volume slider. On phones, the device's own volume buttons are used instead.
 
 ## Profiles
 
@@ -37,7 +38,7 @@ Each profile has its own daily lock and catalog numbers, so two people can each 
 | `unheard:currentProfile` | The id of the logged-in profile |
 | `unheard:<id>:today` | That profile's discovery of the day: date, mode, option, song and catalog number |
 | `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag, rarity and whether it filled a new set slot |
-| `unheard:<id>:settings` | That profile's settings: blocked genres, default mode and preview autoplay |
+| `unheard:<id>:settings` | That profile's settings: blocked genres, default mode, preview autoplay, theme and preview volume |
 
 To block a genre, the app looks up its `matches` in `data/pool.json` (the genre names iTunes uses, for example Hip-Hop is `"Hip-Hop/Rap"`) and drops every song whose `primaryGenreName` is on that list. "Hard Rock" is listed under both Rock and Metal, so blocking Metal also removes Hard Rock songs.
 
@@ -47,7 +48,8 @@ Every discovery becomes a card in the profile's binder, opened from the profile 
 
 - **Cards** show the cover, catalog number, rarity badge, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
 - **Play the previews:** every cover has a play button. While a card plays, its button turns into a pause button in the mode's color, a glowing line along the bottom of the cover shows the progress, and the card's info is tinted. Only one preview plays at a time: the binder has a single audio player (`js/player.js`), so starting another card stops the previous one immediately. It also pauses today's song on the Revealed screen, and stops when you leave the binder.
-- **Favorites:** a heart on each card and on the Revealed screen. Both hearts stay in sync.
+- **Rate and favorite:** each card ends with five small stars (in the card's mode color) and the heart. Ratings and favorites made in the binder and on the Revealed screen always stay in sync, because both screens update every control for that catalog number.
+- **Volume (desktop):** one mute button and slider at the end of the filter row. It shares the same saved volume as the Today player, so changing it in one place changes it in the other.
 - **Stats:** pressings, countries visited with World Explorer, Legendary cards, and on desktop the average star rating.
 - **Search** by title, artist or tag, **filter** by mode, rarity or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
 - **Sets** (a second tab on phones, a side panel on desktop): World tour (24 countries), Decades (7), Moods (8) and Genres (18, minus the profile's blocked genres), each with a progress bar and a "?" for every slot still missing. A slot is filled by a discovery in that mode with that option.
@@ -138,7 +140,7 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `js/store.js` | Safe JSON reading and writing (in `localStorage` or `sessionStorage`), and one store per profile |
 | `js/render.js` | Everything that changes the page, including the audio player |
 | `js/theme.js` | Applies the selected mode's color and the dark or light theme |
-| `js/player.js` | The binder's single preview player, as a closure: play, pause, stop and progress |
+| `js/player.js` | The binder's single preview player, as a closure: play, pause, stop, progress and volume |
 | `js/utils.js` | Dates (including moving a date by days), countdown, greeting, links and other small helpers |
 
 ## Screen sizes
@@ -180,7 +182,7 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Collector binder: cards, favorites, stats, search, filters and sort, in the three layouts
 - Settings: edit name and record, Negative harmony, default mode, preview autoplay, export favorites, delete profile with confirmation, and the daily streak in the header
 - Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
-- Polish: star ratings, a light theme (Settings and the desktop header), the binder preview player, the desktop binder side panel, and a clearer error state
+- Polish: star ratings (on Revealed and the binder cards), a light theme (Settings and the desktop header), the binder preview player, a saved preview volume with desktop controls, the desktop binder side panel, and a clearer error state
 
 **Next**
 
