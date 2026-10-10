@@ -37,6 +37,7 @@ const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
 const profileGrid = document.querySelector('#profile-grid');
 const createPreview = document.querySelector('#create-preview');
 const createPreviewName = document.querySelector('#create-preview-name');
+const avatarPicker = document.querySelector('#avatar-picker');
 const avatarOptions = document.querySelector('#avatar-options');
 const nameHint = document.querySelector('#profile-name-hint');
 const nameInput = document.querySelector('#profile-name');
@@ -94,9 +95,28 @@ function createAvatarOption(avatar, isChecked, initial = '?') {
     return option;
 }
 
+function fillAvatarPicker(picker, avatars, selectedKey, initial) {
+    const toOption = (avatar) => createAvatarOption(avatar, avatar.key === selectedKey, initial);
+    const records = avatars.filter((avatar) => !avatar.image).map(toOption);
+    const images = avatars.filter((avatar) => avatar.image).map(toOption);
+    picker.querySelector('[data-panel="records"]').replaceChildren(...records);
+    picker.querySelector('[data-panel="avatars"]').replaceChildren(...images);
+
+    const selected = avatars.find((avatar) => avatar.key === selectedKey);
+    renderAvatarTab(picker, selected?.image ? 'avatars' : 'records');
+}
+
+export function renderAvatarTab(picker, tabName) {
+    picker.querySelectorAll('[role="tab"]').forEach((tab) => {
+        tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName));
+    });
+    picker.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+        panel.classList.toggle('is-hidden', panel.dataset.panel !== tabName);
+    });
+}
+
 export function renderAvatarOptions(avatars, selectedKey) {
-    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key === selectedKey));
-    avatarOptions.replaceChildren(...options);
+    fillAvatarPicker(avatarPicker, avatars, selectedKey);
 }
 
 export function renderCreatePreview(name, avatar) {

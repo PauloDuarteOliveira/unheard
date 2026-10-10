@@ -47,9 +47,18 @@
           <p class="field-hint" id="profile-name-hint">Up to 20 characters. Shown in your greeting.</p>
         </div>
 
-        <fieldset class="avatar-picker">
+        <fieldset class="avatar-picker" id="avatar-picker">
           <legend class="field-label">Pick your record</legend>
-          <div class="avatar-options" id="avatar-options"></div>
+          <div class="avatar-tabs" role="tablist" aria-label="Record or avatar">
+            <button class="avatar-tab" id="tab-records" type="button" role="tab" data-tab="records"
+              aria-controls="avatar-options" aria-selected="true">Records</button>
+            <button class="avatar-tab" id="tab-avatars" type="button" role="tab" data-tab="avatars"
+              aria-controls="avatar-images" aria-selected="false">Avatars</button>
+          </div>
+          <div class="avatar-options" id="avatar-options" role="tabpanel" data-panel="records"
+            aria-labelledby="tab-records"></div>
+          <div class="avatar-options is-hidden" id="avatar-images" role="tabpanel" data-panel="avatars"
+            aria-labelledby="tab-avatars"></div>
         </fieldset>
 
         <div class="create-actions">
