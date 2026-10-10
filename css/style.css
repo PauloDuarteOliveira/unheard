@@ -1855,7 +1855,8 @@ h2 {
 }
 
 .binder-select,
-.binder-toggle {
+.binder-toggle,
+.binder-clear {
   height: 40px;
   padding: 0 12px;
   border-radius: 8px;
@@ -1872,6 +1873,28 @@ h2 {
 
 .binder-select {
   appearance: none;
+}
+
+.binder-clear {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+}
+
+.binder-clear .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.binder-clear:hover {
+  color: var(--text);
+  border-color: var(--text-soft);
+}
+
+.binder-clear:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .select-wrap {
@@ -3102,13 +3125,16 @@ h2 {
 
   .binder-filters {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
 
   .binder-search {
-    width: 300px;
+    flex: 1 1 180px;
+    min-width: 0;
+    max-width: 300px;
   }
 
   .binder-grid {
