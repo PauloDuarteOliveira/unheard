@@ -57,6 +57,7 @@ const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
 const settingsName = document.querySelector('#settings-name');
 const settingsNameHint = document.querySelector('#settings-name-hint');
+const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
 const settingsAvatar = document.querySelector('#settings-avatar');
 const settingsGenreChips = document.querySelector('#settings-genre-chips');
 const settingsGenreCount = document.querySelector('#settings-genre-count');
@@ -287,11 +288,9 @@ export function renderMenuOpen(isOpen) {
 
 export function renderSettingsProfile(profile, avatars) {
     const initial = profile.name.charAt(0).toUpperCase();
-    const options = avatars.map((avatar) => createAvatarOption(avatar, avatar.key ===
-        profile.avatar, initial));
 
     settingsName.value = profile.name;
-    settingsAvatar.replaceChildren(...options);
+    fillAvatarPicker(settingsAvatarPicker, avatars, profile.avatar, initial);
     renderSettingsNameError('');
 }
 

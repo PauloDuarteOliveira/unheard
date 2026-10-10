@@ -71,6 +71,7 @@ function init() {
     const profileGrid = document.querySelector('#profile-grid');
     const createForm = document.querySelector('#create-form');
     const avatarPicker = document.querySelector('#avatar-picker');
+    const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
     const createBackButton = document.querySelector('#create-back');
     const harmonyForm = document.querySelector('#harmony-form');
     const harmonyBackButton = document.querySelector('#harmony-back');
@@ -690,6 +691,7 @@ function init() {
     createForm.addEventListener('input', handleCreateInput);
     createForm.addEventListener('submit', handleCreateSubmit);
     avatarPicker.addEventListener('click', handleAvatarTabClick);
+    settingsAvatarPicker.addEventListener('click', handleAvatarTabClick);
     createBackButton.addEventListener('click', showProfiles);
     harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
     harmonyForm.addEventListener('submit', handleHarmonySubmit);
