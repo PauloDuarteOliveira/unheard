@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,dark_mode,delete,download,error,expand_more,favorite,hourglass_empty,library_music,light_mode,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star,volume_off,volume_up&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,close,dark_mode,delete,download,error,expand_more,favorite,hourglass_empty,library_music,light_mode,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star,volume_off,volume_up&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -256,25 +256,37 @@
         </label>
 
         <div class="binder-chips">
-          <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
-            <option value="">All modes</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="mode" id="binder-mode" aria-label="Filter by mode">
+              <option value="">All modes</option>
+            </select>
+          </span>
 
-          <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
-            <option value="">All rarities</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="rarity" id="binder-rarity" aria-label="Filter by rarity">
+              <option value="">All rarities</option>
+            </select>
+          </span>
 
-          <select class="binder-select" name="sort" aria-label="Sort pressings">
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="title">A-Z</option>
-          </select>
+          <span class="select-wrap">
+            <select class="binder-select" name="sort" aria-label="Sort pressings">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title">A-Z</option>
+              <option value="rating">Top rated</option>
+            </select>
+          </span>
 
           <label class="binder-toggle">
             <input type="checkbox" name="favorites">
             <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
             Favorites
           </label>
+
+          <button class="binder-clear" id="binder-clear" type="button" hidden>
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            Clear
+          </button>
 
           <div class="binder-volume" id="binder-volume"></div>
         </div>
@@ -350,7 +362,9 @@
         </div>
         <div class="settings-row">
           <label class="settings-label" for="settings-default-mode">Default mode</label>
-          <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>
+          <span class="select-wrap">
+            <select class="binder-select" id="settings-default-mode" name="defaultMode"></select>
+          </span>
         </div>
 
         <label class="settings-row">

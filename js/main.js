@@ -12,7 +12,7 @@ import {
     renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
     renderAvatarOptions, renderAvatarTab, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
-    renderBinderStats, renderBinderFilters, renderModeFilters, renderSettingsProfile,
+    renderBinderStats, renderBinderFilters, renderFilterState, renderModeFilters, renderSettingsProfile,
     renderSettingsNameError, renderSettingsInitial, renderSettingsHarmony, renderSettingsGenreLimit,
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
@@ -83,6 +83,7 @@ function init() {
     const collectionBackButton = document.querySelector('#collection-back');
     const binderGrid = document.querySelector('#binder-grid');
     const binderForm = document.querySelector('#binder-filters');
+    const binderClearButton = document.querySelector('#binder-clear');
     const binderVolume = document.querySelector('#binder-volume');
     const settingsButton = document.querySelector('#settings-button');
     const settingsBackButton = document.querySelector('#settings-back');
@@ -548,12 +549,19 @@ function init() {
         }));
         const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
         renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+        renderFilterState(filters, DEFAULT_FILTERS);
         renderBinderPlayback(binderPlayer.getState());
     }
 
     function handleBinderFilterInput(event) {
         if (event.target.dataset.action === 'volume') return;
         writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
+        showBinderCards();
+    }
+
+    function clearBinderFilters() {
+        writeJson(BINDER_FILTER_KEY, DEFAULT_FILTERS, sessionStorage);
+        renderBinderFilters(DEFAULT_FILTERS);
         showBinderCards();
     }
 
@@ -706,6 +714,7 @@ function init() {
     binderGrid.addEventListener('click', handleBinderClick);
     binderForm.addEventListener('input', handleBinderFilterInput);
     binderForm.addEventListener('submit', (event) => event.preventDefault());
+    binderClearButton.addEventListener('click', clearBinderFilters);
     settingsButton.addEventListener('click', showSettings);
     settingsBackButton.addEventListener('click', () => renderView('today'));
     settingsLogoutButton.addEventListener('click', handleLogOut);

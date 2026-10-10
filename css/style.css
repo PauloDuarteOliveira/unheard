@@ -1855,7 +1855,8 @@ h2 {
 }
 
 .binder-select,
-.binder-toggle {
+.binder-toggle,
+.binder-clear {
   height: 40px;
   padding: 0 12px;
   border-radius: 8px;
@@ -1872,6 +1873,84 @@ h2 {
 
 .binder-select {
   appearance: none;
+}
+
+.binder-clear {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+}
+
+.binder-clear .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.binder-clear:hover {
+  color: var(--text);
+  border-color: var(--text-soft);
+}
+
+.binder-clear:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.select-wrap {
+  position: relative;
+  display: inline-flex;
+  color: var(--text-soft);
+}
+
+.select-wrap .binder-select {
+  padding-right: 32px;
+  color: inherit;
+}
+
+.select-wrap.is-active {
+  color: var(--text);
+}
+
+.select-wrap.is-active .binder-select {
+  border-color: currentColor;
+  background-color: var(--surface-raised);
+}
+
+.select-wrap.is-active[data-mode] {
+  color: rgb(var(--mode-rgb));
+}
+
+.select-wrap.is-active[data-mode] .binder-select {
+  background-color: rgba(var(--mode-rgb), 0.1);
+}
+
+.select-wrap.is-active[data-rarity="uncommon"] {
+  color: var(--silver);
+}
+
+.select-wrap.is-active[data-rarity="rare"],
+.select-wrap.is-active[data-rarity="legendary"] {
+  color: var(--gold);
+}
+
+.select-wrap.is-active[data-rarity="epic"] .binder-select,
+.select-wrap.is-active[data-rarity="legendary"] .binder-select {
+  border-color: transparent;
+  background: linear-gradient(var(--badge-bg), var(--badge-bg)) padding-box, var(--holo) border-box;
+}
+
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
 }
 
 .binder-select option {
@@ -3046,13 +3125,16 @@ h2 {
 
   .binder-filters {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
 
   .binder-search {
-    width: 300px;
+    flex: 1 1 180px;
+    min-width: 0;
+    max-width: 300px;
   }
 
   .binder-grid {

@@ -55,6 +55,7 @@ const statCountries = document.querySelector('#stat-countries');
 const statLegendary = document.querySelector('#stat-legendary');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
+const binderClear = document.querySelector('#binder-clear');
 const settingsName = document.querySelector('#settings-name');
 const settingsNameHint = document.querySelector('#settings-name-hint');
 const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
@@ -932,6 +933,29 @@ export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     elements.sort.value = sort;
     elements.favorites.checked = favorites;
     elements.rarity.value = rarity;
+}
+
+function setFilterState(select, value, defaultValue, colorKey) {
+    const wrap = select.closest('.select-wrap');
+    const isActive = value !== defaultValue;
+    wrap.classList.toggle('is-active', isActive);
+    if (!colorKey) return;
+
+    if (isActive) {
+        wrap.dataset[colorKey] = value;
+    } else {
+        delete wrap.dataset[colorKey];
+    }
+}
+
+export function renderFilterState(filters, defaults) {
+    const { elements } = binderForm;
+    setFilterState(elements.mode, filters.mode, defaults.mode, 'mode');
+    setFilterState(elements.rarity, filters.rarity, defaults.rarity, 'rarity');
+    setFilterState(elements.sort, filters.sort, defaults.sort);
+
+    const isFiltered = Object.keys(defaults).some((key) => filters[key] !== defaults[key]);
+    binderClear.hidden = !isFiltered;
 }
 
 export function downloadTextFile(fileName, text) {
