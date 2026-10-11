@@ -25,7 +25,7 @@ A failed attempt never uses up the daily discovery: the lock is saved only after
 Several people can share one browser, each with their own profile:
 
 - **Who's listening?** shows every profile as a record, plus a tile to add a new one.
-- **Create your profile** asks for a name (up to 20 characters, no duplicates) and a record color, with a live preview of the record.
+- **Create your profile** asks for a name (up to 20 characters, no duplicates) and a look, with a live preview. The picker has two tabs: **Records** (six colors, the vinyl shows your initial) and **Avatars** (11 round pictures of classmates). Both are saved the same way, as one key, and avatars may be shared by several profiles.
 - **Negative harmony** is an optional second step: block up to 3 genres you never want to hear. Blocked genres are removed from every mode's results, and they disappear from the Genre dial.
 - **The profile menu** in the header shows who is logged in, opens the **Collection** and **Settings**, and has **Log out**.
 - **The streak** (🔥) in the header counts the days in a row with a discovery. It is calculated from the collection dates, so it never goes out of sync, and a day without a discovery yet does not break it until midnight. On desktop it also shows the best streak.
@@ -34,7 +34,7 @@ Each profile has its own daily lock and catalog numbers, so two people can each 
 
 | `localStorage` key | What it holds |
 |---|---|
-| `unheard:profiles` | The list of profiles: id, name and avatar color |
+| `unheard:profiles` | The list of profiles: id, name and avatar key (a record color or a picture) |
 | `unheard:currentProfile` | The id of the logged-in profile |
 | `unheard:<id>:today` | That profile's discovery of the day: date, mode, option, song and catalog number |
 | `unheard:<id>:collection` | Every discovery of that profile, with its favorite flag, rarity and whether it filled a new set slot |
@@ -51,7 +51,8 @@ Every discovery becomes a card in the profile's binder, opened from the profile 
 - **Rate and favorite:** each card ends with five small stars (in the card's mode color) and the heart. Ratings and favorites made in the binder and on the Revealed screen always stay in sync, because both screens update every control for that catalog number.
 - **Volume (desktop):** one mute button and slider at the end of the filter row. It shares the same saved volume as the Today player, so changing it in one place changes it in the other.
 - **Stats:** pressings, countries visited with World Explorer, Legendary cards, and on desktop the average star rating.
-- **Search** by title, artist or tag, **filter** by mode, rarity or favorites, and **sort** by newest, oldest or A–Z. The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
+- **Search** by title, artist or tag, **filter** by mode, rarity or favorites, and **sort** by newest, oldest, A–Z or **top rated** (most stars first, unrated songs last). The filters are kept in `sessionStorage` (`unheard:binderFilters`), so they survive going back to Today or a refresh, and reset on log out or when the tab closes.
+- **Active filters light up:** every dropdown has an arrow, and a filter that is not on its default changes color. The mode filter takes the mode's color, the rarity filter the tier's color (with the holo border for Epic and Legendary), and the sort turns white. A dashed **Clear** chip appears while anything is filtered and resets everything in one tap.
 - **Sets** (a second tab on phones, a side panel on desktop): World tour (24 countries), Decades (7), Moods (8) and Genres (18, minus the profile's blocked genres), each with a progress bar and a "?" for every slot still missing. A slot is filled by a discovery in that mode with that option.
 
 The grid has 2 columns on phones, as many 200 px columns as fit on desktop, and 4 columns in landscape, where the title and the tabs share the first row and the search and filters the second. On desktop there are no tabs: the cards fill the left column, and a 320 px panel on the right holds the four stats and the sets.
@@ -90,7 +91,7 @@ When a discovery fills a new set slot, the Revealed screen says so, for example 
 
 Opened from the profile menu. There is no Save button: every change is saved as soon as it is made.
 
-- **Profile:** change the name (validated like on creation, but a profile may keep its own name) and the record color. The records preview the new initial while typing.
+- **Profile:** change the name (validated like on creation, but a profile may keep its own name) and the look, with the same Records / Avatars tabs as on creation. The picker opens on the tab of the current look, and the records preview the new initial while typing.
 - **Negative harmony:** the same genre chips and 3-genre limit as when creating a profile. Blocking the genre picked in the Genre dial resets the dial to "Surprise me".
 - **Preferences:** the **theme** (dark by default, or light), the default mode selected after logging in, and **Play preview on unveil**. It is off by default, because browsers may block sound that starts by itself; if they do, the preview simply waits for the play button.
 - **Your data:** **Export favorites** downloads a text file (`unheard-favorites-<date>.txt`) with one `Artist - Title` per line, oldest first, ready to paste into a playlist import tool. It is built in the browser with a `Blob`.
@@ -129,7 +130,8 @@ This project uses JavaScript modules (`<script type="module">`), so it will not 
 | `index.html` | The single page of the app |
 | `css/style.css` | Styles. Every color is a CSS variable, and each mode swaps its own color |
 | `data/pool.json` | Search terms for every mode: random words, decades, countries, moods and genres (with the iTunes genre names each genre matches) |
-| `data/config.json` | The six avatar record colors, and the rarity rules and tiers |
+| `data/config.json` | The avatars (six record colors and 11 pictures, told apart by an `image` field), and the rarity rules and tiers |
+| `assets/avatars/` | The avatar pictures: 256×256 WebP, about 13–27 KB each |
 | `js/main.js` | Entry point: connects all the modules and handles clicks |
 | `js/collection.js` | Pure functions for the binder: add, favorite, tag, stats, filter, sort, sets, favorites export and streaks |
 | `js/rarity.js` | Scores a discovery and finds its rarity tier |
@@ -183,6 +185,7 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Settings: edit name and record, Negative harmony, default mode, preview autoplay, export favorites, delete profile with confirmation, and the daily streak in the header
 - Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
 - Polish: star ratings (on Revealed and the binder cards), a light theme (Settings and the desktop header), the binder preview player, a saved preview volume with desktop controls, the desktop binder side panel, and a clearer error state
+- Extras: avatar pictures with Records / Avatars tabs (creation and Settings), today's song pausing when leaving the Today screen, and binder filters that light up when in use, with a Clear chip and a top rated sort
 
 **Next**
 
