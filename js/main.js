@@ -653,6 +653,12 @@ function init() {
         binderPlayer.toggle(number, entry.song.previewUrl);
     }
 
+    function pauseWhenHidden() {
+        if (!document.hidden) return;
+        pauseRevealedPreview();
+        binderPlayer.stop();
+    }
+
     function leaveCollection() {
         binderPlayer.stop();
         showView('today');
@@ -791,6 +797,7 @@ function init() {
     binderTabList.addEventListener('click', handleBinderTabClick);
     themeButton.addEventListener('click', toggleTheme);
     window.addEventListener('popstate', handlePopState);
+    document.addEventListener('visibilitychange', pauseWhenHidden);
 
     preparePool();
 
