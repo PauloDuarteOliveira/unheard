@@ -353,6 +353,13 @@ export function renderView(viewName) {
     })
 }
 
+export function focusViewTitle(viewName) {
+    const title = document.querySelector(`[data-view~="${viewName}"] h1`);
+    if (!title) return;
+    title.tabIndex = -1;
+    title.focus();
+}
+
 export function renderTabs(modes, selectedKey) {
     const tabs = modes.map((mode) => createTab(mode, mode.key === selectedKey));
     tabList.replaceChildren(...tabs);
