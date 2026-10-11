@@ -32,6 +32,15 @@ Several people can share one browser, each with their own profile:
 
 Each profile has its own daily lock and catalog numbers, so two people can each discover a song on the same day. The app remembers the last profile and opens straight on its Today screen.
 
+### The Back button
+
+Every screen has its own "Back to today" button, and the phone or browser Back button works too. One `showView` function draws each screen and keeps the history in step with the History API:
+
+- Collection, Settings, Create profile, Negative harmony and the open profile menu add one history entry with `history.pushState`, without changing the URL.
+- A `popstate` listener decides where Back goes: Today, Who's listening, the previous creation step, or just closing the menu.
+- There is never more than one extra entry, so a second Back leaves the app as usual.
+- `showView` also moves keyboard focus to the new screen's title, so keyboard and screen reader users don't lose their place.
+
 | `localStorage` key | What it holds |
 |---|---|
 | `unheard:profiles` | The list of profiles: id, name and avatar key (a record color or a picture) |
@@ -186,6 +195,7 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
 - Polish: star ratings (on Revealed and the binder cards), a light theme (Settings and the desktop header), the binder preview player, a saved preview volume with desktop controls, the desktop binder side panel, and a clearer error state
 - Extras: avatar pictures with Records / Avatars tabs (creation and Settings), today's song pausing when leaving the Today screen, and binder filters that light up when in use, with a Clear chip and a top rated sort
+- Usability fixes: the phone Back button returns inside the app (screens, creation steps and the menu), light-theme profiles no longer flash dark on load, taller tap areas for the binder stars (22 × 44 px), and focus on each new screen's title
 
 **Next**
 
