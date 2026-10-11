@@ -9,7 +9,7 @@ import createPreviewPlayer from './player.js';
 
 import {
     renderCountdown, renderGreeting, renderModeCard, renderPhase, renderTabs,
-    renderShareFeedback, renderSetup, renderView, renderProfiles, renderNameError,
+    renderShareFeedback, renderSetup, renderView, focusViewTitle, renderProfiles, renderNameError,
     renderAvatarOptions, renderAvatarTab, renderCreatePreview, renderHarmony, renderGenreLimit,
     renderProfileButton, renderMenuOpen, renderBinderSummary, renderBinderGrid, renderFavorite,
     renderBinderStats, renderBinderFilters, renderFilterState, renderModeFilters, renderSettingsProfile,
@@ -38,6 +38,7 @@ const DEV_MODE_KEY = 'unheard:devMode';
 const BINDER_FILTER_KEY = 'unheard:binderFilters';
 const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
 const NO_MATCHES = 'No pressings match these filters.';
+const ROOT_VIEWS = ['today', 'profiles'];
 
 function isDevMode() {
     const params = new URLSearchParams(window.location.search);
@@ -108,6 +109,50 @@ function init() {
     let volumeBeforeMute = UNMUTE_VOLUME;
     let pendingProfile = null;
     let currentProfile = null;
+    let currentView = null;
+    let skipNextPop = false;
+
+    function showView(view) {
+        currentView = view;
+        renderView(view);
+        focusViewTitle(view);
+
+        const hasBackEntry = history.state?.inApp === true;
+        if (!ROOT_VIEWS.includes(view) && !hasBackEntry) {
+            history.pushState({ inApp: true }, '');
+        } else if (ROOT_VIEWS.includes(view) && hasBackEntry) {
+            skipNextPop = true;
+            history.back();
+        }
+    }
+
+    function handlePopState() {
+        if (skipNextPop) {
+            skipNextPop = false;
+            return;
+        }
+
+        if (!profileMenu.hidden) {
+            renderMenuOpen(false);
+            if (!ROOT_VIEWS.includes(currentView)) history.pushState({ inApp: true }, '');
+            return;
+        }
+
+        switch (currentView) {
+            case 'collection':
+                leaveCollection();
+                break;
+            case 'settings':
+                showView('today');
+                break;
+            case 'create':
+                showProfiles();
+                break;
+            case 'harmony':
+                handleHarmonyBack();
+                break;
+        }
+    }
 
     function setVolume(volume) {
         store.saveSettings({ ...store.getSettings(), volume });
@@ -156,7 +201,7 @@ function init() {
         setCurrentProfile(profile.id);
         renderProfileButton(profile, getAvatar(profile.avatar));
         renderMenuOpen(false);
-        renderView('today');
+        showView('today');
         tick();
     }
 
@@ -167,7 +212,7 @@ function init() {
             console.error('Avatars could not be loaded:', error);
         }
         renderProfiles(getProfiles(), config?.avatars);
-        renderView('profiles');
+        showView('profiles');
     }
 
     function handleProfileClick(event) {
@@ -197,7 +242,7 @@ function init() {
         renderNameError('');
         renderAvatarOptions(avatars, firstFree?.key);
         renderCreatePreview('', firstFree);
-        renderView('create');
+        showView('create');
         createForm.elements.name.focus();
     }
 
@@ -230,7 +275,7 @@ function init() {
     function showHarmony() {
         const avatar = getAvatar(pendingProfile.avatar);
         renderHarmony(pendingProfile.name, avatar, pool?.genres ?? [], pendingProfile.blockedGenres ?? [], MAX_BLOCKED_GENRES);
-        renderView('harmony');
+        showView('harmony');
     }
 
     function finishCreate(blockedGenres) {
@@ -248,22 +293,39 @@ function init() {
 
     function handleHarmonyBack() {
         pendingProfile = { ...pendingProfile, blockedGenres: new FormData(harmonyForm).getAll('genre') };
-        renderView('create');
+        showView('create');
+    }
+
+    function openMenu() {
+        renderMenuOpen(true);
+        if (history.state?.inApp !== true) history.pushState({ inApp: true }, '');
+    }
+
+    function closeMenu() {
+        renderMenuOpen(false);
+        if (ROOT_VIEWS.includes(currentView) && history.state?.inApp === true) {
+            skipNextPop = true;
+            history.back();
+        }
     }
 
     function toggleMenu() {
-        renderMenuOpen(profileMenu.hidden);
+        if (profileMenu.hidden) {
+            openMenu();
+        } else {
+            closeMenu();
+        }
     }
 
     function closeMenuOnOutsideClick(event) {
         if (profileMenu.hidden) return;
         if (event.target.closest('.header-actions')) return;
-        renderMenuOpen(false);
+        closeMenu();
     }
 
     function closeMenuOnEscape(event) {
         if (event.key !== 'Escape' || profileMenu.hidden) return;
-        renderMenuOpen(false);
+        closeMenu();
         profileButton.focus();
     }
 
@@ -288,7 +350,7 @@ function init() {
         renderSettingsHarmony(pool?.genres ?? [], settings.blockedGenres, MAX_BLOCKED_GENRES);
         renderSettingsPreferences(MODES, settings);
         renderMenuOpen(false);
-        renderView('settings');
+        showView('settings');
         renderExportStatus('');
     }
 
@@ -402,7 +464,7 @@ function init() {
         showBinderCards();
         renderSets(getSets(collection, pool, getBlockedGenres()));
         renderBinderTab('pressings');
-        renderView('collection');
+        showView('collection');
     }
 
     async function preparePool() {
@@ -593,7 +655,7 @@ function init() {
 
     function leaveCollection() {
         binderPlayer.stop();
-        renderView('today');
+        showView('today');
     }
 
     function handleRevealedClick(event) {
@@ -716,7 +778,7 @@ function init() {
     binderForm.addEventListener('submit', (event) => event.preventDefault());
     binderClearButton.addEventListener('click', clearBinderFilters);
     settingsButton.addEventListener('click', showSettings);
-    settingsBackButton.addEventListener('click', () => renderView('today'));
+    settingsBackButton.addEventListener('click', () => showView('today'));
     settingsLogoutButton.addEventListener('click', handleLogOut);
     settingsProfileForm.addEventListener('change', handleSettingsProfileChange);
     settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
@@ -728,11 +790,13 @@ function init() {
     deleteDialog.addEventListener('close', handleDeleteClose);
     binderTabList.addEventListener('click', handleBinderTabClick);
     themeButton.addEventListener('click', toggleTheme);
+    window.addEventListener('popstate', handlePopState);
 
     preparePool();
 
     const savedProfile = getCurrentProfile();
     if (savedProfile) {
+        applyTheme(createStore(savedProfile.id).getSettings().theme);
         loadConfig().then((data) => {
             config = data;
             enterToday(savedProfile);
