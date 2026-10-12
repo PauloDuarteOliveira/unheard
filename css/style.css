@@ -1,3 +1,24 @@
+/* style.css: all the styles of Unheard.
+
+   It is written mobile first. The rules outside any media query are the phone
+   portrait layout; the two big media queries at the end only add what changes:
+     - Desktop: (min-width: 768px) and (min-height: 501px)
+     - Phone landscape: (orientation: landscape) and (max-height: 500px)
+   Desktop also needs height, so a phone held sideways never gets the desktop rules.
+
+   Every color is a CSS variable. The light theme only swaps the variables,
+   and each mode has its own color in --mode-rgb.
+
+   Sections (phone portrait):
+     Theme colors · Mode colors · Base · Small shared pieces · Header · Today screen
+     Mode tabs · Unveil button · Revealed song · Mode card · Profiles · Create profile
+     Negative harmony · Status bar · Collector binder · Settings · Rarity · Rating
+     Binder player
+   Then: Desktop, and Phone landscape.
+
+   Order matters in CSS: when two rules have the same specificity, the later one wins.
+   That is why the media queries come last. */
+
 /* ---------- Theme colors (dark is the default) ---------- */
 
 :root {
@@ -2690,8 +2711,10 @@ body[data-screen="harmony"] .app-footer {
 }
 
 /* ---------- Desktop ---------- */
+/* Wide and tall screens. Builds on the phone rules, never undoes them. */
 
 @media (min-width: 768px) and (min-height: 501px) {
+  /* Page, header and Today */
   :root {
     --glow-shape: 46% 60% at 50% 58%;
   }
@@ -2878,6 +2901,7 @@ body[data-screen="harmony"] .app-footer {
     max-width: 680px;
   }
 
+  /* Revealed song, its player and the volume controls */
   .revealed {
     max-width: 1047px;
     display: grid;
@@ -2995,6 +3019,7 @@ body[data-screen="harmony"] .app-footer {
     accent-color: var(--text);
   }
 
+  /* Mode card */
   .mode-card {
     padding: 16px 20px;
     flex-direction: row;
@@ -3017,6 +3042,7 @@ body[data-screen="harmony"] .app-footer {
     font-size: 15px;
   }
 
+  /* Footer: shown on more screens on desktop, with the Apple credit centered */
   .app-footer {
     min-height: 52px;
     box-sizing: border-box;
@@ -3052,6 +3078,7 @@ body[data-screen="harmony"] .app-footer {
     font-size: 11px;
   }
 
+  /* Who's listening and the first-visit intro */
   .profiles-view {
     gap: 44px;
   }
@@ -3150,6 +3177,7 @@ body[data-screen="harmony"] .app-footer {
     font-size: 18px;
   }
 
+  /* Create profile and Negative harmony */
   .create-view {
     padding-top: 0;
     justify-content: center;
@@ -3203,6 +3231,7 @@ body[data-screen="harmony"] .app-footer {
     box-shadow: inset 0 1px 0 var(--line);
   }
 
+  /* Collector binder: no tabs, the sets are a side panel */
   .collection-view {
     padding: 16px 40px 24px;
     display: grid;
@@ -3299,6 +3328,7 @@ body[data-screen="harmony"] .app-footer {
     gap: 14px;
   }
 
+  /* Settings: three columns placed with grid areas */
   .settings-view {
     box-sizing: border-box;
     width: 100%;
@@ -3351,6 +3381,7 @@ body[data-screen="harmony"] .app-footer {
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
   }
 
+  /* Collector binder: rarity legend */
   .rarity-legend {
     display: flex;
     flex-wrap: wrap;
@@ -3359,7 +3390,11 @@ body[data-screen="harmony"] .app-footer {
   }
 }
 
+/* ---------- Phone landscape ---------- */
+/* A phone held sideways: wide but short, so most screens use two columns. */
+
 @media (orientation: landscape) and (max-height: 500px) {
+  /* Page, header and footer */
   body {
     --glow-shape: 38% 70% at 22% 58%;
     padding: 10px 20px 4px;
@@ -3380,6 +3415,8 @@ body[data-screen="harmony"] .app-footer {
     text-transform: uppercase;
   }
 
+
+  /* Today */
   .today {
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr);
@@ -3442,6 +3479,7 @@ body[data-screen="harmony"] .app-footer {
     display: none;
   }
 
+  /* Revealed song: the cover on the left, the details on the right */
   .revealed {
     grid-column: 1 / -1;
     grid-row: 1 / -1;
@@ -3517,6 +3555,7 @@ body[data-screen="harmony"] .app-footer {
     width: 44px;
   }
 
+  /* Mode tabs, error card, mode card and status */
   .tabs {
     grid-area: tabs;
     min-height: 0;
@@ -3575,6 +3614,7 @@ body[data-screen="harmony"] .app-footer {
     width: auto;
   }
 
+  /* Who's listening and the first-visit intro */
   .profiles-view {
     flex-direction: row;
     gap: 32px;
@@ -3665,6 +3705,7 @@ body[data-screen="harmony"] .app-footer {
     font-size: 15px;
   }
 
+  /* Create profile */
   .create-view {
     padding-top: 0;
     display: grid;
@@ -3744,6 +3785,7 @@ body[data-screen="harmony"] .app-footer {
     height: 44px;
   }
 
+  /* Negative harmony */
   .harmony-view {
     padding-top: 0;
     display: grid;
@@ -3787,6 +3829,7 @@ body[data-screen="harmony"] .app-footer {
     align-self: center;
   }
 
+  /* Collector binder */
   .collection-view {
     padding-top: 0;
     display: grid;
@@ -3856,6 +3899,7 @@ body[data-screen="harmony"] .app-footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  /* Settings: two columns */
   .settings-view {
     padding-top: 0;
     display: grid;

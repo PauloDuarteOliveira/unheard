@@ -1,3 +1,6 @@
+// picker.js: finds the day's song. createPicker remembers which songs were already
+// tried, and discoverSong runs the search, filters and preview check, up to 3 times.
+
 import { searchSongs, verifyPreview } from './api.js';
 import { buildQuery } from './modes.js';
 import { pickRandom } from './utils.js';
@@ -6,6 +9,7 @@ const MAX_ATTEMPTS = 3;
 
 export const NO_SONG_MESSAGE = 'No playable song found';
 
+// A closure: triedIds is private, so a retry never picks the same song twice.
 export default function createPicker() {
     const triedIds = new Set();
 
@@ -21,12 +25,15 @@ export default function createPicker() {
     return { pick };
 }
 
+// Negative harmony: turns the profile's blocked genres into the genre names iTunes uses.
 function getBlockedNames(genres, blockedGenres) {
     return genres
         .filter((genre) => blockedGenres.includes(genre.key))
         .flatMap((genre) => genre.matches);
 }
 
+// Each attempt builds a new search, keeps the songs that fit the mode and are not
+// blocked, picks one and checks its preview. If all attempts fail, it throws.
 export async function discoverSong(modeKey, pool, picker, optionKey, blockedGenres = []) {
     const blockedNames = getBlockedNames(pool.genres, blockedGenres);
     const allowedPool = {

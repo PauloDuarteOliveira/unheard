@@ -1,6 +1,12 @@
+// modes.js: the five discovery modes. Each mode is described once in MODES (its
+// name, icon, texts and which list of options its dial uses), and has one function
+// that builds the search for the iTunes API.
+
 import { getReleaseYear, pickRandom } from './utils.js';
 
 const YEARS_PER_DECADE = 10;
+
+// ===== The modes =====
 
 export const MODES = [
     {
@@ -71,10 +77,13 @@ export const MODES = [
     },
 ];
 
+// ===== Looking up a mode =====
+
 export function getMode(modeKey) {
     return MODES.find((mode) => mode.key === modeKey);
 }
 
+// The status line while searching, for example "Going back to the 1980s".
 export function describeSearch(mode, option) {
     if (!option) return 'Digging for a song';
 
@@ -94,14 +103,10 @@ export function describeSearch(mode, option) {
     }
 }
 
-function pickOption(options, optionKey) {
-    return options.find((option) => option.key === optionKey) ?? pickRandom(options);
-}
+// ===== Building the search =====
 
-function buildRandomQuery(pool) {
-    return { term: pickRandom(pool.random) };
-}
-
+// A query is { term, country, optionKey, filter }. The filter is a closure that
+// keeps only the songs that fit the chosen option, for example the right decade.
 export function buildQuery(modeKey, pool, optionKey) {
     switch (modeKey) {
         case 'random':
@@ -119,6 +124,15 @@ export function buildQuery(modeKey, pool, optionKey) {
     }
 }
 
+// The option the user chose, or a random one when the dial is on "Surprise me".
+function pickOption(options, optionKey) {
+    return options.find((option) => option.key === optionKey) ?? pickRandom(options);
+}
+
+function buildRandomQuery(pool) {
+    return { term: pickRandom(pool.random) };
+}
+
 function buildTimeQuery(pool, optionKey) {
     const decade = pickOption(pool.decades, optionKey);
     const lastYear = decade.start + YEARS_PER_DECADE - 1;
@@ -133,6 +147,7 @@ function buildTimeQuery(pool, optionKey) {
     };
 }
 
+// World Explorer searches that country's own iTunes store.
 function buildWorldQuery(pool, optionKey) {
     const country = pickOption(pool.countries, optionKey);
     return { term: pickRandom(country.terms), country: country.key, optionKey: country.key };

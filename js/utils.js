@@ -1,3 +1,6 @@
+// utils.js: small helpers used across the app: dates and the countdown, time and
+// text formatting, links, and picking at random. None of them touch the page.
+
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
@@ -15,10 +18,10 @@ const SPOTIFY_SEARCH_URL = 'https://open.spotify.com/search/';
 const CATALOG_PREFIX = 'UNH-';
 const CATALOG_DIGITS = 3;
 
-function twoDigits(number) {
-    return String(number).padStart(2, '0');
-}
+// ===== Dates =====
 
+// A local date as "2026-10-12". The daily lock and the streaks use the local date,
+// so a new day starts at the user's own midnight.
 export function getDateKey(date = new Date()) {
     const year = date.getFullYear();
     const month = twoDigits(date.getMonth() + 1);
@@ -26,9 +29,28 @@ export function getDateKey(date = new Date()) {
     return `${year}-${month}-${day}`;
 }
 
+export function addDays(dateKey, amount) {
+    const date = new Date(`${dateKey}T00:00`);
+    date.setDate(date.getDate() + amount);
+    return getDateKey(date);
+}
+
 export function getMsUntilMidnight(now = new Date()) {
     const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     return midnight - now;
+}
+
+export function getGreeting(hour = new Date().getHours()) {
+    if (hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR) return 'Good morning';
+    if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';
+    if (hour >= EVENING_START_HOUR && hour < LATE_NIGHT_START_HOUR) return 'Good evening';
+    return 'Late night listening';
+}
+
+// ===== Formatting =====
+
+function twoDigits(number) {
+    return String(number).padStart(2, '0');
 }
 
 export function formatCountdown(ms) {
@@ -50,21 +72,28 @@ export function formatTimeLength(ms) {
     return formatTime(ms / MS_PER_SECOND);
 }
 
-export function getGreeting(hour = new Date().getHours()) {
-    if (hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR) return 'Good morning';
-    if (hour >= AFTERNOON_START_HOUR && hour < EVENING_START_HOUR) return 'Good afternoon';
-    if (hour >= EVENING_START_HOUR && hour < LATE_NIGHT_START_HOUR) return 'Good evening';
-    return 'Late night listening';
+export function formatShortDate(dateKey) {
+    const date = new Date(`${dateKey}T00:00`);
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    return `${date.getDate()} ${month}`;
+}
+
+export function formatCatalogNumber(number) {
+    return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
 }
 
 export function getReleaseYear(releaseDate) {
     return releaseDate ? releaseDate.slice(0, 4) : '';
 }
 
+// ===== Songs: covers, links and sharing =====
+
+// iTunes sends a 100 px cover; the same address with 600x600 gives a sharp one.
 export function getCoverUrl(artworkUrl) {
     return artworkUrl.replace(SMALL_COVER_SIZE, LARGE_COVER_SIZE);
 }
 
+// iTunes has no Spotify ids, so the link opens a Spotify search for the song.
 export function getSpotifyUrl(song) {
     const searchText = `${song.trackName} ${song.artistName}`;
     return SPOTIFY_SEARCH_URL + encodeURIComponent(searchText);
@@ -74,23 +103,9 @@ export function getShareText(song) {
     return `Today I discovered ${song.trackName} by ${song.artistName} 🎧`;
 }
 
-export function formatCatalogNumber(number) {
-    return CATALOG_PREFIX + String(number).padStart(CATALOG_DIGITS, '0');
-}
-
-export function formatShortDate(dateKey) {
-    const date = new Date(`${dateKey}T00:00`);
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    return `${date.getDate()} ${month}`;
-}
+// ===== Random =====
 
 export function pickRandom(list) {
     const index = Math.floor(Math.random() * list.length);
     return list[index];
-}
-
-export function addDays(dateKey, amount) {
-    const date = new Date(`${dateKey}T00:00`);
-    date.setDate(date.getDate() + amount);
-    return getDateKey(date);
 }

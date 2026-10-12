@@ -1,3 +1,6 @@
+// rarity.js: scores a new discovery and finds its rarity tier. All the points and
+// thresholds come from data/config.json, so they can be tuned without changing code.
+
 import { getReleaseYear } from "./utils.js";
 
 function getYearPoints(song, rules) {
@@ -12,6 +15,7 @@ function rollLuck(rules) {
     return Math.floor(Math.random() * (rules.maxLuck + 1));
 }
 
+// The luck is a parameter with a random default, so the scoring can be tested with fixed numbers.
 export function scoreSong(entry, collection, rules, luck = rollLuck(rules)) {
     const { song } = entry;
     let points = getYearPoints(song, rules);
@@ -30,6 +34,7 @@ export function scoreSong(entry, collection, rules, luck = rollLuck(rules)) {
     return points + luck;
 }
 
+// The tiers are listed from Legendary down, so the first one reached is the right one.
 export function getTier(points, rules) {
     return rules.tiers.find((tier) => points >= tier.min);
 }
