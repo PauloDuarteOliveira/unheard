@@ -2,6 +2,8 @@
 
 # Unheard
 
+<a href="https://PauloDuarteOliveira.github.io/unheard/"><img src="docs/qr-code.svg" alt="QR code that opens the Unheard app" width="150"></a>
+
 **One song you've never heard, every day.**
 
 [![Live demo](https://img.shields.io/badge/live_demo-online-3fb950)](https://PauloDuarteOliveira.github.io/unheard/)
