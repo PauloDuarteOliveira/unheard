@@ -17,7 +17,7 @@ import {
     renderSettingsPreferences, playPreview, downloadTextFile, renderExportStatus,
     renderDeleteDialog, renderStreak, renderRarityFilter, renderRarityLegend,
     renderSets, renderBinderTab, renderRating, renderThemeControls, renderBinderPlayback,
-    pauseRevealedPreview, renderVolume, renderBinderVolume,
+    pauseRevealedPreview, renderVolume, renderBinderVolume, renderFirstVisit,
 } from './render.js';
 
 import {
@@ -97,6 +97,7 @@ function init() {
     const deleteDialog = document.querySelector('#delete-dialog');
     const binderTabList = document.querySelector('#binder-tabs');
     const themeButton = document.querySelector('#theme-button');
+    const introButton = document.querySelector('#intro-button');
     const binderPlayer = createPreviewPlayer(renderBinderPlayback);
 
     let store = null;
@@ -211,6 +212,7 @@ function init() {
         } catch (error) {
             console.error('Avatars could not be loaded:', error);
         }
+        renderFirstVisit(getProfiles().length === 0);
         renderProfiles(getProfiles(), config?.avatars);
         showView('profiles');
     }
@@ -798,6 +800,7 @@ function init() {
     themeButton.addEventListener('click', toggleTheme);
     window.addEventListener('popstate', handlePopState);
     document.addEventListener('visibilitychange', pauseWhenHidden);
+    introButton.addEventListener('click', showCreate);
 
     preparePool();
 

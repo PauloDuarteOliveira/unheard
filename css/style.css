@@ -1119,6 +1119,87 @@ h2 {
   letter-spacing: -0.01em;
 }
 
+.welcome-intro {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+.intro-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.intro-text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.intro-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intro-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.intro-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(var(--mode-rgb), 0.12);
+  color: rgb(var(--mode-rgb));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.intro-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.intro-step-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.intro-button {
+  width: 100%;
+}
+
 .profile-grid {
   width: 100%;
   max-width: 420px;
@@ -1566,6 +1647,16 @@ h2 {
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
+}
+
+body:not([data-screen="today"]) .status-bar {
+  display: none;
+}
+
+body[data-screen="profiles"] .app-footer,
+body[data-screen="create"] .app-footer,
+body[data-screen="harmony"] .app-footer {
+  display: none;
 }
 
 .status-bar {
@@ -2936,6 +3027,16 @@ h2 {
     font-size: 13px;
   }
 
+  body[data-screen="profiles"] .app-footer,
+  body[data-screen="create"] .app-footer,
+  body[data-screen="harmony"] .app-footer {
+    display: flex;
+  }
+
+  body:not([data-screen="today"]) .app-footer {
+    justify-content: center;
+  }
+
   .status-bar {
     width: auto;
     justify-content: flex-start;
@@ -2970,6 +3071,61 @@ h2 {
 
   .welcome-title {
     font-size: 26px;
+  }
+
+  .welcome-intro {
+    max-width: none;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .intro-head {
+    max-width: 760px;
+    gap: 12px;
+  }
+
+  .intro-title {
+    font-size: 42px;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  .intro-text {
+    font-size: 17px;
+  }
+
+  .intro-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 280px));
+    gap: 20px;
+  }
+
+  .intro-step {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 24px;
+  }
+
+  .intro-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+
+  .intro-step-text {
+    gap: 6px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .intro-step-title {
+    font-size: 18px;
+  }
+
+  .intro-button {
+    width: 320px;
   }
 
   .profile-grid {
@@ -3442,6 +3598,52 @@ h2 {
     flex-grow: 1;
     align-items: stretch;
     gap: 16px;
+  }
+
+  .welcome-intro {
+    flex-grow: 1;
+    max-width: none;
+    gap: 12px;
+  }
+
+  .intro-head {
+    text-align: left;
+  }
+
+  .intro-title {
+    font-size: 21px;
+  }
+
+  .intro-text {
+    display: none;
+  }
+
+  .intro-steps {
+    gap: 8px;
+  }
+
+  .intro-step {
+    padding: 8px 12px;
+    gap: 12px;
+  }
+
+  .intro-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .intro-step-text {
+    font-size: 12px;
+  }
+
+  .intro-step-title {
+    font-size: 14px;
+  }
+
+  .intro-button {
+    width: 220px;
+    height: 44px;
   }
 
   .profile-grid {

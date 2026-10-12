@@ -81,6 +81,9 @@ const binderPressings = document.querySelector('#binder-pressings');
 const binderSets = document.querySelector('#binder-sets');
 const themeButton = document.querySelector('#theme-button');
 const statRating = document.querySelector('#stat-rating');
+const welcomeIntro = document.querySelector('#welcome-intro');
+const welcomePicker = document.querySelector('#welcome-picker');
+const welcomeTagline = document.querySelector('#welcome-tagline');
 
 function createAvatarOption(avatar, isChecked, initial = '?') {
     const input = document.createElement('input');
@@ -219,6 +222,12 @@ export function renderProfiles(profiles, avatars = []) {
     profileGrid.replaceChildren(...tiles, createNewProfileTile());
 }
 
+export function renderFirstVisit(isFirstVisit) {
+    welcomeIntro.hidden = !isFirstVisit;
+    welcomePicker.hidden = isFirstVisit;
+    welcomeTagline.hidden = isFirstVisit;
+}
+
 function createIcon(name) {
     const icon = document.createElement('span');
     icon.className = 'material-symbols-outlined';
@@ -354,7 +363,8 @@ export function renderView(viewName) {
 }
 
 export function focusViewTitle(viewName) {
-    const title = document.querySelector(`[data-view~="${viewName}"] h1`);
+    const titles = document.querySelectorAll(`[data-view~="${viewName}"] h1`);
+    const title = [...titles].find((item)=> !item.closest('[hidden]'));
     if (!title) return;
     title.tabIndex = -1;
     title.focus();
