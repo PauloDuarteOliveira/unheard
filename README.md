@@ -122,6 +122,8 @@ Small helpers (dates, links, formatting) live in `utils.js`, which most modules 
 - **Async:** `fetch` with `async`/`await` and `try`/`catch`, and the preview check wrapped in a `Promise` with a timeout.
 - **Storage:** `localStorage` per profile, and `sessionStorage` for the binder filters and dev mode.
 
+**Reading the code:** start with `js/main.js`. Every file begins with a comment saying what it is for. `main.js` (what happens) and `render.js` (what the page shows) are split into numbered sections in the same order: navigation, profiles, Today, Revealed, the binder, audio and settings. So a feature is in the same section in both files. `index.html` marks each screen, and `css/style.css` starts with an index of its sections.
+
 ## Technical details
 
 <details>
