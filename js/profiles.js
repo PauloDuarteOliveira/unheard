@@ -1,3 +1,6 @@
+// profiles.js: the list of profiles and who is logged in, both saved in localStorage.
+// Each profile's own data (today, collection, settings) lives in store.js.
+
 import { readJson, writeJson } from './store.js';
 
 const PROFILES_KEY = 'unheard:profiles';
@@ -26,6 +29,8 @@ export function logOut() {
     localStorage.removeItem(CURRENT_PROFILE_KEY);
 }
 
+// Returns an error message, or '' when the name is fine. Names are unique, ignoring
+// upper and lower case; ownId lets a profile keep its own name in Settings.
 export function validateName(name, ownId = null) {
     const trimmed = name.trim();
     if (!trimmed) return 'Type a name.';

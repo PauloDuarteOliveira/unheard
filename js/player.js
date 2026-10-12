@@ -1,5 +1,10 @@
+// player.js: the collector binder's preview player. There is one shared <audio> for
+// all the cards, so starting a card stops the one before it.
+
 const PREVIEW_VOLUME = 0.25;
 
+// A closure: the audio element and the playing card's number are private. Every
+// change is reported through onChange, and render.js redraws the cards from it.
 export default function createPreviewPlayer(onChange) {
     const audio = new Audio();
     audio.volume = PREVIEW_VOLUME;
