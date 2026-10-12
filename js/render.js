@@ -1,11 +1,61 @@
-import { formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl, formatCatalogNumber, formatTime, formatTimeLength } from './utils.js';
+// render.js: everything that changes the page. Each function receives data and
+// updates the DOM. Nothing here reads or saves data: main.js decides what to show,
+// and store.js saves it. The sections follow the same order as main.js.
+//
+// Sections:
+//   1. Page elements and constants
+//   2. Shared building blocks: icons, options, record avatars, rarity badges
+//   3. Navigation: screens and focus
+//   4. Profiles: who's listening, create profile, negative harmony
+//   5. Header: profile button, menu and streak
+//   6. Today: tabs, the dial, the Unveil button and the phases
+//   7. Revealed: the song card and its player
+//   8. Ratings and favorites (shared by Revealed and the binder)
+//   9. Collector binder: cards, filters, tabs, sets and previews
+//  10. Audio: volume and mute
+//  11. Settings and the theme
+
+import {
+    formatCountdown, getCoverUrl, getReleaseYear, getSpotifyUrl,
+    formatCatalogNumber, formatTime, formatTimeLength,
+} from './utils.js';
+
+// ===== 1. Page elements and constants =====
 
 const DEFAULT_VOLUME = 0.25;
 const PREVIEW_SECONDS = 30;
 const SHARE_FEEDBACK_MS = 2000;
 const NAME_HINT = 'Up to 20 characters. Shown in your greeting.';
 const MAX_STARS = 5;
+const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
 
+// Profiles
+const profileGrid = document.querySelector('#profile-grid');
+const welcomeIntro = document.querySelector('#welcome-intro');
+const welcomePicker = document.querySelector('#welcome-picker');
+const welcomeTagline = document.querySelector('#welcome-tagline');
+const createPreview = document.querySelector('#create-preview');
+const createPreviewName = document.querySelector('#create-preview-name');
+const avatarPicker = document.querySelector('#avatar-picker');
+const avatarOptions = document.querySelector('#avatar-options');
+const nameHint = document.querySelector('#profile-name-hint');
+const nameInput = document.querySelector('#profile-name');
+const harmonyProfile = document.querySelector('#harmony-profile');
+const genreChips = document.querySelector('#genre-chips');
+const genreCount = document.querySelector('#genre-count');
+
+// Header
+const profileButton = document.querySelector('#profile-button');
+const profileButtonName = document.querySelector('#profile-button-name');
+const profileMenu = document.querySelector('#profile-menu');
+const profileMenuHead = document.querySelector('#profile-menu-head');
+const streak = document.querySelector('#streak');
+const streakCount = document.querySelector('#streak-count');
+const streakBest = document.querySelector('#streak-best');
+const themeButton = document.querySelector('#theme-button');
+
+// Today and Revealed
+const today = document.querySelector('#today');
 const greetingBlock = document.querySelector('#greeting-block');
 const greeting = document.querySelector('#greeting');
 const phaseStamp = document.querySelector('#phase-stamp');
@@ -16,46 +66,40 @@ const unveilButton = document.querySelector('#unveil-button');
 const unveilTitle = document.querySelector('#unveil-title');
 const unveilSubtitle = document.querySelector('#unveil-subtitle');
 const statusText = document.querySelector('#status');
-const revealed = document.querySelector('#revealed');
-const binderVolume = document.querySelector('#binder-volume');
 const modeCard = document.querySelector('#mode-card');
 const modeStamp = document.querySelector('#mode-stamp');
 const modeDescription = document.querySelector('#mode-description');
-const lockDot = document.querySelector('#lock-dot');
-const lockStatus = document.querySelector('#lock-status');
-const countdown = document.querySelector('#countdown');
-const errorCard = document.querySelector('#error-card');
-const errorTitle = document.querySelector('#error-title');
-const today = document.querySelector('#today');
 const dial = document.querySelector('#setup');
 const noSetupText = document.querySelector('#no-setup');
 const dialLabel = document.querySelector('#setup-label');
 const dialIcon = document.querySelector('#setup-icon');
 const dialSelect = document.querySelector('#setup-select');
 const dialChevron = document.querySelector('#setup-chevron');
-const FALLBACK_AVATAR = { color: 'var(--muted)', ink: 'var(--bg)' };
-const profileGrid = document.querySelector('#profile-grid');
-const createPreview = document.querySelector('#create-preview');
-const createPreviewName = document.querySelector('#create-preview-name');
-const avatarPicker = document.querySelector('#avatar-picker');
-const avatarOptions = document.querySelector('#avatar-options');
-const nameHint = document.querySelector('#profile-name-hint');
-const nameInput = document.querySelector('#profile-name');
-const harmonyProfile = document.querySelector('#harmony-profile');
-const genreChips = document.querySelector('#genre-chips');
-const genreCount = document.querySelector('#genre-count');
-const profileButton = document.querySelector('#profile-button');
-const profileButtonName = document.querySelector('#profile-button-name');
-const profileMenu = document.querySelector('#profile-menu');
-const profileMenuHead = document.querySelector('#profile-menu-head');
+const errorCard = document.querySelector('#error-card');
+const errorTitle = document.querySelector('#error-title');
+const lockDot = document.querySelector('#lock-dot');
+const lockStatus = document.querySelector('#lock-status');
+const countdown = document.querySelector('#countdown');
+const revealed = document.querySelector('#revealed');
+
+// Collector binder
 const binderSummary = document.querySelector('#binder-summary');
 const binderGrid = document.querySelector('#binder-grid');
 const statPressings = document.querySelector('#stat-pressings');
 const statCountries = document.querySelector('#stat-countries');
 const statLegendary = document.querySelector('#stat-legendary');
+const statRating = document.querySelector('#stat-rating');
 const binderForm = document.querySelector('#binder-filters');
 const binderMode = document.querySelector('#binder-mode');
+const binderRarity = document.querySelector('#binder-rarity');
 const binderClear = document.querySelector('#binder-clear');
+const binderVolume = document.querySelector('#binder-volume');
+const rarityLegend = document.querySelector('#rarity-legend');
+const binderTabs = document.querySelectorAll('.binder-tab');
+const binderPressings = document.querySelector('#binder-pressings');
+const binderSets = document.querySelector('#binder-sets');
+
+// Settings and the delete dialog
 const settingsName = document.querySelector('#settings-name');
 const settingsNameHint = document.querySelector('#settings-name-hint');
 const settingsAvatarPicker = document.querySelector('#settings-avatar-picker');
@@ -71,95 +115,25 @@ const deleteText = document.querySelector('#delete-text');
 const deletePressings = document.querySelector('#delete-pressings');
 const deleteCountries = document.querySelector('#delete-countries');
 const deleteFavorites = document.querySelector('#delete-favorites');
-const streak = document.querySelector('#streak');
-const streakCount = document.querySelector('#streak-count');
-const streakBest = document.querySelector('#streak-best');
-const binderRarity = document.querySelector('#binder-rarity');
-const rarityLegend = document.querySelector('#rarity-legend');
-const binderTabs = document.querySelectorAll('.binder-tab');
-const binderPressings = document.querySelector('#binder-pressings');
-const binderSets = document.querySelector('#binder-sets');
-const themeButton = document.querySelector('#theme-button');
-const statRating = document.querySelector('#stat-rating');
-const welcomeIntro = document.querySelector('#welcome-intro');
-const welcomePicker = document.querySelector('#welcome-picker');
-const welcomeTagline = document.querySelector('#welcome-tagline');
 
-function createAvatarOption(avatar, isChecked, initial = '?') {
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = 'avatar';
-    input.value = avatar.key;
-    input.checked = isChecked;
-    input.className = 'avatar-radio';
-    input.setAttribute('aria-label', `${avatar.label} ${avatar.image ? 'avatar' : 'record'}`);
+// ===== 2. Shared building blocks: icons, options, record avatars, rarity badges =====
 
-    const option = document.createElement('label');
-    option.className = 'avatar-option';
-    option.append(input, createRecordAvatar({ name: initial }, avatar));
+function createIcon(name) {
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = name;
+    return icon;
+}
+
+function createOption(value, label) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
     return option;
 }
 
-function fillAvatarPicker(picker, avatars, selectedKey, initial) {
-    const toOption = (avatar) => createAvatarOption(avatar, avatar.key === selectedKey, initial);
-    const records = avatars.filter((avatar) => !avatar.image).map(toOption);
-    const images = avatars.filter((avatar) => avatar.image).map(toOption);
-    picker.querySelector('[data-panel="records"]').replaceChildren(...records);
-    picker.querySelector('[data-panel="avatars"]').replaceChildren(...images);
-
-    const selected = avatars.find((avatar) => avatar.key === selectedKey);
-    renderAvatarTab(picker, selected?.image ? 'avatars' : 'records');
-}
-
-export function renderAvatarTab(picker, tabName) {
-    picker.querySelectorAll('[role="tab"]').forEach((tab) => {
-        tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName));
-    });
-    picker.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
-        panel.classList.toggle('is-hidden', panel.dataset.panel !== tabName);
-    });
-}
-
-export function renderAvatarOptions(avatars, selectedKey) {
-    fillAvatarPicker(avatarPicker, avatars, selectedKey);
-}
-
-export function renderCreatePreview(name, avatar) {
-    const initial = name.trim().charAt(0).toUpperCase() || '?';
-    const record = createRecordAvatar({ name: initial }, avatar);
-    createPreview.querySelector('.record-avatar')?.remove();
-    createPreview.prepend(record);
-    createPreviewName.textContent = name.trim() || 'Your name';
-    avatarOptions.querySelectorAll('.record-label').forEach((label) => {
-        label.textContent = initial;
-    });
-    createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
-}
-
-function setFieldError(input, hint, message) {
-    hint.textContent = message || NAME_HINT;
-    hint.classList.toggle('is-error', Boolean(message));
-    input.setAttribute('aria-invalid', String(Boolean(message)));
-}
-
-export function renderNameError(message) {
-    setFieldError(nameInput, nameHint, message);
-}
-
-export function renderSettingsNameError(message) {
-    setFieldError(settingsName, settingsNameHint, message);
-}
-
-export function renderSettingsHarmony(genres, blocked, max) {
-    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
-    settingsGenreChips.replaceChildren(...chips);
-    renderSettingsGenreLimit(max);
-}
-
-export function renderSettingsGenreLimit(max) {
-    renderGenreLimit(max, settingsGenreChips, settingsGenreCount);
-}
-
+// A profile's look: a round picture for avatars, or a vinyl with the initial for records.
 export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
     const record = document.createElement('span');
     record.className = 'record-avatar';
@@ -181,6 +155,45 @@ export function createRecordAvatar(profile, avatar = FALLBACK_AVATAR) {
     label.style.setProperty('--avatar-ink', avatar.ink);
     record.append(label);
     return record;
+}
+
+function createRarityBadge(rarity, label) {
+    const badge = document.createElement('span');
+    badge.className = 'rarity-badge';
+    badge.dataset.rarity = rarity.tier;
+    if (rarity.tier === 'legendary') badge.append(createIcon('star'));
+    badge.append(label);
+    return badge;
+}
+
+// ===== 3. Navigation: screens and focus =====
+
+// Each element lists the screens it belongs to in data-view, for example "today collection".
+export function renderView(viewName) {
+    document.body.dataset.screen = viewName;
+    document.querySelectorAll('[data-view]').forEach((element) => {
+        const views = element.dataset.view.split(' ');
+        element.hidden = !views.includes(viewName);
+    });
+}
+
+// Focuses the first visible title: the profiles screen has two (the intro and "Who's listening?").
+export function focusViewTitle(viewName) {
+    const titles = document.querySelectorAll(`[data-view~="${viewName}"] h1`);
+    const title = [...titles].find((item) => !item.closest('[hidden]'));
+    if (!title) return;
+    title.tabIndex = -1;
+    title.focus();
+}
+
+// ===== 4. Profiles: who's listening, create profile, negative harmony =====
+
+export function renderProfiles(profiles, avatars = []) {
+    const tiles = profiles.map((profile) => {
+        const avatar = avatars.find((item) => item.key === profile.avatar);
+        return createProfileTile(profile, avatar);
+    });
+    profileGrid.replaceChildren(...tiles, createNewProfileTile());
 }
 
 function createProfileTile(profile, avatar) {
@@ -214,26 +227,84 @@ function createNewProfileTile() {
     return tile;
 }
 
-export function renderProfiles(profiles, avatars = []) {
-    const tiles = profiles.map((profile) => {
-        const avatar = avatars.find((item) => item.key === profile.avatar);
-        return createProfileTile(profile, avatar);
-    });
-    profileGrid.replaceChildren(...tiles, createNewProfileTile());
-}
-
+// With no profiles yet, the first screen shows the intro instead of the profile list.
 export function renderFirstVisit(isFirstVisit) {
     welcomeIntro.hidden = !isFirstVisit;
     welcomePicker.hidden = isFirstVisit;
     welcomeTagline.hidden = isFirstVisit;
 }
 
-function createIcon(name) {
-    const icon = document.createElement('span');
-    icon.className = 'material-symbols-outlined';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = name;
-    return icon;
+export function renderAvatarOptions(avatars, selectedKey) {
+    fillAvatarPicker(avatarPicker, avatars, selectedKey);
+}
+
+// Records have no image and avatars do. The picker opens on the tab of the selected one.
+// Used by the create screen and by Settings.
+function fillAvatarPicker(picker, avatars, selectedKey, initial) {
+    const toOption = (avatar) => createAvatarOption(avatar, avatar.key === selectedKey, initial);
+    const records = avatars.filter((avatar) => !avatar.image).map(toOption);
+    const images = avatars.filter((avatar) => avatar.image).map(toOption);
+    picker.querySelector('[data-panel="records"]').replaceChildren(...records);
+    picker.querySelector('[data-panel="avatars"]').replaceChildren(...images);
+
+    const selected = avatars.find((avatar) => avatar.key === selectedKey);
+    renderAvatarTab(picker, selected?.image ? 'avatars' : 'records');
+}
+
+function createAvatarOption(avatar, isChecked, initial = '?') {
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'avatar';
+    input.value = avatar.key;
+    input.checked = isChecked;
+    input.className = 'avatar-radio';
+    input.setAttribute('aria-label', `${avatar.label} ${avatar.image ? 'avatar' : 'record'}`);
+
+    const option = document.createElement('label');
+    option.className = 'avatar-option';
+    option.append(input, createRecordAvatar({ name: initial }, avatar));
+    return option;
+}
+
+export function renderAvatarTab(picker, tabName) {
+    picker.querySelectorAll('[role="tab"]').forEach((tab) => {
+        tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName));
+    });
+    picker.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+        panel.classList.toggle('is-hidden', panel.dataset.panel !== tabName);
+    });
+}
+
+export function renderCreatePreview(name, avatar) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    const record = createRecordAvatar({ name: initial }, avatar);
+    createPreview.querySelector('.record-avatar')?.remove();
+    createPreview.prepend(record);
+    createPreviewName.textContent = name.trim() || 'Your name';
+    avatarOptions.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+    });
+    createPreview.closest('.create-view').style.setProperty('--pick-color', avatar?.color ?? '');
+}
+
+export function renderNameError(message) {
+    setFieldError(nameInput, nameHint, message);
+}
+
+function setFieldError(input, hint, message) {
+    hint.textContent = message || NAME_HINT;
+    hint.classList.toggle('is-error', Boolean(message));
+    input.setAttribute('aria-invalid', String(Boolean(message)));
+}
+
+export function renderHarmony(name, avatar, genres, blocked, max) {
+    const profileName = document.createElement('span');
+    profileName.textContent = name;
+    harmonyProfile.replaceChildren(createRecordAvatar({ name }, avatar), profileName);
+
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    genreChips.replaceChildren(...chips);
+    renderGenreLimit(max);
 }
 
 function createGenreChip(genre, isChecked) {
@@ -257,6 +328,7 @@ function createGenreChip(genre, isChecked) {
     return chip;
 }
 
+// Disables the unchecked genres once the limit is reached. Used by Harmony and Settings.
 export function renderGenreLimit(max, chips = genreChips, counter = genreCount) {
     const boxes = [...chips.querySelectorAll('.genre-checkbox')];
     const count = boxes.filter((box) => box.checked).length;
@@ -268,15 +340,7 @@ export function renderGenreLimit(max, chips = genreChips, counter = genreCount) 
     });
 }
 
-export function renderHarmony(name, avatar, genres, blocked, max) {
-    const profileName = document.createElement('span');
-    profileName.textContent = name;
-    harmonyProfile.replaceChildren(createRecordAvatar({ name }, avatar), profileName);
-
-    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
-    genreChips.replaceChildren(...chips);
-    renderGenreLimit(max);
-}
+// ===== 5. Header: profile button, menu and streak =====
 
 export function renderProfileButton(profile, avatar) {
     profileButton.querySelector('.record-avatar')?.remove();
@@ -293,37 +357,23 @@ export function renderProfileButton(profile, avatar) {
 export function renderMenuOpen(isOpen) {
     profileMenu.hidden = !isOpen;
     profileButton.setAttribute('aria-expanded', String(isOpen));
-
 }
 
-export function renderSettingsProfile(profile, avatars) {
-    const initial = profile.name.charAt(0).toUpperCase();
-
-    settingsName.value = profile.name;
-    fillAvatarPicker(settingsAvatarPicker, avatars, profile.avatar, initial);
-    renderSettingsNameError('');
+export function renderStreak(current, best) {
+    streak.hidden = current === 0;
+    streakCount.textContent = current;
+    streakBest.textContent = `· best ${best}`;
 }
 
-export function renderSettingsInitial(name) {
-    const initial = name.trim().charAt(0).toUpperCase() || '?';
-    settingsAvatar.querySelectorAll('.record-label').forEach((label) => {
-        label.textContent = initial;
-    });
+// ===== 6. Today: tabs, the dial, the Unveil button and the phases =====
+
+export function renderGreeting(text) {
+    greeting.textContent = text;
 }
 
-export function renderSettingsPreferences(modes, { defaultMode, autoplay, theme }) {
-    const { elements } = settingsPreferencesForm;
-    const options = modes.map((mode) => createOption(mode.key, mode.name));
-
-    elements.defaultMode.replaceChildren(...options);
-    elements.defaultMode.value = defaultMode;
-    elements.autoplay.checked = autoplay;
-    elements.theme.value = theme;
-}
-
-export function playPreview() {
-    revealed.querySelector('audio')?.play()
-        .catch((error) => console.warn('Autoplay was blocked by the browser:', error));
+export function renderTabs(modes, selectedKey) {
+    const tabs = modes.map((mode) => createTab(mode, mode.key === selectedKey));
+    tabList.replaceChildren(...tabs);
 }
 
 function createTab(mode, isSelected) {
@@ -347,34 +397,6 @@ function createTab(mode, isSelected) {
     return tab;
 }
 
-export function renderThemeControls(theme) {
-    const isLight = theme === 'light';
-    themeButton.querySelector('.material-symbols-outlined').textContent = isLight ? 'light_mode' : 'dark_mode';
-    themeButton.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
-    settingsPreferencesForm.elements.theme.value = theme;
-}
-
-export function renderView(viewName) {
-    document.body.dataset.screen = viewName;
-    document.querySelectorAll('[data-view]').forEach((element) => {
-        const views = element.dataset.view.split(' ');
-        element.hidden = !views.includes(viewName);
-    })
-}
-
-export function focusViewTitle(viewName) {
-    const titles = document.querySelectorAll(`[data-view~="${viewName}"] h1`);
-    const title = [...titles].find((item)=> !item.closest('[hidden]'));
-    if (!title) return;
-    title.tabIndex = -1;
-    title.focus();
-}
-
-export function renderTabs(modes, selectedKey) {
-    const tabs = modes.map((mode) => createTab(mode, mode.key === selectedKey));
-    tabList.replaceChildren(...tabs);
-}
-
 function setTabsLocked(modes, isLocked) {
     tabList.querySelectorAll('.tab').forEach((tab) => {
         const mode = modes.find((item) => item.key === tab.dataset.mode);
@@ -387,13 +409,7 @@ export function renderModeCard(mode) {
     modeDescription.textContent = mode.description;
 }
 
-function createOption(value, label) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = label;
-    return option;
-}
-
+// The dial: the mode's options, starting with "Surprise me". Random mode has none.
 export function renderSetup(mode, options = [], selectedKey = '') {
     const hasSetup = Boolean(mode.optionsKey);
     dial.hidden = !hasSetup;
@@ -417,10 +433,6 @@ function renderDialLock(mode, isLocked) {
 export function renderCountdown(msLeft, isLocked) {
     const label = isLocked ? 'Next in' : 'Resets in';
     countdown.textContent = `${label} ${formatCountdown(msLeft)}`;
-}
-
-export function renderGreeting(text) {
-    greeting.textContent = text;
 }
 
 function renderLockStatus(isLocked) {
@@ -460,51 +472,187 @@ function renderStatus(message, isError) {
     statusText.classList.toggle('is-error', isError);
 }
 
-function setMuteState(button, volume) {
-    const isMuted = volume === 0;
-    button.querySelector('.material-symbols-outlined').textContent = isMuted ? 'volume_off' : 'volume_up';
-    button.setAttribute('aria-label', isMuted ? 'Unmute previews' : 'Mute previews');
-    button.setAttribute('aria-pressed', String(isMuted));
+// Today has four phases: idle, searching, revealed and error. The phase is written
+// on <main> as data-phase, so the CSS can change the layout for each one.
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME }) {
+    today.dataset.phase = phase;
+    const isRevealed = phase === 'revealed';
+    const isSearching = phase === 'searching';
+
+    greetingBlock.classList.toggle('is-collected', isRevealed);
+    stage.hidden = isRevealed;
+    modeCard.hidden = isRevealed;
+    revealed.hidden = !isRevealed;
+
+    setTabsLocked(modes, isRevealed || isSearching);
+    renderUnveilButton(phase);
+    renderDialLock(mode, isSearching);
+    errorCard.hidden = phase !== 'error';
+    renderLockStatus(isRevealed);
+    phaseDot.classList.toggle('is-busy', isSearching || isRevealed);
+
+    switch (phase) {
+        case 'searching':
+            phaseStamp.textContent = 'Pressing in progress';
+            renderStatus(message, false);
+            break;
+        case 'error':
+            phaseStamp.textContent = 'Transmission lost';
+            errorTitle.textContent = message;
+            renderStatus('', false);
+            break;
+        case 'revealed':
+            phaseStamp.textContent = "Today's pressing · collected";
+            revealed.dataset.rarity = rarity?.tier ?? '';
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume }));
+            break;
+        default:
+            phaseStamp.textContent = "Choose today's frequency";
+            renderStatus('', false);
+            revealed.replaceChildren();
+    }
 }
 
-function createVolumeControl(volume) {
-    const muteButton = document.createElement('button');
-    muteButton.type = 'button';
-    muteButton.className = 'audio-mute';
-    muteButton.dataset.action = 'mute';
-    muteButton.append(createIcon('volume_up'));
-    setMuteState(muteButton, volume);
+// ===== 7. Revealed: the song card and its player =====
 
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.className = 'volume-slider';
-    slider.min = '0';
-    slider.max = '100';
-    slider.value = String(Math.round(volume * 100));
-    slider.dataset.action = 'volume';
-    slider.setAttribute('aria-label', 'Preview volume');
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME } = {}) {
+    const dot = document.createElement('span');
+    dot.className = 'dot dot-mode';
 
-    const group = document.createElement('div');
-    group.className = 'audio-volume';
-    group.append(muteButton, slider);
-    return group;
+    const modeLabel = document.createElement('span');
+    modeLabel.className = 'stamp stamp-mode';
+    modeLabel.textContent = mode.name;
+
+    const modeTag = document.createElement('span');
+    modeTag.className = 'stamp-row';
+    modeTag.append(dot, modeLabel);
+
+    const catalog = document.createElement('span');
+    catalog.className = 'stamp catalog-number';
+    catalog.textContent = formatCatalogNumber(number);
+
+    const header = document.createElement('div');
+    header.className = 'song-header';
+    const headerTags = document.createElement('span');
+    headerTags.className = 'song-header-tags';
+    headerTags.append(catalog);
+    if (rarity) headerTags.append(createRarityBadge(rarity, rarityLabel));
+
+    header.append(modeTag, headerTags);
+
+    const cover = document.createElement('img');
+    cover.className = 'song-cover';
+    cover.src = getCoverUrl(song.artworkUrl100);
+    cover.alt = `Cover of ${song.collectionName}`;
+
+    const label = document.createElement('div');
+    label.className = 'vinyl-label';
+
+    const vinyl = document.createElement('div');
+    vinyl.className = 'vinyl';
+    vinyl.append(label);
+
+    const sleeve = document.createElement('div');
+    sleeve.className = 'sleeve';
+    sleeve.setAttribute('aria-hidden', 'true');
+    sleeve.append(vinyl, cover);
+
+    const title = document.createElement('h2');
+    title.className = 'song-title';
+    title.textContent = song.trackName;
+
+    const meta = document.createElement('p');
+    meta.className = 'song-meta';
+    const metaYear = document.createElement('span');
+    metaYear.className = 'song-meta-year';
+    metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
+    meta.append(song.artistName, metaYear);
+
+    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
+    favoriteButton.classList.add('song-link', 'song-share');
+
+    const rateLabel = document.createElement('span');
+    rateLabel.className = 'stamp';
+    rateLabel.textContent = 'Rate it';
+
+    const rateRow = document.createElement('div');
+    rateRow.className = 'song-rate';
+    rateRow.append(rateLabel, createRating(number, song.trackName, rating), favoriteButton);
+
+    const extras = document.createElement('div');
+    extras.className = 'song-extras';
+
+    if (unlockMessage) {
+        const unlock = document.createElement('p');
+        unlock.className = 'song-unlock';
+        unlock.append(createIcon('star'), unlockMessage);
+        extras.append(unlock);
+    }
+
+    extras.append(rateRow);
+
+    const details = createDetails(song);
+
+    const dock = createAudioDock(song, volume);
+
+    const spotifyLink = document.createElement('a');
+    spotifyLink.className = 'song-link song-link-primary';
+    spotifyLink.href = getSpotifyUrl(song);
+    spotifyLink.target = '_blank';
+    spotifyLink.rel = 'noopener';
+    spotifyLink.textContent = 'Open in Spotify';
+
+    const appleLink = document.createElement('a');
+    appleLink.className = 'song-link';
+    appleLink.href = song.trackViewUrl;
+    appleLink.target = '_blank';
+    appleLink.rel = 'noopener';
+    appleLink.textContent = 'Apple Music';
+
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'song-link song-share';
+    shareButton.dataset.action = 'share';
+    shareButton.setAttribute('aria-label', "Share today's discovery");
+    shareButton.append(createIcon('share'));
+
+    const actions = document.createElement('div');
+    actions.className = 'song-actions';
+    actions.append(spotifyLink, appleLink, shareButton);
+
+    return [header, sleeve, title, meta, details, extras, dock, actions];
 }
 
-export function renderVolume(volume) {
-    const audio = revealed.querySelector('audio');
-    if (audio) audio.volume = volume;
+function createDetails(song) {
+    const details = [
+        { label: 'Year', value: getReleaseYear(song.releaseDate) },
+        { label: 'Genre', value: song.primaryGenreName },
+        { label: 'Length', value: song.trackTimeMillis ? formatTimeLength(song.trackTimeMillis) : '' },
+    ];
 
-    document.querySelectorAll('.volume-slider').forEach((slider) => {
-        slider.value = String(Math.round(volume * 100));
-    });
+    const list = document.createElement('dl');
+    list.className = 'song-details';
 
-    document.querySelectorAll('.audio-mute').forEach((muteButton) => setMuteState(muteButton, volume));
+    details
+        .filter((detail) => detail.value)
+        .forEach(({ label, value }) => {
+            const term = document.createElement('dt');
+            term.textContent = label;
+
+            const description = document.createElement('dd');
+            description.textContent = value;
+
+            const item = document.createElement('div');
+            item.className = 'song-detail';
+            item.append(term, description);
+            list.append(item);
+        });
+
+    return list;
 }
 
-export function renderBinderVolume(volume) {
-    binderVolume.replaceChildren(createVolumeControl(volume));
-}
-
+// The custom player for today's song. Its inner functions are closures over this
+// dock's own elements. If the preview fails to load, it offers a re-roll.
 function createAudioDock(song, volume) {
     const audio = document.createElement('audio');
     audio.src = song.previewUrl;
@@ -601,179 +749,13 @@ function createAudioDock(song, volume) {
     return dock;
 }
 
-function createDetails(song) {
-    const details = [
-        { label: 'Year', value: getReleaseYear(song.releaseDate) },
-        { label: 'Genre', value: song.primaryGenreName },
-        { label: 'Length', value: song.trackTimeMillis ? formatTimeLength(song.trackTimeMillis) : '' },
-    ];
-
-    const list = document.createElement('dl');
-    list.className = 'song-details';
-
-    details
-        .filter((detail) => detail.value)
-        .forEach(({ label, value }) => {
-            const term = document.createElement('dt');
-            term.textContent = label;
-
-            const description = document.createElement('dd');
-            description.textContent = value;
-
-            const item = document.createElement('div');
-            item.className = 'song-detail';
-            item.append(term, description);
-            list.append(item);
-        });
-
-    return list;
+export function playPreview() {
+    revealed.querySelector('audio')?.play()
+        .catch((error) => console.warn('Autoplay was blocked by the browser:', error));
 }
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME } = {}) {
-    const dot = document.createElement('span');
-    dot.className = 'dot dot-mode'
-
-    const modeLabel = document.createElement('span');
-    modeLabel.className = 'stamp stamp-mode';
-    modeLabel.textContent = mode.name;
-
-    const modeTag = document.createElement('span');
-    modeTag.className = 'stamp-row';
-    modeTag.append(dot, modeLabel);
-
-    const catalog = document.createElement('span');
-    catalog.className = 'stamp catalog-number';
-    catalog.textContent = formatCatalogNumber(number);
-
-    const header = document.createElement('div');
-    header.className = 'song-header';
-    const headerTags = document.createElement('span');
-    headerTags.className = 'song-header-tags';
-    headerTags.append(catalog);
-    if (rarity) headerTags.append(createRarityBadge(rarity, rarityLabel));
-
-    header.append(modeTag, headerTags);
-
-    const cover = document.createElement('img');
-    cover.className = 'song-cover';
-    cover.src = getCoverUrl(song.artworkUrl100);
-    cover.alt = `Cover of ${song.collectionName}`;
-
-    const label = document.createElement('div');
-    label.className = 'vinyl-label';
-
-    const vinyl = document.createElement('div');
-    vinyl.className = 'vinyl';
-    vinyl.append(label);
-
-    const sleeve = document.createElement('div');
-    sleeve.className = 'sleeve';
-    sleeve.setAttribute('aria-hidden', 'true');
-    sleeve.append(vinyl, cover);
-
-    const title = document.createElement('h2');
-    title.className = 'song-title';
-    title.textContent = song.trackName;
-
-    const meta = document.createElement('p');
-    meta.className = 'song-meta';
-    const metaYear = document.createElement('span');
-    metaYear.className = 'song-meta-year';
-    metaYear.textContent = ` · ${getReleaseYear(song.releaseDate)}`;
-    meta.append(song.artistName, metaYear);
-
-    const favoriteButton = createFavoriteButton(number, song.trackName, isFavorite);
-    favoriteButton.classList.add('song-link', 'song-share');
-
-    const rateLabel = document.createElement('span');
-    rateLabel.className = 'stamp';
-    rateLabel.textContent = 'Rate it';
-
-    const rateRow = document.createElement('div');
-    rateRow.className = 'song-rate';
-    rateRow.append(rateLabel, createRating(number, song.trackName, rating), favoriteButton);
-
-    const extras = document.createElement('div');
-    extras.className = 'song-extras';
-
-    if (unlockMessage) {
-        const unlock = document.createElement('p');
-        unlock.className = 'song-unlock';
-        unlock.append(createIcon('star'), unlockMessage);
-        extras.append(unlock);
-    }
-
-    extras.append(rateRow);
-
-    const details = createDetails(song);
-
-    const dock = createAudioDock(song, volume);
-
-    const spotifyLink = document.createElement('a');
-    spotifyLink.className = 'song-link song-link-primary';
-    spotifyLink.href = getSpotifyUrl(song);
-    spotifyLink.target = '_blank';
-    spotifyLink.rel = 'noopener';
-    spotifyLink.textContent = 'Open in Spotify'
-
-    const appleLink = document.createElement('a');
-    appleLink.className = 'song-link';
-    appleLink.href = song.trackViewUrl;
-    appleLink.target = '_blank';
-    appleLink.rel = 'noopener';
-    appleLink.textContent = 'Apple Music';
-
-    const shareButton = document.createElement('button');
-    shareButton.type = 'button';
-    shareButton.className = 'song-link song-share'
-    shareButton.dataset.action = 'share';
-    shareButton.setAttribute('aria-label', "Share today's discovery");
-    shareButton.append(createIcon('share'));
-
-    const actions = document.createElement('div');
-    actions.className = 'song-actions';
-    actions.append(spotifyLink, appleLink, shareButton);
-
-    return [header, sleeve, title, meta, details, extras, dock, actions];
-}
-
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME }) {
-    today.dataset.phase = phase;
-    const isRevealed = phase === 'revealed';
-    const isSearching = phase === 'searching';
-
-    greetingBlock.classList.toggle('is-collected', isRevealed);
-    stage.hidden = isRevealed;
-    modeCard.hidden = isRevealed;
-    revealed.hidden = !isRevealed;
-
-    setTabsLocked(modes, isRevealed || isSearching);
-    renderUnveilButton(phase);
-    renderDialLock(mode, isSearching);
-    errorCard.hidden = phase !== 'error';
-    renderLockStatus(isRevealed);
-    phaseDot.classList.toggle('is-busy', isSearching || isRevealed);
-
-    switch (phase) {
-        case 'searching':
-            phaseStamp.textContent = 'Pressing in progress';
-            renderStatus(message, false);
-            break;
-        case 'error':
-            phaseStamp.textContent = 'Transmission lost';
-            errorTitle.textContent = message;
-            renderStatus('', false);
-            break;
-        case 'revealed':
-            phaseStamp.textContent = "Today's pressing · collected";
-            revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume }));
-            break;
-        default:
-            phaseStamp.textContent = "Choose today's frequency";
-            renderStatus('', false);
-            revealed.replaceChildren();
-    }
+export function pauseRevealedPreview() {
+    revealed.querySelector('audio')?.pause();
 }
 
 export function renderShareFeedback(button) {
@@ -785,40 +767,91 @@ export function renderShareFeedback(button) {
     }, SHARE_FEEDBACK_MS);
 }
 
+// ===== 8. Ratings and favorites (shared by Revealed and the binder) =====
+
+function createRating(number, trackName, rating) {
+    const group = document.createElement('div');
+    group.className = 'song-rating';
+    group.dataset.number = number;
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', `Rate ${trackName}`);
+
+    for (let stars = 1; stars <= MAX_STARS; stars++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'star-button';
+        button.dataset.action = 'rate';
+        button.dataset.stars = stars;
+        button.setAttribute('aria-label', `${stars} ${stars === 1 ? 'star' : 'stars'}`);
+        button.append(createIcon('star'));
+        group.append(button);
+    }
+
+    setRatingState(group, rating);
+    return group;
+}
+
+function setRatingState(group, rating) {
+    group.querySelectorAll('.star-button').forEach((button) => {
+        const stars = Number(button.dataset.stars);
+        button.classList.toggle('is-on', stars <= rating);
+        button.setAttribute('aria-pressed', String(stars === rating));
+    });
+}
+
+// Updates every stars group with this catalog number, so Revealed and the binder always agree.
+export function renderRating(number, rating) {
+    document.querySelectorAll(`.song-rating[data-number="${number}"]`)
+        .forEach((group) => setRatingState(group, rating));
+}
+
+function createFavoriteButton(number, trackName, isFavorite) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'favorite-button';
+    button.dataset.action = 'favorite';
+    button.dataset.number = number;
+    button.append(createIcon('favorite'));
+    setFavoriteState(button, trackName, isFavorite);
+    return button;
+}
+
+function setFavoriteState(button, trackName, isFavorite) {
+    button.setAttribute('aria-pressed', String(isFavorite));
+    button.setAttribute('aria-label', isFavorite ? `Remove ${trackName} from favorites` :
+        `Add ${trackName} to favorites`);
+}
+
+// Same idea as renderRating: every heart with this catalog number is updated.
+export function renderFavorite(number, trackName, isFavorite) {
+    document.querySelectorAll(`[data-action="favorite"][data-number="${number}"]`)
+        .forEach((button) => setFavoriteState(button, trackName, isFavorite));
+}
+
+// ===== 9. Collector binder: cards, filters, tabs, sets and previews =====
+
 export function renderBinderSummary(count, since) {
     const word = count === 1 ? 'pressing' : 'pressings';
     binderSummary.textContent = since ? `${count} ${word} · since ${since}` : 'No pressings yet';
 }
 
-function setPreviewState(button, isPlaying) {
-    button.querySelector('.material-symbols-outlined').textContent = isPlaying ? 'pause' : 'play_arrow';
-    button.setAttribute('aria-label', `${isPlaying ? 'Pause' : 'Play'} preview of ${button.dataset.title}`);
-    button.setAttribute('aria-pressed', String(isPlaying));
+export function renderBinderStats({ pressings, countries, legendary, averageRating }) {
+    statPressings.textContent = pressings;
+    statCountries.textContent = countries;
+    statLegendary.textContent = legendary;
+    statRating.textContent = averageRating ? averageRating.toFixed(1) : '–';
 }
 
-function createPreviewButton(entry) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'preview-button';
-    button.dataset.action = 'preview';
-    button.dataset.number = entry.number;
-    button.dataset.title = entry.song.trackName;
-    button.append(createIcon('play_arrow'));
-    setPreviewState(button, false);
-    return button;
-}
+export function renderBinderGrid(entries, emptyMessage) {
+    if (entries.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'binder-empty';
+        empty.textContent = emptyMessage;
+        binderGrid.replaceChildren(empty);
+        return;
+    }
 
-export function pauseRevealedPreview() {
-    revealed.querySelector('audio')?.pause();
-}
-
-export function renderBinderPlayback({ number = null, isPlaying = false, progress = 0 } = {}) {
-    binderGrid.querySelectorAll('.binder-card').forEach((card) => {
-        const isCurrent = Number(card.dataset.number) === number;
-        card.classList.toggle('is-playing', isCurrent && isPlaying);
-        card.style.setProperty('--progress', isCurrent ? progress : 0);
-        setPreviewState(card.querySelector('.preview-button'), isCurrent && isPlaying);
-    });
+    binderGrid.replaceChildren(...entries.map(createBinderCard));
 }
 
 function createBinderCard(entry) {
@@ -882,45 +915,38 @@ function createBinderCard(entry) {
     return card;
 }
 
-function setFavoriteState(button, trackName, isFavorite) {
-    button.setAttribute('aria-pressed', String(isFavorite));
-    button.setAttribute('aria-label', isFavorite ? `Remove ${trackName} from favorites` :
-        `Add ${trackName} to favorites`);
-}
-
-function createFavoriteButton(number, trackName, isFavorite) {
+function createPreviewButton(entry) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'favorite-button';
-    button.dataset.action = 'favorite';
-    button.dataset.number = number;
-    button.append(createIcon('favorite'));
-    setFavoriteState(button, trackName, isFavorite);
+    button.className = 'preview-button';
+    button.dataset.action = 'preview';
+    button.dataset.number = entry.number;
+    button.dataset.title = entry.song.trackName;
+    button.append(createIcon('play_arrow'));
+    setPreviewState(button, false);
     return button;
 }
 
-export function renderFavorite(number, trackName, isFavorite) {
-    document.querySelectorAll(`[data-action="favorite"][data-number="${number}"]`)
-        .forEach((button) => setFavoriteState(button, trackName, isFavorite));
+function setPreviewState(button, isPlaying) {
+    button.querySelector('.material-symbols-outlined').textContent = isPlaying ? 'pause' : 'play_arrow';
+    button.setAttribute('aria-label', `${isPlaying ? 'Pause' : 'Play'} preview of ${button.dataset.title}`);
+    button.setAttribute('aria-pressed', String(isPlaying));
 }
 
-export function renderBinderGrid(entries, emptyMessage) {
-    if (entries.length === 0) {
-        const empty = document.createElement('p');
-        empty.className = 'binder-empty';
-        empty.textContent = emptyMessage;
-        binderGrid.replaceChildren(empty);
-        return
-    }
-
-    binderGrid.replaceChildren(...entries.map(createBinderCard));
+// Called by the binder's preview player on every change. The --progress variable
+// draws the glowing line under the playing card's cover in CSS.
+export function renderBinderPlayback({ number = null, isPlaying = false, progress = 0 } = {}) {
+    binderGrid.querySelectorAll('.binder-card').forEach((card) => {
+        const isCurrent = Number(card.dataset.number) === number;
+        card.classList.toggle('is-playing', isCurrent && isPlaying);
+        card.style.setProperty('--progress', isCurrent ? progress : 0);
+        setPreviewState(card.querySelector('.preview-button'), isCurrent && isPlaying);
+    });
 }
 
-export function renderBinderStats({ pressings, countries, legendary, averageRating }) {
-    statPressings.textContent = pressings;
-    statCountries.textContent = countries;
-    statLegendary.textContent = legendary;
-    statRating.textContent = averageRating ? averageRating.toFixed(1) : '–';
+export function renderModeFilters(modes) {
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+    binderMode.replaceChildren(createOption('', 'All modes'), ...options);
 }
 
 export function renderRarityFilter(tiers) {
@@ -938,11 +964,6 @@ export function renderRarityLegend(tiers) {
     rarityLegend.replaceChildren(title, ...badges);
 }
 
-export function renderModeFilters(modes) {
-    const options = modes.map((mode) => createOption(mode.key, mode.name));
-    binderMode.replaceChildren(createOption('', 'All modes'), ...options);
-}
-
 export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     const { elements } = binderForm;
     elements.search.value = search;
@@ -952,6 +973,18 @@ export function renderBinderFilters({ search, mode, sort, favorites, rarity }) {
     elements.rarity.value = rarity;
 }
 
+// Lights up the dropdowns that are not on their default, and shows Clear while anything is filtered.
+export function renderFilterState(filters, defaults) {
+    const { elements } = binderForm;
+    setFilterState(elements.mode, filters.mode, defaults.mode, 'mode');
+    setFilterState(elements.rarity, filters.rarity, defaults.rarity, 'rarity');
+    setFilterState(elements.sort, filters.sort, defaults.sort);
+
+    const isFiltered = Object.keys(defaults).some((key) => filters[key] !== defaults[key]);
+    binderClear.hidden = !isFiltered;
+}
+
+// data-mode or data-rarity on the wrapper gives the active dropdown that mode's or tier's color in CSS.
 function setFilterState(select, value, defaultValue, colorKey) {
     const wrap = select.closest('.select-wrap');
     const isActive = value !== defaultValue;
@@ -965,59 +998,29 @@ function setFilterState(select, value, defaultValue, colorKey) {
     }
 }
 
-export function renderFilterState(filters, defaults) {
-    const { elements } = binderForm;
-    setFilterState(elements.mode, filters.mode, defaults.mode, 'mode');
-    setFilterState(elements.rarity, filters.rarity, defaults.rarity, 'rarity');
-    setFilterState(elements.sort, filters.sort, defaults.sort);
-
-    const isFiltered = Object.keys(defaults).some((key) => filters[key] !== defaults[key]);
-    binderClear.hidden = !isFiltered;
+export function renderBinderTab(tabName) {
+    binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
+    binderPressings.classList.toggle('is-hidden', tabName !== 'pressings');
+    binderSets.classList.toggle('is-hidden', tabName !== 'sets');
 }
 
-export function downloadTextFile(fileName, text) {
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+export function renderSets(sets) {
+    const found = sets.reduce((sum, set) => sum + set.count, 0);
+    const total = sets.reduce((sum, set) => sum + set.slots.length, 0);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
+    const title = document.createElement('span');
+    title.className = 'stamp';
+    title.textContent = 'Binder sets';
 
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-}
+    const count = document.createElement('span');
+    count.className = 'sets-total';
+    count.textContent = `${found} / ${total} slots`;
 
-export function renderExportStatus(message) {
-    exportStatus.textContent = message;
-}
+    const head = document.createElement('div');
+    head.className = 'sets-head';
+    head.append(title, count);
 
-export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
-    deleteHead.querySelector('.record-avatar')?.remove();
-    deleteHead.prepend(createRecordAvatar(profile, avatar));
-    deleteTitle.textContent = `Delete ${profile.name}'s profile? This can't be undone.`;
-    deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
-
-    deletePressings.textContent = pressings;
-    deleteCountries.textContent = countries;
-    deleteFavorites.textContent = favorites;
-
-    deleteDialog.returnValue = '';
-    deleteDialog.showModal();
-}
-
-export function renderStreak(current, best) {
-    streak.hidden = current === 0;
-    streakCount.textContent = current;
-    streakBest.textContent = `· best ${best}`;
-}
-
-function createRarityBadge(rarity, label) {
-    const badge = document.createElement('span');
-    badge.className = 'rarity-badge';
-    badge.dataset.rarity = rarity.tier;
-    if (rarity.tier === 'legendary') badge.append(createIcon('star'));
-    badge.append(label);
-    return badge;
+    binderSets.replaceChildren(head, ...sets.map(createSetCard));
 }
 
 function createSetCard(set) {
@@ -1066,63 +1069,131 @@ function createSetCard(set) {
     return card;
 }
 
+// ===== 10. Audio: volume and mute =====
 
-export function renderBinderTab(tabName) {
-    binderTabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === tabName)));
-    binderPressings.classList.toggle('is-hidden', tabName !== 'pressings');
-    binderSets.classList.toggle('is-hidden', tabName !== 'sets');
-}
+// Updates today's player and every volume slider and mute button at once.
+export function renderVolume(volume) {
+    const audio = revealed.querySelector('audio');
+    if (audio) audio.volume = volume;
 
-function setRatingState(group, rating) {
-    group.querySelectorAll('.star-button').forEach((button) => {
-        const stars = Number(button.dataset.stars);
-        button.classList.toggle('is-on', stars <= rating);
-        button.setAttribute('aria-pressed', String(stars === rating));
+    document.querySelectorAll('.volume-slider').forEach((slider) => {
+        slider.value = String(Math.round(volume * 100));
     });
+
+    document.querySelectorAll('.audio-mute').forEach((muteButton) => setMuteState(muteButton, volume));
 }
 
-function createRating(number, trackName, rating) {
+export function renderBinderVolume(volume) {
+    binderVolume.replaceChildren(createVolumeControl(volume));
+}
+
+function createVolumeControl(volume) {
+    const muteButton = document.createElement('button');
+    muteButton.type = 'button';
+    muteButton.className = 'audio-mute';
+    muteButton.dataset.action = 'mute';
+    muteButton.append(createIcon('volume_up'));
+    setMuteState(muteButton, volume);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'volume-slider';
+    slider.min = '0';
+    slider.max = '100';
+    slider.value = String(Math.round(volume * 100));
+    slider.dataset.action = 'volume';
+    slider.setAttribute('aria-label', 'Preview volume');
+
     const group = document.createElement('div');
-    group.className = 'song-rating';
-    group.dataset.number = number;
-    group.setAttribute('role', 'group');
-    group.setAttribute('aria-label', `Rate ${trackName}`);
-
-    for (let stars = 1; stars <= MAX_STARS; stars++) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'star-button';
-        button.dataset.action = 'rate';
-        button.dataset.stars = stars;
-        button.setAttribute('aria-label', `${stars} ${stars === 1 ? 'star' : 'stars'}`);
-        button.append(createIcon('star'));
-        group.append(button);
-    }
-
-    setRatingState(group, rating);
+    group.className = 'audio-volume';
+    group.append(muteButton, slider);
     return group;
 }
 
-export function renderRating(number, rating) {
-    document.querySelectorAll(`.song-rating[data-number="${number}"]`)
-        .forEach((group) => setRatingState(group, rating));
+function setMuteState(button, volume) {
+    const isMuted = volume === 0;
+    button.querySelector('.material-symbols-outlined').textContent = isMuted ? 'volume_off' : 'volume_up';
+    button.setAttribute('aria-label', isMuted ? 'Unmute previews' : 'Mute previews');
+    button.setAttribute('aria-pressed', String(isMuted));
 }
 
-export function renderSets(sets) {
-    const found = sets.reduce((sum, set) => sum + set.count, 0);
-    const total = sets.reduce((sum, set) => sum + set.slots.length, 0);
+// ===== 11. Settings and the theme =====
 
-    const title = document.createElement('span');
-    title.className = 'stamp';
-    title.textContent = 'Binder sets';
+export function renderSettingsProfile(profile, avatars) {
+    const initial = profile.name.charAt(0).toUpperCase();
 
-    const count = document.createElement('span');
-    count.className = 'sets-total';
-    count.textContent = `${found} / ${total} slots`;
+    settingsName.value = profile.name;
+    fillAvatarPicker(settingsAvatarPicker, avatars, profile.avatar, initial);
+    renderSettingsNameError('');
+}
 
-    const head = document.createElement('div');
-    head.className = 'sets-head';
-    head.append(title, count);
+export function renderSettingsInitial(name) {
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    settingsAvatar.querySelectorAll('.record-label').forEach((label) => {
+        label.textContent = initial;
+    });
+}
 
-    binderSets.replaceChildren(head, ...sets.map(createSetCard));
+export function renderSettingsNameError(message) {
+    setFieldError(settingsName, settingsNameHint, message);
+}
+
+export function renderSettingsHarmony(genres, blocked, max) {
+    const chips = genres.map((genre) => createGenreChip(genre, blocked.includes(genre.key)));
+    settingsGenreChips.replaceChildren(...chips);
+    renderSettingsGenreLimit(max);
+}
+
+export function renderSettingsGenreLimit(max) {
+    renderGenreLimit(max, settingsGenreChips, settingsGenreCount);
+}
+
+export function renderSettingsPreferences(modes, { defaultMode, autoplay, theme }) {
+    const { elements } = settingsPreferencesForm;
+    const options = modes.map((mode) => createOption(mode.key, mode.name));
+
+    elements.defaultMode.replaceChildren(...options);
+    elements.defaultMode.value = defaultMode;
+    elements.autoplay.checked = autoplay;
+    elements.theme.value = theme;
+}
+
+// Keeps the header's sun/moon button and the Settings choice showing the same theme.
+export function renderThemeControls(theme) {
+    const isLight = theme === 'light';
+    themeButton.querySelector('.material-symbols-outlined').textContent = isLight ? 'light_mode' : 'dark_mode';
+    themeButton.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+    settingsPreferencesForm.elements.theme.value = theme;
+}
+
+export function renderExportStatus(message) {
+    exportStatus.textContent = message;
+}
+
+// Builds the file in the browser with a Blob, and frees the temporary URL right after.
+export function downloadTextFile(fileName, text) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.d ownload= fileName;
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+// returnValue is reset before opening, so Escape can never repeat an earlier "delete".
+export function renderDeleteDialog(profile, avatar, { pressings, countries, favorites }) {
+    deleteHead.querySelector('.record-avatar')?.remove();
+    deleteHead.prepend(createRecordAvatar(profile, avatar));
+    deleteTitle.textContent = `Delete ${profile.name}'s profile? This can't be undone.`;
+    deleteText.textContent = `This permanently removes everything saved for ${profile.name}:`;
+
+    deletePressings.textContent = pressings;
+    deleteCountries.textContent = countries;
+    deleteFavorites.textContent = favorites;
+
+    deleteDialog.returnValue = '';
+    deleteDialog.showModal();
 }
