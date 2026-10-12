@@ -1,3 +1,20 @@
+// main.js: the app's controller. It keeps the state, reacts to events and decides
+// what to show. render.js draws the page, store.js saves the data, and the other
+// modules do the work (finding songs, scoring rarity, filtering the binder).
+//
+// Sections inside init():
+//   1. Setup: page elements and state
+//   2. Navigation: screens and the Back button
+//   3. Profiles: who's listening, create profile, negative harmony
+//   4. Profile menu and log out
+//   5. Today: modes, the dial and the daily lock
+//   6. Discovery: unveil, save and rarity
+//   7. Revealed: share, re-roll, rate and favorite
+//   8. Collector binder: cards, filters, tabs and previews
+//   9. Audio: volume, mute and pausing in the background
+//  10. Settings and the theme
+//  11. Start-up and event listeners
+
 import { loadPool, POOL_ERROR_MESSAGE, loadConfig } from './api.js';
 import { MODES, getMode, describeSearch } from './modes.js';
 import createPicker, { discoverSong, NO_SONG_MESSAGE } from './picker.js';
@@ -40,6 +57,7 @@ const EMPTY_BINDER = 'Unveil your first song and it will appear here.';
 const NO_MATCHES = 'No pressings match these filters.';
 const ROOT_VIEWS = ['today', 'profiles'];
 
+// Dev mode (?dev=1) shows a button that clears today's lock, for testing and demos.
 function isDevMode() {
     const params = new URLSearchParams(window.location.search);
 
@@ -62,6 +80,8 @@ function getErrorTitle(error) {
 }
 
 function init() {
+    // ===== 1. Setup: page elements and state =====
+
     const picker = createPicker();
     const tabList = document.querySelector('#mode-tabs');
     const unveilButton = document.querySelector('#unveil-button');
@@ -113,6 +133,11 @@ function init() {
     let currentView = null;
     let skipNextPop = false;
 
+    // ===== 2. Navigation: screens and the Back button =====
+
+    // Inner screens add one history entry, so the phone's Back button has somewhere
+    // to go. Main screens remove it again; skipNextPop ignores the popstate that
+    // this history.back() causes.
     function showView(view) {
         currentView = view;
         renderView(view);
@@ -155,56 +180,7 @@ function init() {
         }
     }
 
-    function setVolume(volume) {
-        store.saveSettings({ ...store.getSettings(), volume });
-        binderPlayer.setVolume(volume);
-        renderVolume(volume);
-    }
-
-    function handleVolumeInput(event) {
-        if (event.target.dataset.action !== 'volume') return;
-        setVolume(Number(event.target.value) / 100);
-    }
-
-    function handleBinderVolumeClick(event) {
-        if (event.target.closest('[data-action="mute"]')) toggleMute();
-    }
-
-    function toggleMute() {
-        const { volume } = store.getSettings();
-
-        if (volume > 0) {
-            volumeBeforeMute = volume;
-            setVolume(0);
-        } else {
-            setVolume(volumeBeforeMute);
-        }
-    }
-
-    function setTheme(theme) {
-        store.saveSettings({ ...store.getSettings(), theme });
-        applyTheme(theme);
-        renderThemeControls(theme);
-    }
-
-    function toggleTheme() {
-        setTheme(store.getSettings().theme === 'light' ? 'dark' : 'light');
-    }
-
-    function enterToday(profile) {
-        currentProfile = profile;
-        store = createStore(profile.id);
-        applyTheme(store.getSettings().theme);
-        renderThemeControls(store.getSettings().theme);
-        binderPlayer.setVolume(store.getSettings().volume);
-        selectMode(store.getSettings().defaultMode);
-        showCurrentState();
-        setCurrentProfile(profile.id);
-        renderProfileButton(profile, getAvatar(profile.avatar));
-        renderMenuOpen(false);
-        showView('today');
-        tick();
-    }
+    // ===== 3. Profiles: who's listening, create profile, negative harmony =====
 
     async function showProfiles() {
         try {
@@ -298,6 +274,8 @@ function init() {
         showView('create');
     }
 
+    // ===== 4. Profile menu and log out =====
+
     function openMenu() {
         renderMenuOpen(true);
         if (history.state?.inApp !== true) history.pushState({ inApp: true }, '');
@@ -342,6 +320,399 @@ function init() {
         showProfiles();
         sessionStorage.removeItem(BINDER_FILTER_KEY);
     }
+
+    // ===== 5. Today: modes, the dial and the daily lock =====
+
+    // Each profile gets its own store, so the daily lock and catalog numbers are per profile.
+    function enterToday(profile) {
+        currentProfile = profile;
+        store = createStore(profile.id);
+        applyTheme(store.getSettings().theme);
+        renderThemeControls(store.getSettings().theme);
+        binderPlayer.setVolume(store.getSettings().volume);
+        selectMode(store.getSettings().defaultMode);
+        showCurrentState();
+        setCurrentProfile(profile.id);
+        renderProfileButton(profile, getAvatar(profile.avatar));
+        renderMenuOpen(false);
+        showView('today');
+        tick();
+    }
+
+    async function preparePool() {
+        try {
+            pool = await loadPool();
+            const mode = getMode(currentModeKey);
+            renderSetup(mode, getOptions(mode), currentOptionKey);
+        } catch (error) {
+            console.error('Search terms could not be loaded yet:', error);
+        }
+    }
+
+    function selectMode(modeKey, optionKey = '') {
+        currentModeKey = modeKey;
+        currentOptionKey = optionKey;
+        const mode = getMode(modeKey);
+        applyMode(modeKey);
+        renderTabs(MODES, modeKey);
+        renderModeCard(mode);
+        renderSetup(mode, getOptions(mode), currentOptionKey);
+    }
+
+    function handleTabClick(event) {
+        const tab = event.target.closest('.tab');
+        if (!tab || tab.disabled) return;
+
+        selectMode(tab.dataset.mode);
+        showPhase('idle');
+    }
+
+    function handleOptionChange(event) {
+        currentOptionKey = event.target.value;
+    }
+
+    function getOptions(mode) {
+        const options = pool?.[mode.optionsKey] ?? [];
+        if (mode.optionsKey !== 'genres') return options;
+
+        const blockedGenres = getBlockedGenres();
+        return options.filter((option) => !blockedGenres.includes(option.key));
+    }
+
+    function getBlockedGenres() {
+        return store?.getSettings().blockedGenres ?? [];
+    }
+
+    // Today's discovery, but only if it is from today's date and has a song.
+    function getLockedToday() {
+        const today = store?.getToday();
+        return today && today.date === getDateKey() && today.song ? today : null;
+    }
+
+    // A re-roll keeps today's catalog number; a new day takes the next one.
+    function getNextNumber() {
+        const today = store.getToday();
+        if (today?.date === getDateKey()) return today.number;
+
+        const numbers = store.getCollection().map((entry) => entry.number);
+        return Math.max(0, ...numbers) + 1;
+    }
+
+    function showPhase(phase, details = {}) {
+        renderPhase(phase, { modes: MODES, mode: getMode(currentModeKey), ...details });
+    }
+
+    function showCurrentState() {
+        updateStreak();
+        const today = getLockedToday();
+        isShowingLocked = Boolean(today);
+
+        if (today) {
+            const entry = store.getCollection().find((item) => item.number === today.number);
+            selectMode(today.mode, today.optionKey);
+            showPhase('revealed', {
+                song: today.song,
+                number: today.number,
+                isFavorite: entry?.isFavorite ?? false,
+                rarity: entry?.rarity ?? null,
+                rarityLabel: getTierLabel(entry?.rarity),
+                unlockMessage: getUnlockMessage(entry),
+                rating: entry?.rating ?? 0,
+                volume: store.getSettings().volume,
+            });
+        } else {
+            showPhase('idle');
+        }
+    }
+
+    // Runs every second: greeting, countdown, and unlocking the screen at midnight.
+    function tick() {
+        const isLocked = Boolean(getLockedToday());
+        renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
+        renderCountdown(getMsUntilMidnight(), isLocked);
+
+        if (isShowingLocked && !isLocked && !isSearching) {
+            showCurrentState();
+        }
+    }
+
+    function updateStreak() {
+        const collection = store?.getCollection() ?? [];
+        renderStreak(getStreak(collection, getDateKey()), getBestStreak(collection));
+    }
+
+    function handleDevReset() {
+        store.clearToday();
+        showCurrentState();
+        tick();
+    }
+
+    // ===== 6. Discovery: unveil, save and rarity =====
+
+    // The lock is saved only after a playable song is found,
+    // so a failed attempt never uses up the day.
+    async function handleUnveil() {
+        if (isSearching || getLockedToday()) return;
+
+        isSearching = true;
+        showPhase('searching', { message: getSearchingMessage() });
+
+        let found;
+        try {
+            pool = pool ?? await loadPool();
+            found = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
+        } catch (error) {
+            console.error('Discovery failed:', error);
+            showPhase('error', { message: getErrorTitle(error) });
+            return;
+        } finally {
+            isSearching = false;
+            tick();
+        }
+
+        saveDiscovery(found.song, found.optionKey);
+        showCurrentState();
+        tick();
+        if (store.getSettings().autoplay) playPreview();
+    }
+
+    function getSearchingMessage() {
+        const mode = getMode(currentModeKey);
+        const option = getOptions(mode).find((item) => item.key === currentOptionKey);
+        return `${describeSearch(mode, option)} and making sure the preview plays before we lock it in.`;
+    }
+
+    // Rarity is calculated once and saved with the card, because some factors
+    // (like the first song from a country) are only true on the day it is found.
+    function saveDiscovery(song, optionKey) {
+        const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
+        const previous = store.getCollection().filter((entry) => entry.number !== today.number);
+        const rarity = config?.rarity ? getRarity(today, previous) : null;
+        const isNewSlot = Boolean(optionKey) && !previous.some((entry) => entry.mode === currentModeKey && entry.optionKey === optionKey);
+
+        store.saveToday(today);
+        store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
+    }
+
+    function getRarity(entry, collection) {
+        const points = scoreSong(entry, collection, config.rarity);
+        return { points, tier: getTier(points, config.rarity).key };
+    }
+
+    function getTierLabel(rarity) {
+        return config?.rarity?.tiers.find((tier) => tier.key === rarity?.tier)?.label ?? '';
+    }
+
+    function getUnlockMessage(entry) {
+        if (!entry?.isNewSlot) return '';
+
+        const mode = getMode(entry.mode);
+        const option = pool?.[mode.optionsKey]?.find((item) => item.key === entry.optionKey);
+        const set = getSets(store.getCollection(), pool, getBlockedGenres()).find((item) => item.key === entry.mode);
+        if (!option || !set) return '';
+
+        return `New ${mode.setUnit} unlocked: ${option.label} · ${set.title} ${set.count}/${set.slots.length}`;
+    }
+
+    // ===== 7. Revealed: share, re-roll, rate and favorite =====
+
+    function handleRevealedClick(event) {
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) return;
+
+        switch (actionButton.dataset.action) {
+            case 'share':
+                shareToday(actionButton);
+                break;
+            case 'reroll':
+                rerollToday();
+                break;
+            case 'favorite':
+                handleFavoriteClick(actionButton);
+                break;
+            case 'rate':
+                rateToday(actionButton);
+                break;
+            case 'mute':
+                toggleMute();
+                break;
+        }
+    }
+
+    async function shareToday(button) {
+        const today = getLockedToday();
+        if (!today) return;
+
+        try {
+            await navigator.clipboard.writeText(getShareText(today.song));
+            renderShareFeedback(button);
+        } catch (error) {
+            console.error('could not copy to the clipboard', error);
+        }
+    }
+
+    // Used when a preview stops working after the day is locked.
+    function rerollToday() {
+        const today = getLockedToday();
+        if (!today) return;
+
+        store.saveToday({ ...today, song: null });
+        handleUnveil();
+    }
+
+    function rateToday(button) {
+        const today = getLockedToday();
+        if (today) rateEntry(today.number, Number(button.dataset.stars));
+    }
+
+    // Shared by Revealed and the binder: the render functions update every control
+    // with that catalog number, so both screens always agree.
+    function rateEntry(number, stars) {
+        const collection = setRating(store.getCollection(), number, stars);
+        store.saveCollection(collection);
+        renderRating(number, collection.find((entry) => entry.number === number)?.rating ?? 0);
+        renderBinderStats(getStats(collection));
+    }
+
+    function handleFavoriteClick(button) {
+        const number = Number(button.dataset.number);
+        const collection = toggleFavorite(store.getCollection(), number);
+        store.saveCollection(collection);
+
+        const entry = collection.find((item) => item.number === number);
+        renderFavorite(number, entry.song.trackName, entry.isFavorite);
+        renderBinderStats(getStats(collection));
+    }
+
+    // ===== 8. Collector binder: cards, filters, tabs and previews =====
+
+    function showCollection() {
+        pauseRevealedPreview();
+        const collection = store.getCollection();
+        const firstDate = getFirstDate(collection);
+        const tiers = config?.rarity?.tiers ?? [];
+
+        renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
+        renderBinderStats(getStats(collection));
+        renderMenuOpen(false);
+        renderRarityFilter(tiers);
+        renderRarityLegend(tiers);
+        renderBinderFilters(getBinderFilters());
+        renderBinderVolume(store.getSettings().volume);
+        showBinderCards();
+        renderSets(getSets(collection, pool, getBlockedGenres()));
+        renderBinderTab('pressings');
+        showView('collection');
+    }
+
+    function leaveCollection() {
+        binderPlayer.stop();
+        showView('today');
+    }
+
+    // The filters live in sessionStorage: they survive a refresh, and reset when the tab closes.
+    function getBinderFilters() {
+        return { ...DEFAULT_FILTERS, ...readJson(BINDER_FILTER_KEY, {}, sessionStorage) };
+    }
+
+    function readBinderForm() {
+        const { search, mode, rarity, sort, favorites } = binderForm.elements;
+        return { search: search.value, mode: mode.value, rarity: rarity.value, sort: sort.value, favorites: favorites.checked };
+    }
+
+    function showBinderCards() {
+        const filters = getBinderFilters();
+        const tagged = store.getCollection().map((entry) => ({
+            ...entry,
+            tag: getEntryTag(entry, pool),
+            rarityLabel: getTierLabel(entry.rarity),
+        }));
+        const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
+        renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
+        renderFilterState(filters, DEFAULT_FILTERS);
+        renderBinderPlayback(binderPlayer.getState());
+    }
+
+    function handleBinderFilterInput(event) {
+        if (event.target.dataset.action === 'volume') return;
+        writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
+        showBinderCards();
+    }
+
+    function clearBinderFilters() {
+        writeJson(BINDER_FILTER_KEY, DEFAULT_FILTERS, sessionStorage);
+        renderBinderFilters(DEFAULT_FILTERS);
+        showBinderCards();
+    }
+
+    function handleBinderTabClick(event) {
+        const tab = event.target.closest('[data-tab]');
+        if (tab) renderBinderTab(tab.dataset.tab);
+    }
+
+    // Event delegation: one listener on the grid handles every card's buttons.
+    function handleBinderClick(event) {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        switch (button.dataset.action) {
+            case 'favorite':
+                handleFavoriteClick(button);
+                break;
+            case 'preview':
+                playBinderPreview(button);
+                break;
+            case 'rate':
+                rateEntry(Number(button.closest('.song-rating').dataset.number), Number(button.dataset.stars));
+                break;
+        }
+    }
+
+    function playBinderPreview(button) {
+        const number = Number(button.dataset.number);
+        const entry = store.getCollection().find((item) => item.number === number);
+        if (!entry) return;
+
+        pauseRevealedPreview();
+        binderPlayer.toggle(number, entry.song.previewUrl);
+    }
+
+    // ===== 9. Audio: volume, mute and pausing in the background =====
+
+    function setVolume(volume) {
+        store.saveSettings({ ...store.getSettings(), volume });
+        binderPlayer.setVolume(volume);
+        renderVolume(volume);
+    }
+
+    function handleVolumeInput(event) {
+        if (event.target.dataset.action !== 'volume') return;
+        setVolume(Number(event.target.value) / 100);
+    }
+
+    function handleBinderVolumeClick(event) {
+        if (event.target.closest('[data-action="mute"]')) toggleMute();
+    }
+
+    function toggleMute() {
+        const { volume } = store.getSettings();
+
+        if (volume > 0) {
+            volumeBeforeMute = volume;
+            setVolume(0);
+        } else {
+            setVolume(volumeBeforeMute);
+        }
+    }
+
+    // Phones keep <audio> playing in the background, so pause the music when the app is hidden.
+    function pauseWhenHidden() {
+        if (!document.hidden) return;
+        pauseRevealedPreview();
+        binderPlayer.stop();
+    }
+
+    // ===== 10. Settings and the theme =====
 
     function showSettings() {
         pauseRevealedPreview();
@@ -400,313 +771,14 @@ function init() {
         setTheme(theme.value);
     }
 
-    function updateStreak() {
-        const collection = store?.getCollection() ?? [];
-        renderStreak(getStreak(collection, getDateKey()), getBestStreak(collection));
+    function setTheme(theme) {
+        store.saveSettings({ ...store.getSettings(), theme });
+        applyTheme(theme);
+        renderThemeControls(theme);
     }
 
-    function getLockedToday() {
-        const today = store?.getToday();
-        return today && today.date === getDateKey() && today.song ? today : null;
-    }
-
-    function getOptions(mode) {
-        const options = pool?.[mode.optionsKey] ?? [];
-        if (mode.optionsKey !== 'genres') return options;
-
-        const blockedGenres = getBlockedGenres();
-        return options.filter((option) => !blockedGenres.includes(option.key));
-    }
-
-    function getBlockedGenres() {
-        return store?.getSettings().blockedGenres ?? [];
-    }
-
-    function getSearchingMessage() {
-        const mode = getMode(currentModeKey);
-        const option = getOptions(mode).find((item) => item.key === currentOptionKey);
-        return `${describeSearch(mode, option)} and making sure the preview plays before we lock it in.`;
-    }
-
-    function getNextNumber() {
-        const today = store.getToday();
-        if (today?.date === getDateKey()) return today.number;
-
-        const numbers = store.getCollection().map((entry) => entry.number);
-        return Math.max(0, ...numbers) + 1;
-    }
-
-    function showPhase(phase, details = {}) {
-        renderPhase(phase, { modes: MODES, mode: getMode(currentModeKey), ...details });
-    }
-
-    function selectMode(modeKey, optionKey = '') {
-        currentModeKey = modeKey;
-        currentOptionKey = optionKey;
-        const mode = getMode(modeKey);
-        applyMode(modeKey);
-        renderTabs(MODES, modeKey);
-        renderModeCard(mode);
-        renderSetup(mode, getOptions(mode), currentOptionKey);
-    }
-
-    function showCollection() {
-        pauseRevealedPreview();
-        const collection = store.getCollection();
-        const firstDate = getFirstDate(collection);
-        const tiers = config?.rarity?.tiers ?? [];
-
-        renderBinderSummary(collection.length, firstDate && formatShortDate(firstDate));
-        renderBinderStats(getStats(collection));
-        renderMenuOpen(false);
-        renderRarityFilter(tiers);
-        renderRarityLegend(tiers);
-        renderBinderFilters(getBinderFilters());
-        renderBinderVolume(store.getSettings().volume);
-        showBinderCards();
-        renderSets(getSets(collection, pool, getBlockedGenres()));
-        renderBinderTab('pressings');
-        showView('collection');
-    }
-
-    async function preparePool() {
-        try {
-            pool = await loadPool();
-            const mode = getMode(currentModeKey);
-            renderSetup(mode, getOptions(mode), currentOptionKey);
-        } catch (error) {
-            console.error('Search terms could not be loaded yet:', error);
-        }
-    }
-
-    function showCurrentState() {
-        updateStreak();
-        const today = getLockedToday();
-        isShowingLocked = Boolean(today);
-
-        if (today) {
-            const entry = store.getCollection().find((item) => item.number === today.number);
-            selectMode(today.mode, today.optionKey);
-            showPhase('revealed', {
-                song: today.song,
-                number: today.number,
-                isFavorite: entry?.isFavorite ?? false,
-                rarity: entry?.rarity ?? null,
-                rarityLabel: getTierLabel(entry?.rarity),
-                unlockMessage: getUnlockMessage(entry),
-                rating: entry?.rating ?? 0,
-                volume: store.getSettings().volume,
-            });
-        } else {
-            showPhase('idle');
-        }
-    }
-
-    function tick() {
-        const isLocked = Boolean(getLockedToday());
-        renderGreeting(currentProfile ? `${getGreeting()}, ${currentProfile.name}` : getGreeting());
-        renderCountdown(getMsUntilMidnight(), isLocked);
-
-        if (isShowingLocked && !isLocked && !isSearching) {
-            showCurrentState();
-        }
-    }
-
-    function getRarity(entry, collection) {
-        const points = scoreSong(entry, collection, config.rarity);
-        return { points, tier: getTier(points, config.rarity).key };
-    }
-
-    function getTierLabel(rarity) {
-        return config?.rarity?.tiers.find((tier) => tier.key === rarity?.tier)?.label ?? '';
-    }
-
-    function getUnlockMessage(entry) {
-        if (!entry?.isNewSlot) return '';
-
-        const mode = getMode(entry.mode);
-        const option = pool?.[mode.optionsKey]?.find((item) => item.key === entry.optionKey);
-        const set = getSets(store.getCollection(), pool, getBlockedGenres()).find((item) => item.key === entry.mode);
-        if (!option || !set) return '';
-
-        return `New ${mode.setUnit} unlocked: ${option.label} · ${set.title} ${set.count}/${set.slots.length}`;
-    }
-
-    async function handleUnveil() {
-        if (isSearching || getLockedToday()) return;
-
-        isSearching = true;
-        showPhase('searching', { message: getSearchingMessage() });
-
-        let found;
-        try {
-            pool = pool ?? await loadPool();
-            found = await discoverSong(currentModeKey, pool, picker, currentOptionKey, getBlockedGenres());
-        } catch (error) {
-            console.error('Discovery failed:', error);
-            showPhase('error', { message: getErrorTitle(error) });
-            return;
-        } finally {
-            isSearching = false;
-            tick();
-        }
-
-        saveDiscovery(found.song, found.optionKey);
-        showCurrentState();
-        tick();
-        if (store.getSettings().autoplay) playPreview();
-    }
-
-    function saveDiscovery(song, optionKey) {
-        const today = { date: getDateKey(), mode: currentModeKey, optionKey, song, number: getNextNumber() };
-        const previous = store.getCollection().filter((entry) => entry.number !== today.number);
-        const rarity = config?.rarity ? getRarity(today, previous) : null;
-        const isNewSlot = Boolean(optionKey) && !previous.some((entry) => entry.mode === currentModeKey && entry.optionKey === optionKey);
-
-        store.saveToday(today);
-        store.saveCollection(addEntry(store.getCollection(), { ...today, rarity, isNewSlot }));
-    }
-
-    function handleTabClick(event) {
-        const tab = event.target.closest('.tab');
-        if (!tab || tab.disabled) return;
-
-        selectMode(tab.dataset.mode);
-        showPhase('idle');
-    }
-
-    function handleOptionChange(event) {
-        currentOptionKey = event.target.value;
-    }
-
-    function handleDevReset() {
-        store.clearToday();
-        showCurrentState();
-        tick();
-    }
-
-    function handleFavoriteClick(button) {
-        const number = Number(button.dataset.number);
-        const collection = toggleFavorite(store.getCollection(), number);
-        store.saveCollection(collection);
-
-        const entry = collection.find((item) => item.number === number);
-        renderFavorite(number, entry.song.trackName, entry.isFavorite);
-        renderBinderStats(getStats(collection));
-    }
-
-    function getBinderFilters() {
-        return { ...DEFAULT_FILTERS, ...readJson(BINDER_FILTER_KEY, {}, sessionStorage) };
-    }
-
-    function readBinderForm() {
-        const { search, mode, rarity, sort, favorites } = binderForm.elements;
-        return { search: search.value, mode: mode.value, rarity: rarity.value, sort: sort.value, favorites: favorites.checked };
-    }
-
-    function showBinderCards() {
-        const filters = getBinderFilters();
-        const tagged = store.getCollection().map((entry) => ({
-            ...entry,
-            tag: getEntryTag(entry, pool),
-            rarityLabel: getTierLabel(entry.rarity),
-        }));
-        const cards = sortCollection(filterCollection(tagged, filters), filters.sort);
-        renderBinderGrid(cards, tagged.length === 0 ? EMPTY_BINDER : NO_MATCHES);
-        renderFilterState(filters, DEFAULT_FILTERS);
-        renderBinderPlayback(binderPlayer.getState());
-    }
-
-    function handleBinderFilterInput(event) {
-        if (event.target.dataset.action === 'volume') return;
-        writeJson(BINDER_FILTER_KEY, readBinderForm(), sessionStorage);
-        showBinderCards();
-    }
-
-    function clearBinderFilters() {
-        writeJson(BINDER_FILTER_KEY, DEFAULT_FILTERS, sessionStorage);
-        renderBinderFilters(DEFAULT_FILTERS);
-        showBinderCards();
-    }
-
-    function handleBinderClick(event) {
-        const button = event.target.closest('[data-action]');
-        if (!button) return;
-
-        switch (button.dataset.action) {
-            case 'favorite':
-                handleFavoriteClick(button);
-                break;
-            case 'preview':
-                playBinderPreview(button);
-                break;
-            case 'rate':
-                rateEntry(Number(button.closest('.song-rating').dataset.number), Number(button.dataset.stars));
-                break;
-        }
-    }
-
-    function playBinderPreview(button) {
-        const number = Number(button.dataset.number);
-        const entry = store.getCollection().find((item) => item.number === number);
-        if (!entry) return;
-
-        pauseRevealedPreview();
-        binderPlayer.toggle(number, entry.song.previewUrl);
-    }
-
-    function pauseWhenHidden() {
-        if (!document.hidden) return;
-        pauseRevealedPreview();
-        binderPlayer.stop();
-    }
-
-    function leaveCollection() {
-        binderPlayer.stop();
-        showView('today');
-    }
-
-    function handleRevealedClick(event) {
-        const actionButton = event.target.closest('[data-action]');
-        if (!actionButton) return;
-
-        switch (actionButton.dataset.action) {
-            case 'share':
-                shareToday(actionButton);
-                break;
-            case 'reroll':
-                rerollToday();
-                break;
-            case 'favorite':
-                handleFavoriteClick(actionButton);
-                break;
-            case 'rate':
-                rateToday(actionButton);
-                break;
-            case 'mute':
-                toggleMute();
-                break;
-        }
-    }
-
-    async function shareToday(button) {
-        const today = getLockedToday();
-        if (!today) return;
-
-        try {
-            await navigator.clipboard.writeText(getShareText(today.song));
-            renderShareFeedback(button);
-        } catch (error) {
-            console.error('could not copy to the clipboard', error);
-        }
-    }
-
-    function rerollToday() {
-        const today = getLockedToday();
-        if (!today) return;
-
-        store.saveToday({ ...today, song: null });
-        handleUnveil();
+    function toggleTheme() {
+        setTheme(store.getSettings().theme === 'light' ? 'dark' : 'light');
     }
 
     function exportFavorites() {
@@ -726,6 +798,7 @@ function init() {
             getStats(store.getCollection()));
     }
 
+    // The dialog's returnValue is 'delete' only when the Delete button closed it.
     function handleDeleteClose() {
         if (deleteDialog.returnValue !== 'delete') return;
 
@@ -734,22 +807,7 @@ function init() {
         handleLogOut();
     }
 
-    function handleBinderTabClick(event) {
-        const tab = event.target.closest('[data-tab]');
-        if (tab) renderBinderTab(tab.dataset.tab);
-    }
-
-    function rateEntry(number, stars) {
-        const collection = setRating(store.getCollection(), number, stars);
-        store.saveCollection(collection);
-        renderRating(number, collection.find((entry) => entry.number === number)?.rating ?? 0);
-        renderBinderStats(getStats(collection));
-    }
-
-    function rateToday(button) {
-        const today = getLockedToday();
-        if (today) rateEntry(today.number, Number(button.dataset.stars));
-    }
+    // ===== 11. Start-up and event listeners =====
 
     selectMode(currentModeKey);
     showCurrentState();
@@ -757,53 +815,63 @@ function init() {
     setInterval(tick, TICK_MS);
     renderModeFilters(MODES);
 
-    profileGrid.addEventListener('click', handleProfileClick);
-    unveilButton.addEventListener('click', handleUnveil);
-    tabList.addEventListener('click', handleTabClick);
-    revealed.addEventListener('click', handleRevealedClick);
-    revealed.addEventListener('input', handleVolumeInput);
-    binderVolume.addEventListener('input', handleVolumeInput);
-    binderVolume.addEventListener('click', handleBinderVolumeClick);
-    retryButton.addEventListener('click', handleUnveil)
-    dialSelect.addEventListener('change', handleOptionChange);
-    createForm.addEventListener('input', handleCreateInput);
-    createForm.addEventListener('submit', handleCreateSubmit);
-    avatarPicker.addEventListener('click', handleAvatarTabClick);
-    settingsAvatarPicker.addEventListener('click', handleAvatarTabClick);
-    createBackButton.addEventListener('click', showProfiles);
-    harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
-    harmonyForm.addEventListener('submit', handleHarmonySubmit);
-    harmonyBackButton.addEventListener('click', handleHarmonyBack);
-    harmonySkipButton.addEventListener('click', () => finishCreate([]));
+    // Navigation and the profile menu
+    window.addEventListener('popstate', handlePopState);
     profileButton.addEventListener('click', toggleMenu);
     document.addEventListener('click', closeMenuOnOutsideClick);
     document.addEventListener('keydown', closeMenuOnEscape);
     logoutButton.addEventListener('click', handleLogOut);
     collectionButton.addEventListener('click', showCollection);
+    settingsButton.addEventListener('click', showSettings);
+    themeButton.addEventListener('click', toggleTheme);
+
+    // Profiles
+    profileGrid.addEventListener('click', handleProfileClick);
+    introButton.addEventListener('click', showCreate);
+    createForm.addEventListener('input', handleCreateInput);
+    createForm.addEventListener('submit', handleCreateSubmit);
+    avatarPicker.addEventListener('click', handleAvatarTabClick);
+    createBackButton.addEventListener('click', showProfiles);
+    harmonyForm.addEventListener('change', () => renderGenreLimit(MAX_BLOCKED_GENRES));
+    harmonyForm.addEventListener('submit', handleHarmonySubmit);
+    harmonyBackButton.addEventListener('click', handleHarmonyBack);
+    harmonySkipButton.addEventListener('click', () => finishCreate([]));
+
+    // Today and Revealed
+    tabList.addEventListener('click', handleTabClick);
+    dialSelect.addEventListener('change', handleOptionChange);
+    unveilButton.addEventListener('click', handleUnveil);
+    retryButton.addEventListener('click', handleUnveil);
+    revealed.addEventListener('click', handleRevealedClick);
+    revealed.addEventListener('input', handleVolumeInput);
+
+    // Collector binder
     collectionBackButton.addEventListener('click', leaveCollection);
     binderGrid.addEventListener('click', handleBinderClick);
     binderForm.addEventListener('input', handleBinderFilterInput);
     binderForm.addEventListener('submit', (event) => event.preventDefault());
     binderClearButton.addEventListener('click', clearBinderFilters);
-    settingsButton.addEventListener('click', showSettings);
+    binderTabList.addEventListener('click', handleBinderTabClick);
+    binderVolume.addEventListener('input', handleVolumeInput);
+    binderVolume.addEventListener('click', handleBinderVolumeClick);
+    document.addEventListener('visibilitychange', pauseWhenHidden);
+
+    // Settings
     settingsBackButton.addEventListener('click', () => showView('today'));
     settingsLogoutButton.addEventListener('click', handleLogOut);
     settingsProfileForm.addEventListener('change', handleSettingsProfileChange);
     settingsProfileForm.addEventListener('input', handleSettingsProfileInput);
     settingsProfileForm.addEventListener('submit', (event) => event.preventDefault());
+    settingsAvatarPicker.addEventListener('click', handleAvatarTabClick);
     settingsHarmonyForm.addEventListener('change', handleSettingsHarmonyChange);
     settingsPreferencesForm.addEventListener('change', handleSettingsPreferencesChange);
     exportButton.addEventListener('click', exportFavorites);
     deleteButton.addEventListener('click', confirmDelete);
     deleteDialog.addEventListener('close', handleDeleteClose);
-    binderTabList.addEventListener('click', handleBinderTabClick);
-    themeButton.addEventListener('click', toggleTheme);
-    window.addEventListener('popstate', handlePopState);
-    document.addEventListener('visibilitychange', pauseWhenHidden);
-    introButton.addEventListener('click', showCreate);
 
     preparePool();
 
+    // Apply the saved theme before the config loads, so a light profile never flashes dark.
     const savedProfile = getCurrentProfile();
     if (savedProfile) {
         applyTheme(createStore(savedProfile.id).getSettings().theme);
