@@ -1649,6 +1649,16 @@ h2 {
   font-size: 11px;
 }
 
+body:not([data-screen="today"]) .status-bar {
+  display: none;
+}
+
+body[data-screen="profiles"] .app-footer,
+body[data-screen="create"] .app-footer,
+body[data-screen="harmony"] .app-footer {
+  display: none;
+}
+
 .status-bar {
   width: 100%;
   min-height: 24px;
@@ -3017,6 +3027,16 @@ h2 {
     font-size: 13px;
   }
 
+  body[data-screen="profiles"] .app-footer,
+  body[data-screen="create"] .app-footer,
+  body[data-screen="harmony"] .app-footer {
+    display: flex;
+  }
+
+  body:not([data-screen="today"]) .app-footer {
+    justify-content: center;
+  }
+
   .status-bar {
     width: auto;
     justify-content: flex-start;
@@ -3053,7 +3073,7 @@ h2 {
     font-size: 26px;
   }
 
-    .welcome-intro {
+  .welcome-intro {
     max-width: none;
     align-items: center;
     gap: 40px;
@@ -3580,7 +3600,7 @@ h2 {
     gap: 16px;
   }
 
-    .welcome-intro {
+  .welcome-intro {
     flex-grow: 1;
     max-width: none;
     gap: 12px;
