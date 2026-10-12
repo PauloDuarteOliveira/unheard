@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Unheard · Discover a new sound every day</title>
+  <!-- Fonts: Epilogue for titles, Hanken Grotesk for text, JetBrains Mono for labels.
+       Material Symbols only downloads the icons listed in icon_names. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet"
@@ -15,6 +17,12 @@
 </head>
 
 <body data-mode="random">
+  <!-- One page, several screens. Each block lists the screens it belongs to in data-view,
+       and renderView (js/render.js) shows only the blocks of the current screen.
+       Everything that changes (profile tiles, mode tabs, the song card, binder cards...)
+       is built by js/render.js. -->
+
+  <!-- ===== Who's listening: the first-visit intro, or the list of profiles ===== -->
   <section class="view profiles-view" id="view-profiles" data-view="profiles" hidden>
     <div class="welcome-brand">
       <span class="welcome-mark" aria-hidden="true"><span></span></span>
@@ -59,6 +67,7 @@
     </div>
   </section>
 
+  <!-- ===== Create profile, step 1: name and look (Records / Avatars tabs) ===== -->
   <section class="view create-view" id="view-create" data-view="create" hidden>
     <div class="create-heading">
       <span class="stamp">Step 1 of 2</span>
@@ -104,6 +113,7 @@
     </div>
   </section>
 
+  <!-- ===== Create profile, step 2: Negative harmony (optional) ===== -->
   <section class="view harmony-view" id="view-harmony" data-view="harmony" hidden>
     <div class="harmony-intro">
       <p class="harmony-profile" id="harmony-profile"></p>
@@ -137,6 +147,7 @@
     </form>
   </section>
 
+  <!-- ===== Header: logo, streak, theme button and the profile menu ===== -->
   <header class="app-header" data-view="today collection settings">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
@@ -183,7 +194,9 @@
     </div>
   </header>
 
+  <!-- ===== Today: greeting, mode tabs, the Unveil button, today's song and the mode card ===== -->
   <main class="today" id="today" data-view="today">
+    <!-- Greeting and the phase stamp ("Choose today's frequency", "Pressing in progress"...) -->
     <div class="greeting" id="greeting-block">
       <h1 id="greeting"></h1>
       <p class="stamp-row">
@@ -192,8 +205,10 @@
       </p>
     </div>
 
+    <!-- The five mode tabs, built by renderTabs -->
     <div class="tabs" id="mode-tabs" role="tablist" aria-label="Discovery mode"></div>
 
+    <!-- The Unveil button, the search status and the error card -->
     <div class="stage" id="stage">
       <button class="unveil" id="unveil-button" type="button" aria-label="Unveil today's song">
         <span class="unveil-face">
@@ -217,8 +232,10 @@
       </div>
     </div>
 
+    <!-- Today's song, built by createSongCard once it is revealed -->
     <section class="revealed" id="revealed" aria-live="polite" hidden></section>
 
+    <!-- What the selected mode does, and its dial of options -->
     <section class="mode-card" id="mode-card" aria-label="Mode setup">
       <div class="mode-card-text">
         <p class="stamp-row">
@@ -245,6 +262,7 @@
     </section>
   </main>
 
+  <!-- ===== Collector binder: stats, search and filters, the cards, and the sets ===== -->
   <section class="view collection-view" id="view-collection" data-view="collection" hidden>
     <button class="button-ghost back-button" id="collection-back" type="button">
       <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -255,6 +273,7 @@
       <h1 class="binder-title">Collector binder</h1>
       <p class="stamp" id="binder-summary"></p>
     </div>
+    <!-- Pressings / Sets tabs (phones only; on desktop the sets are a side panel) -->
     <div class="binder-tabs" id="binder-tabs" role="tablist" aria-label="Binder view">
       <button class="binder-tab" id="tab-pressings" type="button" role="tab" data-tab="pressings"
         aria-controls="binder-pressings" aria-selected="true">Pressings</button>
@@ -326,9 +345,11 @@
       <div class="rarity-legend" id="rarity-legend"></div>
       <div class="binder-grid" id="binder-grid"></div>
     </div>
+    <!-- The binder sets, built by renderSets -->
     <div class="binder-sets is-hidden" id="binder-sets" role="tabpanel" aria-labelledby="tab-sets"></div>
   </section>
 
+  <!-- ===== Settings: profile, Negative harmony, preferences, your data and profile actions ===== -->
   <section class="view settings-view" id="view-settings" data-view="settings" hidden>
     <button class="button-ghost back-button" id="settings-back" type="button">
       <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -431,6 +452,7 @@
     </section>
   </section>
 
+  <!-- ===== Footer: today's lock status and countdown (Today only), and the Apple credit ===== -->
   <footer class="app-footer" data-view="today collection profiles create harmony">
     <div class="status-bar">
       <button class="dev-button" type="button" id="dev-button" hidden>👨🏻‍💻</button>
@@ -443,6 +465,7 @@
     <span class="credit">Previews provided by Apple</span>
   </footer>
 
+  <!-- ===== Delete profile: a native dialog opened with showModal() ===== -->
   <dialog class="delete-dialog" id="delete-dialog" aria-labelledby="delete-title">
     <form class="delete-form" method="dialog">
       <div class="delete-head" id="delete-head">
@@ -472,6 +495,7 @@
       </div>
     </form>
   </dialog>
+  <!-- The app's code: JavaScript modules, starting at main.js -->
   <script type="module" src="js/main.js"></script>
 </body>
 
