@@ -56,7 +56,7 @@ To block a genre, the app looks up its `matches` in `data/pool.json` (the genre 
 Every discovery becomes a card in the profile's binder, opened from the profile menu:
 
 - **Cards** show the cover, catalog number, rarity badge, title, artist and a tag in the mode's color with what was chosen (a decade, a country, a mood or a genre). When the dial was on "Surprise me", the tag shows the option the app actually picked.
-- **Play the previews:** every cover has a play button. While a card plays, its button turns into a pause button in the mode's color, a glowing line along the bottom of the cover shows the progress, and the card's info is tinted. Only one preview plays at a time: the binder has a single audio player (`js/player.js`), so starting another card stops the previous one immediately. It also pauses today's song on the Revealed screen, and stops when you leave the binder.
+- **Play the previews:** every cover has a play button. While a card plays, its button turns into a pause button in the mode's color, a glowing line along the bottom of the cover shows the progress, and the card's info is tinted. Only one preview plays at a time: the binder has a single audio player (`js/player.js`), so starting another card stops the previous one immediately. It also pauses today's song on the Revealed screen, and stops when you leave the binder. Both today's song and the binder previews pause when the app goes to the background (home screen, locked phone or another tab), through a `visibilitychange` listener, and stay paused until you press play again.
 - **Rate and favorite:** each card ends with five small stars (in the card's mode color) and the heart. Ratings and favorites made in the binder and on the Revealed screen always stay in sync, because both screens update every control for that catalog number.
 - **Volume (desktop):** one mute button and slider at the end of the filter row. It shares the same saved volume as the Today player, so changing it in one place changes it in the other.
 - **Stats:** pressings, countries visited with World Explorer, Legendary cards, and on desktop the average star rating.
@@ -195,7 +195,7 @@ A small developer button appears in the footer. It removes today's lock of the l
 - Rarity: five tiers with badges and frames, a rarity filter, a legend and a Legendary stat, binder sets with progress, and "new slot unlocked" messages
 - Polish: star ratings (on Revealed and the binder cards), a light theme (Settings and the desktop header), the binder preview player, a saved preview volume with desktop controls, the desktop binder side panel, and a clearer error state
 - Extras: avatar pictures with Records / Avatars tabs (creation and Settings), today's song pausing when leaving the Today screen, and binder filters that light up when in use, with a Clear chip and a top rated sort
-- Usability fixes: the phone Back button returns inside the app (screens, creation steps and the menu), light-theme profiles no longer flash dark on load, taller tap areas for the binder stars (22 × 44 px), and focus on each new screen's title
+- Usability fixes: the phone Back button returns inside the app (screens, creation steps and the menu), light-theme profiles no longer flash dark on load, taller tap areas for the binder stars (22 × 44 px), focus on each new screen's title, and the music pausing when the app goes to the background
 
 **Next**
 
