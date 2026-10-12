@@ -3448,18 +3448,17 @@ body[data-screen="harmony"] .app-footer {
     max-width: none;
     display: grid;
     grid-template-columns: 277px minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto auto auto auto auto 1fr;
+    grid-template-rows: repeat(6, auto);
     grid-template-areas:
-      "sleeve ."
       "sleeve header"
       "sleeve title"
       "sleeve meta"
       "sleeve rating"
       "sleeve dock"
-      "sleeve actions"
-      "sleeve .";
+      "sleeve actions";
+    align-content: center;
     column-gap: 28px;
-    row-gap: 8px;
+    row-gap: 6px;
   }
 
   .star-button {
@@ -3497,11 +3496,12 @@ body[data-screen="harmony"] .app-footer {
 
   .song-extras {
     grid-area: rating;
+    gap: 4px;
   }
 
   .audio-dock {
     grid-area: dock;
-    padding: 6px 14px 6px 6px;
+    padding: 3px 14px 3px 3px;
   }
 
   .song-actions {
