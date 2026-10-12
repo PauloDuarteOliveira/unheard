@@ -10,7 +10,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,arrow_back,block,check,close,dark_mode,delete,download,error,expand_more,favorite,hourglass_empty,library_music,light_mode,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,progress_activity,public,refresh,search,settings,share,shuffle,star,volume_off,volume_up&display=block">
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0&icon_names=add,album,arrow_back,block,check,close,dark_mode,delete,download,error,expand_more,favorite,hourglass_empty,library_music,light_mode,local_fire_department,lock,logout,mood,music_note,pause,play_arrow,play_circle,progress_activity,public,refresh,search,settings,share,shuffle,star,tune,volume_off,volume_up&display=block">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -19,9 +19,41 @@
     <div class="welcome-brand">
       <span class="welcome-mark" aria-hidden="true"><span></span></span>
       <span class="welcome-name">Unheard</span>
-      <span class="stamp">Discover a new sound every day</span>
+      <span class="stamp" id="welcome-tagline">Discover a new sound every day</span>
     </div>
-    <div class="welcome-picker">
+
+    <div class="welcome-intro" id="welcome-intro" hidden>
+      <div class="intro-head">
+        <h1 class="intro-title">One song you've never heard, every day.</h1>
+        <p class="intro-text">A small daily ritual for finding music outside your usual loop.</p>
+      </div>
+      <ol class="intro-steps">
+        <li class="intro-step" data-mode="random">
+          <span class="intro-icon material-symbols-outlined" aria-hidden="true">tune</span>
+          <span class="intro-step-text">
+            <strong class="intro-step-title">Pick a mode</strong>
+            Random, a decade, a country, a mood or a genre.
+          </span>
+        </li>
+        <li class="intro-step" data-mode="time">
+          <span class="intro-icon material-symbols-outlined" aria-hidden="true">play_circle</span>
+          <span class="intro-step-text">
+            <strong class="intro-step-title">Press play</strong>
+            One per day, with a 30-second preview. Tomorrow brings a new one.
+          </span>
+        </li>
+        <li class="intro-step" data-mode="world">
+          <span class="intro-icon material-symbols-outlined" aria-hidden="true">album</span>
+          <span class="intro-step-text">
+            <strong class="intro-step-title">Collect it</strong>
+            Every song goes into your binder. Rate it, favorite it, find the rare ones.
+          </span>
+        </li>
+      </ol>
+      <button class="button-primary intro-button" id="intro-button" type="button">Create your profile</button>
+    </div>
+
+    <div class="welcome-picker" id="welcome-picker">
       <h1 class="welcome-title">Who's listening?</h1>
       <div class="profile-grid" id="profile-grid"></div>
     </div>
