@@ -141,6 +141,8 @@ Every dial starts on **Surprise me**, which picks a random option. While searchi
 
 All the options and their search terms are in `data/pool.json`. Every decade and genre term was tested against the API, and terms that found too few matching songs were replaced.
 
+On desktop, the song card shows its details: year, genre and length, plus **country** in World Explorer. The country is the one you picked, not iTunes' own `country` field, because that field is the store that was searched (always the US store in the other modes), not where the artist is from.
+
 - **If something fails**, an error card explains what happened (no connection, no playable song, or the search terms could not load) and offers **Try again**.
 - **If a preview stops working after the day is locked**, the player shows **Re-roll**, which finds a new song in the same mode and keeps the same catalog number.
 - **Share** copies "Today I discovered … by … 🎧" to the clipboard.
