@@ -419,6 +419,7 @@ function init() {
                 unlockMessage: getUnlockMessage(entry),
                 rating: entry?.rating ?? 0,
                 volume: store.getSettings().volume,
+                country: getCountryName(today),
             });
         } else {
             showPhase('idle');
@@ -512,6 +513,16 @@ function init() {
         if (!option || !set) return '';
 
         return `New ${mode.setUnit} unlocked: ${option.label} · ${set.title} ${set.count}/${set.slots.length}`;
+    }
+
+    // iTunes' own "country" is the store it searched, not where the artist is from,
+    // so the country is only shown in World Explorer, where the user picked it.
+    // If pool.json hasn't loaded yet, the browser's Intl names the country instead.
+    function getCountryName(entry) {
+        if (entry.mode !== 'world' || !entry.optionKey) return '';
+
+        const country = pool?.countries.find((item) => item.key === entry.optionKey);
+        return country?.label ?? new Intl.DisplayNames(['en'], { type: 'region' }).of(entry.optionKey);
     }
 
     // ===== 7. Revealed: share, re-roll, rate and favorite =====
