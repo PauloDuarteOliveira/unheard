@@ -474,7 +474,7 @@ function renderStatus(message, isError) {
 
 // Today has four phases: idle, searching, revealed and error. The phase is written
 // on <main> as data-phase, so the CSS can change the layout for each one.
-export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME }) {
+export function renderPhase(phase, { modes, mode, song, number = 1, message = '', isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME, country = '' }) {
     today.dataset.phase = phase;
     const isRevealed = phase === 'revealed';
     const isSearching = phase === 'searching';
@@ -504,7 +504,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
         case 'revealed':
             phaseStamp.textContent = "Today's pressing · collected";
             revealed.dataset.rarity = rarity?.tier ?? '';
-            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume }));
+            revealed.replaceChildren(...createSongCard(song, mode, number, { isFavorite, rarity, rarityLabel, unlockMessage, rating, volume, country }));
             break;
         default:
             phaseStamp.textContent = "Choose today's frequency";
@@ -515,7 +515,7 @@ export function renderPhase(phase, { modes, mode, song, number = 1, message = ''
 
 // ===== 7. Revealed: the song card and its player =====
 
-function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME } = {}) {
+function createSongCard(song, mode, number, { isFavorite = false, rarity = null, rarityLabel = '', unlockMessage = '', rating = 0, volume = DEFAULT_VOLUME, country = '' } = {}) {
     const dot = document.createElement('span');
     dot.className = 'dot dot-mode';
 
@@ -591,7 +591,7 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
 
     extras.append(rateRow);
 
-    const details = createDetails(song);
+    const details = createDetails(song, country);
 
     const dock = createAudioDock(song, volume);
 
@@ -623,8 +623,10 @@ function createSongCard(song, mode, number, { isFavorite = false, rarity = null,
     return [header, sleeve, title, meta, details, extras, dock, actions];
 }
 
-function createDetails(song) {
+// The empty values are filtered out below, so Country only appears in World Explorer.
+function createDetails(song, country = '') {
     const details = [
+        { label: 'Country', value: country },
         { label: 'Year', value: getReleaseYear(song.releaseDate) },
         { label: 'Genre', value: song.primaryGenreName },
         { label: 'Length', value: song.trackTimeMillis ? formatTimeLength(song.trackTimeMillis) : '' },
